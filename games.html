@@ -1,0 +1,163 @@
+﻿<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title data-i18n="tab_games">APC Algérie G3 · Jeux</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+.games-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;max-width:800px;margin:40px auto;padding:0 20px;}
+.game-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:.3s;cursor:pointer;text-align:center;}
+.game-card:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,.25);border-color:var(--accent);}
+.game-card .preview{height:180px;display:flex;align-items:center;justify-content:center;font-size:64px;position:relative;overflow:hidden;}
+.game-card .preview.space{background:linear-gradient(135deg,#03040a,#0d1326);}
+.game-card .preview.plant{background:linear-gradient(135deg,#0a1a08,#1a3a18);}
+.game-card .preview .stars{position:absolute;inset:0;}
+.game-card .card-body{padding:20px;}
+.game-card h3{font-size:18px;margin-bottom:6px;color:var(--text);}
+.game-card p{font-size:13px;color:var(--text-muted);margin-bottom:14px;line-height:1.5;}
+.game-card .card-tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:12px;}
+.game-card .tag{background:var(--bg-module);color:var(--accent);padding:2px 10px;border-radius:10px;font-size:10px;text-transform:uppercase;letter-spacing:.5px;}
+.game-card .btn-game{background:linear-gradient(135deg,var(--accent),var(--accent-hover));color:#fff;border:none;padding:10px 24px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;letter-spacing:.5px;}
+.game-card .btn-game:hover{transform:scale(1.04);box-shadow:0 4px 16px rgba(0,0,0,.3);}
+@media(max-width:500px){.games-grid{grid-template-columns:1fr;padding:0 12px;gap:16px;}}
+</style>
+</head>
+<body>
+<div id="apcCompatBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(135deg,#E65100,#FF8F00);color:#fff;padding:10px 16px;text-align:center;font-size:13px;font-weight:500;box-shadow:0 2px 12px rgba(0,0,0,.3);align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;">
+  <i class="fas fa-exclamation-triangle" style="font-size:16px;"></i>
+  <span>Mode de compatibilité activé pour votre navigateur.</span>
+  <button id="apcCompatBannerClose" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);color:#fff;padding:4px 14px;border-radius:14px;font-size:12px;cursor:pointer;">OK</button>
+</div>
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <span class="drawer-title">☰ Menu</span>
+    <button class="btn-icon drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-section">
+    <button class="drawer-nav-btn" onclick="closeDrawer();goTo('index.html')"><span data-i18n="tab_home">🏠 Accueil</span></button>
+    <button class="drawer-nav-btn" onclick="closeDrawer();goTo('generator.html')"><span data-i18n="tab_generator">📝 Générateur de Prompts</span></button>
+    <button class="drawer-nav-btn" onclick="closeDrawer();goTo('assistant.html')"><span data-i18n="tab_assistant">🤖 Assistant IA</span></button>
+    <button class="drawer-nav-btn" onclick="closeDrawer();goTo('from-doc.html')"><span data-i18n="tab_fromdoc">📄 Document → Présentation</span></button>
+    <button class="drawer-nav-btn" onclick="closeDrawer();goTo('quiz.html')"><span data-i18n="tab_quiz">🎯 Quiz</span></button>
+    <button class="drawer-nav-btn" onclick="closeDrawer();goTo('challenges.html')"><span data-i18n="tab_challenge">🎮 Challenges</span></button>
+    <button class="drawer-nav-btn" onclick="closeDrawer();goTo('games.html')" style="background:var(--bg-module);border-color:var(--accent);"><span data-i18n="tab_games">🎮 Jeux</span></button>
+    <button class="drawer-nav-btn" onclick="closeDrawer();goTo('aide.html')"><span data-i18n="tab_guide">📖 Guide complet</span></button>
+    <button class="drawer-nav-btn" onclick="closeDrawer();goTo('aide-cles-api.html')"><span data-i18n="tab_help">❓ Aide Clés API</span></button>
+    <button class="drawer-nav-btn" onclick="closeDrawer();goTo('about.html')"><span data-i18n="tab_about">ℹ️ À propos</span></button>
+    <button class="drawer-nav-btn nav-admin-link" onclick="closeDrawer();goTo('admin.html');closeDrawer();" style="display:none"><span data-i18n="tab_admin">⚙️ Admin</span></button>
+  </div>
+</div>
+<div class="app-container">
+  <header class="app-header">
+    <button class="btn-icon" id="menuBtn" onclick="toggleDrawer()"><i class="fas fa-bars"></i></button>
+    <span class="header-title" data-i18n="tab_games">🎮 Jeux</span>
+    <div style="display:flex;gap:6px;">
+      <button class="btn-icon" onclick="setLang('fr')" title="Français">FR</button>
+      <button class="btn-icon" onclick="setLang('ar')" title="العربية">AR</button>
+      <button class="btn-icon" onclick="setLang('en')" title="English">EN</button>
+    </div>
+  </header>
+  <main class="main-content" style="min-height:calc(100vh - 56px);">
+    <div class="games-grid">
+      <!-- Défense Orbitale -->
+      <div class="game-card" onclick="goTo('challenge-game.html')">
+        <div class="preview space">
+          <div class="stars" id="stars1"></div>
+          <span>🚀</span>
+        </div>
+        <div class="card-body">
+          <h3 data-i18n="card_game1_title">🚀 Défense Orbitale</h3>
+          <p data-i18n="card_game1_desc">Protège la Terre des météorites en répondant aux questions. Bouclier, satellites, action !</p>
+          <div class="card-tags">
+            <span class="tag" data-i18n="tag_space">Espace</span>
+            <span class="tag" data-i18n="tag_reflexes">Réflexes</span>
+            <span class="tag" data-i18n="tag_qcm">QCM</span>
+          </div>
+          <button class="btn-game" data-i18n="btn_play">🚀 Jouer</button>
+        </div>
+      </div>
+      <!-- Fais pousser ta plante -->
+      <div class="game-card" onclick="goTo('challenge-plant.html')">
+        <div class="preview plant">
+          <span>🌱</span>
+        </div>
+        <div class="card-body">
+          <h3 data-i18n="card_game2_title">🌱 Fais pousser ta plante</h3>
+          <p data-i18n="card_game2_desc">Arrose tes connaissances et regarde ta plante fleurir. Doux, éducatif, apaisant.</p>
+          <div class="card-tags">
+            <span class="tag" data-i18n="tag_nature">Nature</span>
+            <span class="tag" data-i18n="tag_progressif">Progressif</span>
+            <span class="tag" data-i18n="tag_qcm">QCM</span>
+          </div>
+          <button class="btn-game" data-i18n="btn_play2">🌱 Jouer</button>
+        </div>
+      </div>
+      <!-- Cartes du Savoir -->
+      <div class="game-card" onclick="goTo('challenge-cards.html')">
+        <div class="preview plant" style="background:linear-gradient(135deg,#1a0a2e,#3a1a5e);">
+          <span>🃏</span>
+        </div>
+        <div class="card-body">
+          <h3 data-i18n="card_game3_title">🃏 Cartes du Savoir</h3>
+          <p data-i18n="card_game3_desc">Retourne les cartes, réponds aux questions et débloque des cartes spéciales. Mémoire, réflexion, rapidité !</p>
+          <div class="card-tags">
+            <span class="tag" data-i18n="tag_memory">Mémoire</span>
+            <span class="tag" data-i18n="tag_reflexes">Réflexes</span>
+            <span class="tag" data-i18n="tag_qcm">QCM</span>
+          </div>
+          <button class="btn-game" data-i18n="btn_play3">🃏 Jouer</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="js/shared.v2.js?v=1.9.9"></script>
+<script>
+(function(){
+var LANG='fr';
+try{
+  var sl=localStorage.getItem('lang');
+  if(sl&&['fr','ar','en'].indexOf(sl)>=0)LANG=sl;
+}catch(e){}
+var I18N_GAMES={
+  fr:{tab_games:"🎮 Jeux",card_game1_title:"🚀 Défense Orbitale",card_game1_desc:"Protège la Terre des météorites en répondant aux questions. Bouclier, satellites, action !",card_game2_title:"🌱 Fais pousser ta plante",card_game2_desc:"Arrose tes connaissances et regarde ta plante fleurir. Doux, éducatif, apaisant.",card_game3_title:"🃏 Cartes du Savoir",card_game3_desc:"Retourne les cartes, réponds aux questions et débloque des cartes spéciales. Mémoire, réflexion, rapidité !",tag_space:"Espace",tag_reflexes:"Réflexes",tag_qcm:"QCM",tag_nature:"Nature",tag_progressif:"Progressif",tag_memory:"Mémoire",btn_play:"🚀 Jouer",btn_play2:"🌱 Jouer",btn_play3:"🃏 Jouer"},
+  ar:{tab_games:"🎮 الألعاب",card_game1_title:"🚀 الدفاع المداري",card_game1_desc:"احمِ الأرض من النيازك بالإجابة على الأسئلة. درع، أقمار صناعية، حركة!",card_game2_title:"🌱 انمي نبتتك",card_game2_desc:"اسقِ معرفتك وشاهد نبتتك تزهر. لطيف، تعليمي، مريح.",card_game3_title:"🃏 بطاقات المعرفة",card_game3_desc:"اقلب البطاقات، أجب على الأسئلة وافتح البطاقات الخاصة. ذاكرة، تفكير، سرعة!",tag_space:"الفضاء",tag_reflexes:"ردود الفعل",tag_qcm:"اختيار من متعدد",tag_nature:"الطبيعة",tag_progressif:"تدريجي",tag_memory:"ذاكرة",btn_play:"🚀 العب",btn_play2:"🌱 العب",btn_play3:"🃏 العب"},
+  en:{tab_games:"🎮 Games",card_game1_title:"🚀 Orbital Defense",card_game1_desc:"Protect Earth from meteors by answering questions. Shield, satellites, action!",card_game2_title:"🌱 Grow your plant",card_game2_desc:"Water your knowledge and watch your plant bloom. Gentle, educational, calming.",card_game3_title:"🃏 Knowledge Cards",card_game3_desc:"Flip cards, answer questions and unlock special cards. Memory, thinking, speed!",tag_space:"Space",tag_reflexes:"Reflexes",tag_qcm:"Quiz",tag_nature:"Nature",tag_progressif:"Progressive",tag_memory:"Memory",btn_play:"🚀 Play",btn_play2:"🌱 Play",btn_play3:"🃏 Play"}
+};
+function t(key){var v=(I18N_GAMES[LANG]||I18N_GAMES.fr)[key];if(v===undefined||v===key){if(typeof T!=='undefined'&&T[LANG]&&T[LANG][key]!==undefined)v=T[LANG][key];else if(typeof T!=='undefined'&&T.fr&&T.fr[key]!==undefined)v=T.fr[key];}return v||key;}
+function applyI18N(){
+  document.documentElement.lang=LANG;
+  document.documentElement.dir=LANG==='ar'?'rtl':'ltr';
+  [].forEach.call(document.querySelectorAll('[data-i18n]'),function(el){
+    var k=el.getAttribute('data-i18n');
+    if(k)el.textContent=t(k);
+  });
+}
+if(window.setLang){
+  var _orig=window.setLang;
+  window.setLang=function(l){_orig(l);LANG=l;applyI18N();};
+}
+applyI18N();
+// Animated stars for space preview
+(function(){
+  var c=document.getElementById('stars1');
+  if(!c)return;
+  var html='';
+  for(var i=0;i<80;i++){
+    var x=Math.random()*100,y=Math.random()*100,s=0.5+Math.random()*1.5,o=0.3+Math.random()*0.7,a=Math.random()*Math.PI*2;
+    html+='<div style="position:absolute;left:'+x+'%;top:'+y+'%;width:'+s+'px;height:'+s+'px;background:#fff;border-radius:50%;opacity:'+o+';animation:twinkle'+(i%5)+' '+(2+Math.random()*3)+'s ease-in-out infinite;animation-delay:'+(Math.random()*2)+'s;"></div>';
+  }
+  c.innerHTML=html;
+})();
+if(!document.getElementById('twinkleStyle')){
+  var st=document.createElement('style');st.id='twinkleStyle';
+  st.textContent='@keyframes twinkle0{0%,100%{opacity:0.3}50%{opacity:1}}@keyframes twinkle1{0%,100%{opacity:0.5}50%{opacity:0.2}}@keyframes twinkle2{0%,100%{opacity:1}50%{opacity:0.3}}@keyframes twinkle3{0%,100%{opacity:0.4}50%{opacity:0.9}}@keyframes twinkle4{0%,100%{opacity:0.7}50%{opacity:0.2}}';
+  document.head.appendChild(st);
+}
+})();
+</script>
+</body>
+</html>

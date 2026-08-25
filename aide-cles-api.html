@@ -1,0 +1,273 @@
+﻿<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+        <title>APC Algérie G3 · Aide Clés API</title>
+        <link rel="stylesheet" href="css/style.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+        <script>var l=localStorage.getItem('lang');if(l){document.documentElement.lang=l;if(l==='ar')document.documentElement.dir='rtl';}</script>
+        <style>        .help-container { max-width: 800px; margin: 0 auto; padding: 24px 16px; }        .help-card { background: var(--card); border-radius: 16px; padding: 28px; margin-bottom: 20px; border: 1px solid var(--border); }        .help-card h2 { margin: 0 0 12px; font-size: 1.3rem; display: flex; align-items: center; gap: 10px; }        .help-card .step { display: flex; gap: 14px; margin: 12px 0; padding: 12px 16px; background: var(--bg); border-radius: 10px; border-left: 3px solid #0077CC; }        .help-card .step .num { width: 28px; height: 28px; background: #0077CC; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }        .help-card .step .content { flex: 1; }        .help-card .step .content strong { display: block; margin-bottom: 2px; }        .help-card .step .content span { font-size: 0.9rem; color: var(--text-muted); }        .btn-link { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 10px; font-weight: 600; text-decoration: none; margin: 6px 4px; font-size: 0.9rem; }        .btn-link.site { background: #0077CC; color: #fff; }        .btn-link.youtube { background: #ff0000; color: #fff; }        .btn-link:hover { opacity: 0.85; }        .warning-box { background: #fff3cd; border: 1px solid #ffeeba; border-radius: 10px; padding: 14px 18px; margin: 16px 0; font-size: 0.9rem; color: #856404; }        .warning-box strong { display: block; margin-bottom: 4px; font-size: 1rem; }        .save-note { background: #d4edda; border: 1px solid #c3e6cb; border-radius: 10px; padding: 14px 18px; margin: 16px 0; font-size: 0.9rem; color: #155724; }        .save-note strong { display: block; margin-bottom: 4px; font-size: 1rem; }        .key-format { font-family: monospace; background: var(--border); padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; }        [dir="rtl"] .help-card .step { border-left: none; border-right: 3px solid #0077CC; }        [dir="rtl"] .help-container { text-align: right; }    </style>
+    </head>
+    <body>
+        <script>if(localStorage.getItem('theme')!=='light')document.body.classList.add('dark');</script>
+        <div id="apcCompatBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(135deg,#E65100,#FF8F00);color:#fff;padding:10px 16px;text-align:center;font-size:13px;font-weight:500;box-shadow:0 2px 12px rgba(0,0,0,.3);align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;">
+            <i class="fas fa-exclamation-triangle" style="font-size:16px;">
+            </i>
+            <span>Mode de compatibilité activé pour votre navigateur. Certaines icônes peuvent être différentes.</span>
+            <button id="apcCompatBannerClose" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);color:#fff;padding:4px 14px;border-radius:14px;font-size:12px;cursor:pointer;">OK</button>
+        </div>
+        <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()">
+        </div>
+        <div class="drawer" id="drawer">
+            <div class="drawer-header">
+                <span class="drawer-title">☰ Menu</span>
+                <button class="btn-icon drawer-close" onclick="closeDrawer()">✕</button>
+            </div>
+            <div class="drawer-section">
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('index.html')">
+                <span data-i18n="tab_home">🏠 Accueil</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('generator.html')">
+                <span data-i18n="tab_generator">📝 Générateur de Prompts</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('assistant.html')">
+                <span data-i18n="tab_assistant">🤖 Assistant IA</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('from-doc.html')">
+                <span data-i18n="tab_fromdoc">📄 Document → Présentation</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('quiz.html')">
+                <span data-i18n="tab_quiz">🎯 Quiz</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('challenges.html')">
+                <span data-i18n="tab_challenge">🎮 Challenges</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('games.html')"><span data-i18n="tab_games">🎮 Jeux</span></button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('aide.html')">
+                <span data-i18n="tab_guide">📖 Guide complet</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('aide-cles-api.html')">
+                <span data-i18n="tab_help">❓ Aide Clés API</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('about.html')">
+                <span data-i18n="tab_about">ℹ️ À propos</span>
+                </button>
+                <button class="drawer-nav-btn nav-admin-link" onclick="closeDrawer();goTo('admin.html');closeDrawer();" style="display:none">
+                <span data-i18n="tab_admin">⚙️ Admin</span>
+                </button>
+            </div>
+            <div class="drawer-divider">
+            </div>
+            <div class="drawer-section">
+                <button id="settingsBtn" class="drawer-nav-btn" onclick="loadKeysIntoModal();document.getElementById('settingsModal')?.classList.add('open');closeDrawer();">⚙️ <span data-i18n="settingsLabel">Paramètres</span>
+                <span id="apiBadge" class="badge missing">●</span>
+                </button>
+                <button id="themeToggle" class="drawer-nav-btn" onclick="toggleTheme()">🌙 <span id="themeLabel">Mode sombre</span>
+                </button>
+                <div class="drawer-lang-row">
+                    <span style="font-size:12px;color:var(--text-muted);margin-bottom:4px;display:block;">Langue :</span>
+                    <div style="display:flex;gap:4px;">
+                        <button id="btnFR" class="btn-icon active-lang" onclick="setLang('fr')">🇫🇷 FR</button>
+                        <button id="btnAR" class="btn-icon" onclick="setLang('ar')">🇩🇿 AR</button>
+                        <button id="btnEN" class="btn-icon" onclick="setLang('en')">🇬🇧 EN</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="hero">
+                <div class="hero-ministere" data-i18n="ministere">Ministère de la Formation et de l'Enseignement Professionnels</div>
+                    <img class="hero-logo-ministere" src="https://mvet.gov.dz/wp-content/uploads/2024/03/logo-mfep-1.png" alt="Ministère de la Formation et de l'Enseignement Professionnels">
+                    <div class="top-bar">
+                        <button class="btn-icon menu-btn" onclick="toggleDrawer()">☰</button>
+                        <span class="auth-state">
+                        </span>
+                    </div>
+                    <div class="hero-title-row">
+                        <div class="hero-text-group">
+                            <h1>APC ALGÉRIE <span>GÉNÉRATION 3</span>
+                            </h1>
+                            <div class="hero-sub" id="pageSub">Aide : Obtenir vos clés API</div>
+                            </div>
+                            <div class="hero-flag-video">
+                                <video src="https://videos.pexels.com/video-files/13859860/13859860-hd_1280_720_25fps.mp4" autoplay loop muted playsinline>
+                                </video>
+                            </div>
+                        </div>
+                        <div class="hero-desc" data-i18n="headerDesc">Une IA pédagogique qui génère automatiquement des prompts professionnels, des scénarios pédagogiques, des présentations, des évaluations, des activités de gamification et des ressources conformes à l'Approche Par Compétences (APC) Algérie .</div>
+                            <div class="nav-links">
+                                <a class="nav-link" onclick="goTo('index.html')" data-i18n="tab_home">🏠 Accueil</a>
+                                <a class="nav-link" onclick="goTo('generator.html')" data-i18n="tab_generator">📝 Générateur de Prompts</a>
+                                <a class="nav-link" onclick="goTo('assistant.html')" data-i18n="tab_assistant">🤖 Assistant IA</a>
+                                <a class="nav-link" onclick="goTo('from-doc.html')" data-i18n="tab_fromdoc">📄 Document → Présentation</a>
+                                <a class="nav-link" onclick="goTo('quiz.html')" data-i18n="tab_quiz">🎯 Quiz</a>
+                                <a class="nav-link" onclick="goTo('challenges.html')" data-i18n="tab_challenge">🎮 Challenges</a>
+                                <a class="nav-link" onclick="goTo('games.html')" data-i18n="tab_games">🎮 Jeux</a>
+                                <a class="nav-link" onclick="goTo('aide.html')" data-i18n="tab_guide">📖 Guide complet</a>
+                                <a class="nav-link" onclick="goTo('aide-cles-api.html')" data-i18n="tab_help">❓ Aide Clés API</a>
+                                <a class="nav-link" onclick="goTo('about.html')" data-i18n="tab_about">ℹ️ À propos</a>
+                                <a class="nav-link" onclick="goTo('admin.html')" style="display:none" data-i18n="tab_admin">⚙️ Admin</a>
+                            </div>
+                            <div class="signature">Créé par MR. AZIZ Mohamed Rostom © 2026</div>
+                            </div>
+                            <div class="help-container" id="helpContent">
+                            </div>
+                        </div>
+                        <div class="modal-overlay" id="settingsModal">
+                            <div class="modal">
+                                <button class="modal-close" id="modalCloseBtn" onclick="document.getElementById('settingsModal')?.classList.remove('open');">&times;</button>
+                                <h2>⚙️ <span data-i18n="settingsTitle">Paramètres IA</span>
+                                </h2>
+                                <p class="desc" data-i18n="settingsDesc">Configurez vos clés API et choisissez le modèle par défaut.</p>
+                                <div class="field-group">
+                                    <label data-i18n="openrouterKeyLabel">🔑 Clé API OpenRouter</label>
+                                    <div class="hint" data-i18n="openrouterKeyHint">Pour utiliser DeepSeek, Llama 3.3 via OpenRouter.</div>
+                                        <input type="text" id="openrouterApiKeyInput" placeholder="sk-or-v1-...">
+                                        <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
+                                            <button class="btn btn-secondary" id="verifyORKeyBtn">🔍 <span data-i18n="verifyBtn">Vérifier</span>
+                                            </button>
+                                            <span id="verifyORResult" class="verify-result">
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="field-group">
+                                        <label data-i18n="groqKeyLabel">⚡ Clé API Groq</label>
+                                        <div class="hint" data-i18n="groqKeyHint">Pour utiliser les modèles Groq (GPT OSS, Mixtral, DeepSeek).</div>
+                                            <input type="text" id="groqApiKeyInput" placeholder="gsk_...">
+                                            <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
+                                                <button class="btn btn-secondary" id="verifyGroqKeyBtn">🔍 <span data-i18n="verifyBtn">Vérifier</span>
+                                                </button>
+                                                <span id="verifyGroqResult" class="verify-result">
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="field-group">
+                                            <label data-i18n="geminiKeyLabel">✦ Clé API Google Gemini</label>
+                                            <div class="hint" data-i18n="geminiKeyHint">Pour utiliser Gemini 1.5 Flash/Pro (gratuit).</div>
+                                                <input type="text" id="geminiApiKeyInput" placeholder="AIza...">
+                                                <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
+                                                    <button class="btn btn-secondary" id="verifyGeminiKeyBtn">🔍 <span data-i18n="verifyBtn">Vérifier</span>
+                                                    </button>
+                                                    <span id="verifyGeminiResult" class="verify-result">
+                                                    </span>
+                                                </div>
+                                            </div>
+                                                    <div class="model-selector admin-only">
+                                                <div class="model-group-title" data-i18n="modelSelection">Modèle à utiliser</div>
+                                                    <label>
+                                                    <input type="radio" name="modelChoice" value="auto" checked>
+                                                    <span data-i18n="modelAuto">☑ Auto (Gemini → Groq → OpenRouter)</span>
+                                                    </label>
+                                                    <label>
+                                                    <input type="radio" name="modelChoice" value="gemini-flash">
+                                                    <span data-i18n="modelGeminiFlash">☐ Gemini 2.0 Flash</span>
+                                                    </label>
+                                                    <label>
+                                                    <input type="radio" name="modelChoice" value="gemini-pro">
+                                                    <span data-i18n="modelGeminiPro">☐ Gemini 2.5 Pro</span>
+                                                    </label>
+                                                    <label>
+                                                    <input type="radio" name="modelChoice" value="deepseek-v3">
+                                                    <span data-i18n="modelV3">☐ DeepSeek V3 (OpenRouter)</span>
+                                                    </label>
+                                                    <label>
+                                                    <input type="radio" name="modelChoice" value="deepseek-r1">
+                                                    <span data-i18n="modelR1">☐ DeepSeek R1 (OpenRouter)</span>
+                                                    </label>
+                                                    <label>
+                                                    <input type="radio" name="modelChoice" value="llama3.3">
+                                                    <span data-i18n="modelLlama">☐ Llama 3.3 70B (OpenRouter)</span>
+                                                    </label>
+                                                    <label>
+<input type="radio" name="modelChoice" value="groq-70b"> <span data-i18n="modelGroq70b">☐ Llama 3.3 70B (Groq)</span>
+                                                    </label>
+                                                    
+                                                    <label>
+                                                    <input type="radio" name="modelChoice" value="or-nemotron-nano-free">
+                                                    <span data-i18n="modelNemotronNanoFree">☐ Nemotron 3 Nano 30B (OpenRouter free)</span>
+                                                    </label>
+                                                    <label>
+                                                    <input type="radio" name="modelChoice" value="or-gemma4-free">
+                                                    <span data-i18n="modelGemma4Free">☐ Gemma 4 31B (OpenRouter free)</span>
+                                                    </label>
+                                                    <label>
+                                                    <input type="radio" name="modelChoice" value="or-gptoss20b-free">
+                                                    <span data-i18n="modelGptOss20bFree">☐ GPT OSS 20B (OpenRouter free)</span>
+                                                    </label>
+                                                    <label>
+                                                    <input type="radio" name="modelChoice" value="or-ling3-free">
+                                                    <span data-i18n="modelLing3Free">☐ Ling 3.0 Flash (OpenRouter free)</span>
+                                                    </label>
+                                                    <label>
+                                                    <input type="radio" name="modelChoice" value="or-nemotron-super-free">
+                                                    <span data-i18n="modelNemotronSuperFree">☐ Nemotron 3 Super 120B (OpenRouter free)</span>
+                                                    </label>
+                                                </div>
+                                                <div class="free-mode-row">
+                                                    <label class="free-mode-label"><input type="checkbox" id="freeModeToggle"> 🔓 Mode libre (tous sujets)</label>
+                                                </div>
+                                                <div class="free-mode-row">
+                                                    <label class="free-mode-label"><input type="checkbox" id="axonToggle"> 🧠 AXON Intelligence (mémoire évolutive)</label>
+                                                </div>
+                                                <div class="btn-row">
+                                                    <button class="btn btn-primary" id="modalSaveBtn">💾 <span data-i18n="saveBtn">Enregistrer</span>
+                                                    </button>
+                                                    <button class="btn btn-danger" id="modalClearBtn">🗑 <span data-i18n="clearBtn">Effacer tout</span>
+                                                    </button>
+                                                    <button class="btn btn-secondary" id="modalCancelBtn" onclick="document.getElementById('settingsModal')?.classList.remove('open');">
+                                                    <span data-i18n="cancelBtn">Annuler</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <script src="https://unpkg.com/@supabase/supabase-js@2">
+                                        </script>
+                                        <script src="js/supabase.js?v=20260707">
+                                        </script>
+                                        <script src="js/compat.js?v=2">
+                                        </script>
+                                        <script src="js/shared.v2.js?v=1.9.9">
+                                        </script>
+                                        <script>        const LANG = localStorage.getItem('lang') || 'fr';        const isAr = LANG === 'ar';        document.documentElement.dir = isAr ? 'rtl' : 'ltr';        document.documentElement.lang = LANG;        const savedTheme = localStorage.getItem('theme') || 'dark';        if (savedTheme === 'dark') document.body.classList.add('dark');        document.getElementById('themeLabel').textContent = savedTheme === 'dark' ? 'Mode sombre' : 'Mode clair';        const C = {            fr: {                intro: "Cette page vous explique comment obtenir vos clés API pour utiliser l'intelligence artificielle sur la plateforme.",                providers: [                    { icon: "🔀", title: "OpenRouter", sub: "DeepSeek V3, DeepSeek R1, Llama 3.3", fmt: "sk-or-v1-...", site: "https://openrouter.ai/keys", slbl: "🔑 openrouter.ai/keys", yt: "https://www.youtube.com/watch?v=93GmaoQzPVA",                        steps: ["Créez un compte gratuit sur openrouter.ai.", "Cliquez sur votre profil → 'API Keys'.", "Cliquez sur 'Create Key' et nommez-la (ex: APC).", "Copiez la clé (commence par sk-or-v1-...).", "Collez-la dans ⚙️ Paramètres → OpenRouter."] },                    { icon: "⚡", title: "Groq", sub: "Llama 3.3, Mixtral, DeepSeek R1", fmt: "gsk_...", site: "https://console.groq.com/keys", slbl: "⚡ console.groq.com/keys", yt: "https://www.youtube.com/watch?v=nt1PJu47nTk",                        steps: ["Créez un compte gratuit sur console.groq.com.", "Connectez-vous avec Google ou GitHub.", "Allez dans 'API Keys' → 'Create API Key'.", "Nommez-la (ex: APC) et copiez la clé.", "Collez-la dans ⚙️ Paramètres → Groq."] },                    { icon: "✦", title: "Google Gemini", sub: "Gemini 2.0 Flash / 2.5 Pro", fmt: "AIza...", site: "https://aistudio.google.com/apikey", slbl: "✦ aistudio.google.com/apikey", yt: "https://www.youtube.com/watch?v=o8iyrtQyrZM",                        steps: ["Allez sur aistudio.google.com.", "Connectez-vous avec votre compte Google.", "Cliquez sur 'Get API Key' → 'Create API Key'.", "Sélectionnez ou créez un projet Google Cloud.", "Copiez la clé et collez-la dans ⚙️ Paramètres → Gemini."] }                ],                save: "💾 Enregistrement des clés",                saveSteps: [                    "Cliquez sur ⚙️ Paramètres en haut à droite.",                    "Collez chaque clé dans le champ correspondant.",                    "Cliquez sur 🔍 Vérifier pour tester la clé.",                    "Cliquez sur 💾 Enregistrer pour sauvegarder.",                    "✅ À faire une seule fois par navigateur."                ],                backup: "📂 Sauvegarde",                backupSteps: [                    "Gardez une copie dans un fichier .txt sécurisé.",                    "Ne partagez jamais vos clés.",                    "Si perdue, créez-en une nouvelle sur le site du fournisseur."                ],                warning: "Ne partagez jamais vos clés API avec d'autres personnes.",                pwd_title: "🔑 Mot de passe oublié ?",                pwd_steps: [                    "Allez sur la page de Connexion et cliquez sur 'Mot de passe oublié'.",                    "Entrez votre adresse e-mail enregistrée.",                    "Consultez votre boîte de réception pour un lien ou un code de réinitialisation.",                    "Suivez les instructions pour créer un nouveau mot de passe robuste."                ],                pwd_tip: "Ne partagez jamais votre mot de passe. Nous ne vous demanderons jamais votre mot de passe par e-mail ou par téléphone.",                win7_title: "🔒 Navigateur incompatible ?",                win7_msg: "Si vous utilisez Windows 7, installez le navigateur Supermium (Chromium-based) pour accéder aux services IA (OpenRouter, Groq, Gemini) qui ne supportent plus les anciens navigateurs."            },            ar: {                intro: "تشرح لك هذه الصفحة كيفية الحصول على مفاتيح API لاستخدام الذكاء الاصطناعي على المنصة.",                providers: [                    { icon: "🔀", title: "OpenRouter", sub: "DeepSeek V3, DeepSeek R1, Llama 3.3", fmt: "sk-or-v1-...", site: "https://openrouter.ai/keys", slbl: "🔑 openrouter.ai/keys", yt: "https://www.youtube.com/watch?v=93GmaoQzPVA",                        steps: ["أنشئ حساباً مجانياً على openrouter.ai.", "انقر على ملفك الشخصي ← 'API Keys'.", "انقر على 'Create Key' وأعطه اسماً (مثال: APC).", "انسخ المفتاح (يبدأ بـ sk-or-v1-...).", "الصقه في ⚙️ الإعدادات ← OpenRouter."] },                    { icon: "⚡", title: "Groq", sub: "Llama 3.3, Mixtral, DeepSeek R1", fmt: "gsk_...", site: "https://console.groq.com/keys", slbl: "⚡ console.groq.com/keys", yt: "https://www.youtube.com/watch?v=nt1PJu47nTk",                        steps: ["أنشئ حساباً مجانياً على console.groq.com.", "سجل الدخول بحساب Google أو GitHub.", "اذهب إلى 'API Keys' ← 'Create API Key'.", "أعطه اسماً (APC) وانسخ المفتاح.", "الصقه في ⚙️ الإعدادات ← Groq."] },                    { icon: "✦", title: "Google Gemini", sub: "Gemini 2.0 Flash / 2.5 Pro", fmt: "AIza...", site: "https://aistudio.google.com/apikey", slbl: "✦ aistudio.google.com/apikey", yt: "https://www.youtube.com/watch?v=o8iyrtQyrZM",                        steps: ["اذهب إلى aistudio.google.com.", "سجل الدخول بحساب Google.", "انقر على 'Get API Key' ← 'Create API Key'.", "اختر أو أنشئ مشروع Google Cloud.", "انسخ المفتاح والصقه في ⚙️ الإعدادات ← Gemini."] }                ],                save: "💾 حفظ المفاتيح",                saveSteps: [                    "انقر على ⚙️ الإعدادات أعلى اليمين.",                    "الصق كل مفتاح في الحقل المناسب.",                    "انقر على 🔍 تحقق لاختبار المفتاح.",                    "انقر على 💾 حفظ لتخزين المفاتيح.",                    "✅ مرة واحدة فقط لكل متصفح."                ],                backup: "📂 نسخ احتياطي",                backupSteps: [                    "احتفظ بنسخة في ملف .txt آمن.",                    "لا تشارك مفاتيحك أبداً.",                    "إذا فقدتها، أنشئ جديدة من موقع المزوّد."                ],                warning: "لا تشارك مفاتيح API الخاصة بك مع أي شخص.",                pwd_title: "🔑 هل نسيت كلمة المرور؟",                pwd_steps: [                    "اذهب إلى صفحة تسجيل الدخول واضغط على 'نسيت كلمة المرور'.",                    "أدخل بريدك الإلكتروني المسجل.",                    "تفقّد صندوق الوارد لاستلام رابط أو رمز إعادة التعيين.",                    "اتبع التعليمات لإنشاء كلمة مرور قوية جديدة."                ],                pwd_tip: "لا تشارك كلمة مرورك أبداً. لن نطلب منك كلمة المرور عبر البريد الإلكتروني أو الهاتف أبداً.",                win7_title: "🔒 المتصفح غير متوافق؟",                win7_msg: "إذا كنت تستخدم Windows 7، قم بتثبيت متصفح Supermium (المبني على Chromium) للوصول إلى خدمات الذكاء الاصطناعي (OpenRouter, Groq, Gemini) التي لم تعد تدعم الإصدارات القديمة من المتصفحات."            },            en: {                intro: "This page explains how to obtain your API keys to use artificial intelligence on the platform.",                providers: [                    { icon: "🔀", title: "OpenRouter", sub: "DeepSeek V3, DeepSeek R1, Llama 3.3", fmt: "sk-or-v1-...", site: "https://openrouter.ai/keys", slbl: "🔑 openrouter.ai/keys", yt: "https://www.youtube.com/watch?v=93GmaoQzPVA",                        steps: ["Create a free account on openrouter.ai.", "Click your profile → 'API Keys'.", "Click 'Create Key' and name it (e.g., APC).", "Copy the key (starts with sk-or-v1-...).", "Paste it in ⚙️ Settings → OpenRouter."] },                    { icon: "⚡", title: "Groq", sub: "Llama 3.3, Mixtral, DeepSeek R1", fmt: "gsk_...", site: "https://console.groq.com/keys", slbl: "⚡ console.groq.com/keys", yt: "https://www.youtube.com/watch?v=nt1PJu47nTk",                        steps: ["Create a free account on console.groq.com.", "Sign in with Google or GitHub.", "Go to 'API Keys' → 'Create API Key'.", "Name it (e.g., APC) and copy the key.", "Paste it in ⚙️ Settings → Groq."] },                    { icon: "✦", title: "Google Gemini", sub: "Gemini 2.0 Flash / 2.5 Pro", fmt: "AIza...", site: "https://aistudio.google.com/apikey", slbl: "✦ aistudio.google.com/apikey", yt: "https://www.youtube.com/watch?v=o8iyrtQyrZM",                        steps: ["Go to aistudio.google.com.", "Sign in with your Google account.", "Click 'Get API Key' → 'Create API Key'.", "Select or create a Google Cloud project.", "Copy the key and paste it in ⚙️ Settings → Gemini."] }                ],                save: "💾 Saving Keys",                saveSteps: [                    "Click ⚙️ Settings in the top right.",                    "Paste each key in the corresponding field.",                    "Click 🔍 Verify to test the key.",                    "Click 💾 Save to store.",                    "✅ Only once per browser."                ],                backup: "📂 Backup",                backupSteps: [                    "Keep a copy in a secure .txt file.",                    "Never share your keys.",                    "If lost, create a new one on the provider's website."                ],                warning: "Never share your API keys with anyone.",                pwd_title: "🔑 Forgot Password?",                pwd_steps: [                    "Go to the Login page and click 'Forgot password'.",                    "Enter your registered email address.",                    "Check your inbox for a reset link or code.",                    "Follow the instructions to create a new strong password."                ],                pwd_tip: "Never share your password. We will never ask for your password by email or phone.",                win7_title: "🔒 Browser not compatible?",                win7_msg: "If you are using Windows 7, install the Supermium browser (Chromium-based) to access AI services (OpenRouter, Groq, Gemini) which no longer support older browser versions."            }        };        function renderHelp() {            const lang = typeof currentLang !== 'undefined' ? currentLang : LANG;            const isAr = lang === 'ar', isEn = lang === 'en';            document.getElementById('pageSub').textContent = isAr ? 'مساعدة : الحصول على مفاتيح API' : isEn ? 'Help : Getting your API keys' : 'Aide : Obtenir vos clés API';            const c = C[lang] || C.fr;            const h = document.getElementById('helpContent');            let html = `<p style="font-size:1rem;color:var(--text-muted);margin-bottom:24px;text-align:center;">${c.intro}</p>`;            for (const p of c.providers) {                html += `<div class="help-card">
+                                        <h2>${p.icon} ${p.title}</h2>
+                                        <p style="color:var(--text-muted);margin-bottom:4px;font-size:0.9rem;">${p.sub}</p>
+                                        <p style="font-size:0.85rem;margin-bottom:12px;">Code : <span class="key-format">${p.fmt}</span>
+                                        </p>
+                                        <div style="margin-bottom:16px;">
+                                            <a href="${p.site}" target="_blank" rel="noopener noreferrer" class="btn-link site">${p.slbl}</a>
+                                            <a href="${p.yt}" target="_blank" rel="noopener noreferrer" class="btn-link youtube">▶ ${isAr ? 'شاهد الدرس' : isEn ? 'Watch tutorial' : 'Regarder le tutoriel'}</a>
+                                        </div>`;                p.steps.forEach((s, i) => {                    html += `<div class="step">
+                                        <div class="num">${i+1}</div>
+                                            <div class="content">
+                                                <span>${s}</span>
+                                            </div>
+                                        </div>`;                });                html += `</div>`;            }            html += `<div class="help-card">
+                                        <h2>${c.save}</h2>`;            c.saveSteps.forEach(s => {                html += `<div class="step" style="border-left-color:#28a745;">
+                                        <div class="num" style="background:#28a745;">✓</div>
+                                            <div class="content">
+                                                <span>${s}</span>
+                                            </div>
+                                        </div>`;            });            html += `</div>`;            html += `<div class="help-card">
+                                        <h2>${c.backup}</h2>`;            c.backupSteps.forEach(s => {                html += `<div class="step" style="border-left-color:#ffc107;">
+                                        <div class="num" style="background:#ffc107;color:#333;">📂</div>
+                                            <div class="content">
+                                                <span>${s}</span>
+                                            </div>
+                                        </div>`;            });            html += `</div>`;            html += `<div class="warning-box">
+                                        <strong>⚠️ ${isAr ? 'تنبيه' : isEn ? 'Warning' : 'Attention'}</strong>${c.warning}</div>`;            html += `<div class="help-card">
+                                        <h2>${c.pwd_title}</h2>`;            c.pwd_steps.forEach((s, i) => {                html += `<div class="step">
+                                        <div class="num">${i+1}</div>
+                                            <div class="content">
+                                                <span>${s}</span>
+                                            </div>
+                                        </div>`;            });            html += `<div class="save-note">
+                                        <strong>🛡️ ${isAr ? 'نصيحة أمنية' : isEn ? 'Security Tip' : 'Conseil de Sécurité'}</strong>${c.pwd_tip}</div>`;            html += `</div>`;            html += `<div class="help-card">
+                                        <h2>${c.win7_title}</h2>
+                                        <div class="warning-box" style="margin:0;">${c.win7_msg}<br>
+                                            <br>
+                                            <a href="https://www.supermium.org/" target="_blank" rel="noopener noreferrer" class="btn-link site">🔽 ${isAr ? 'تحميل Supermium' : isEn ? 'Download Supermium' : 'Télécharger Supermium'}</a>
+                                        </div>
+                                    </div>`;            h.innerHTML = html;        }        function toggleTheme() {            const isDark = !document.body.classList.contains('dark');            document.body.classList.toggle('dark', isDark);            localStorage.setItem('theme', isDark ? 'dark' : 'light');            document.getElementById('themeLabel').textContent = isDark ? 'Mode sombre' : 'Mode clair';        }        renderHelp();    </script>
+                                </body>
+                            </html>

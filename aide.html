@@ -1,0 +1,299 @@
+﻿<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+        <title>APC Algérie G3 · Guide complet</title>
+        <link rel="stylesheet" href="css/style.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+        <script>var l=localStorage.getItem('lang');if(l){document.documentElement.lang=l;if(l==='ar')document.documentElement.dir='rtl';}</script>
+        <style>        .guide-container { max-width: 860px; margin: 0 auto; padding: 24px 16px; }        .guide-card { background: var(--card); border-radius: 16px; padding: 28px; margin-bottom: 20px; border: 1px solid var(--border); }        .guide-card h2 { margin: 0 0 12px; font-size: 1.3rem; display: flex; align-items: center; gap: 10px; }        .guide-card h3 { margin: 16px 0 8px; font-size: 1rem; color: var(--accent); display: flex; align-items: center; gap: 8px; }        .guide-card .step { display: flex; gap: 14px; margin: 10px 0; padding: 12px 16px; background: var(--bg); border-radius: 10px; border-left: 3px solid #0077CC; }        .guide-card .step .num { width: 28px; height: 28px; background: #0077CC; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }        .guide-card .step .content { flex: 1; }        .guide-card .step .content strong { display: block; margin-bottom: 2px; }        .guide-card .step .content span { font-size: 0.9rem; color: var(--text-muted); }        .guide-card p { font-size: 0.92rem; line-height: 1.7; color: var(--text); margin: 8px 0; }        .guide-card ul { padding-left: 20px; font-size: 0.9rem; line-height: 1.8; color: var(--text); }        .guide-card .field-box { background: var(--bg); border-radius: 10px; padding: 14px 18px; margin: 10px 0; border-left: 3px solid #28a745; }        .guide-card .field-box strong { display: block; margin-bottom: 2px; color: var(--accent); }        .guide-card .field-box span { font-size: 0.85rem; color: var(--text-muted); }        .btn-guide { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 10px; font-weight: 600; text-decoration: none; margin: 6px 4px; font-size: 0.9rem; background: #0077CC; color: #fff; }        .btn-guide:hover { opacity: 0.85; }        .guide-intro { font-size: 1rem; color: var(--text-muted); margin-bottom: 24px; text-align: center; line-height: 1.7; }        [dir="rtl"] .guide-card .step { border-left: none; border-right: 3px solid #0077CC; }        [dir="rtl"] .guide-card .field-box { border-left: none; border-right: 3px solid #28a745; }        [dir="rtl"] .guide-container { text-align: right; }        [dir="rtl"] .guide-card ul { padding-left: 0; padding-right: 20px; }    </style>
+    </head>
+    <body>
+        <script>if(localStorage.getItem('theme')!=='light')document.body.classList.add('dark');</script>
+        <div id="apcCompatBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(135deg,#E65100,#FF8F00);color:#fff;padding:10px 16px;text-align:center;font-size:13px;font-weight:500;box-shadow:0 2px 12px rgba(0,0,0,.3);align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;">
+            <i class="fas fa-exclamation-triangle" style="font-size:16px;">
+            </i>
+            <span>Mode de compatibilité activé pour votre navigateur. Certaines icônes peuvent être différentes.</span>
+            <button id="apcCompatBannerClose" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);color:#fff;padding:4px 14px;border-radius:14px;font-size:12px;cursor:pointer;">OK</button>
+        </div>
+        <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()">
+        </div>
+        <div class="drawer" id="drawer">
+            <div class="drawer-header">
+                <span class="drawer-title">☰ Menu</span>
+                <button class="btn-icon drawer-close" onclick="closeDrawer()">✕</button>
+            </div>
+            <div class="drawer-section">
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('index.html')">
+                <span data-i18n="tab_home">🏠 Accueil</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('generator.html')">
+                <span data-i18n="tab_generator">📝 Générateur de Prompts</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('assistant.html')">
+                <span data-i18n="tab_assistant">🤖 Assistant IA</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('from-doc.html')">
+                <span data-i18n="tab_fromdoc">📄 Document → Présentation</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('quiz.html')">
+                <span data-i18n="tab_quiz">🎯 Quiz</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('challenges.html')">
+                <span data-i18n="tab_challenge">🎮 Challenges</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('games.html')"><span data-i18n="tab_games">🎮 Jeux</span></button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('aide.html')">
+                <span data-i18n="tab_guide">📖 Guide complet</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('aide-cles-api.html')">
+                <span data-i18n="tab_help">❓ Aide Clés API</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('about.html')">
+                <span data-i18n="tab_about">ℹ️ À propos</span>
+                </button>
+                <button class="drawer-nav-btn nav-admin-link" onclick="closeDrawer();goTo('admin.html');closeDrawer();" style="display:none">
+                <span data-i18n="tab_admin">⚙️ Admin</span>
+                </button>
+            </div>
+            <div class="drawer-divider">
+            </div>
+            <div class="drawer-section">
+                <button id="settingsBtn" class="drawer-nav-btn" onclick="loadKeysIntoModal();document.getElementById('settingsModal')?.classList.add('open');closeDrawer();">⚙️ <span data-i18n="settingsLabel">Paramètres</span>
+                <span id="apiBadge" class="badge missing">●</span>
+                </button>
+                <button id="themeToggle" class="drawer-nav-btn" onclick="toggleTheme()">🌙 <span id="themeLabel">Mode sombre</span>
+                </button>
+                <div class="drawer-lang-row">
+                    <span style="font-size:12px;color:var(--text-muted);margin-bottom:4px;display:block;">Langue :</span>
+                    <div style="display:flex;gap:4px;">
+                        <button id="btnFR" class="btn-icon active-lang" onclick="setLang('fr')">🇫🇷 FR</button>
+                        <button id="btnAR" class="btn-icon" onclick="setLang('ar')">🇩🇿 AR</button>
+                        <button id="btnEN" class="btn-icon" onclick="setLang('en')">🇬🇧 EN</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="hero">
+                <div class="hero-ministere" data-i18n="ministere">Ministère de la Formation et de l'Enseignement Professionnels</div>
+                    <img class="hero-logo-ministere" src="https://mvet.gov.dz/wp-content/uploads/2024/03/logo-mfep-1.png" alt="Ministère de la Formation et de l'Enseignement Professionnels">
+                    <div class="top-bar">
+                        <button class="btn-icon menu-btn" onclick="toggleDrawer()">☰</button>
+                        <span class="auth-state">
+                        </span>
+                    </div>
+                    <div class="hero-title-row">
+                        <div class="hero-text-group">
+                            <h1>APC ALGÉRIE <span>GÉNÉRATION 3</span>
+                            </h1>
+                            <div class="hero-sub" id="pageSub">Guide complet</div>
+                            </div>
+                            <div class="hero-flag-video">
+                                <video src="https://videos.pexels.com/video-files/13859860/13859860-hd_1280_720_25fps.mp4" autoplay loop muted playsinline>
+                                </video>
+                            </div>
+                        </div>
+                        <div class="hero-desc" data-i18n="headerDesc">Une IA pédagogique qui génère automatiquement des prompts professionnels, des scénarios pédagogiques, des présentations, des évaluations, des activités de gamification et des ressources conformes à l'Approche Par Compétences (APC) Algérie .</div>
+                            <div class="nav-links">
+                                <a class="nav-link" onclick="goTo('index.html')" data-i18n="tab_home">🏠 Accueil</a>
+                                <a class="nav-link" onclick="goTo('generator.html')" data-i18n="tab_generator">📝 Générateur de Prompts</a>
+                                <a class="nav-link" onclick="goTo('assistant.html')" data-i18n="tab_assistant">🤖 Assistant IA</a>
+                                <a class="nav-link" onclick="goTo('from-doc.html')" data-i18n="tab_fromdoc">📄 Document → Présentation</a>
+                                <a class="nav-link" onclick="goTo('quiz.html')" data-i18n="tab_quiz">🎯 Quiz</a>
+                                <a class="nav-link" onclick="goTo('challenges.html')" data-i18n="tab_challenge">🎮 Challenges</a>
+                                <a class="nav-link" onclick="goTo('games.html')" data-i18n="tab_games">🎮 Jeux</a>
+                                <a class="nav-link" onclick="goTo('aide.html')" data-i18n="tab_guide">📖 Guide complet</a>
+                                <a class="nav-link" onclick="goTo('aide-cles-api.html')" data-i18n="tab_help">❓ Aide Clés API</a>
+                                <a class="nav-link" onclick="goTo('about.html')" data-i18n="tab_about">ℹ️ À propos</a>
+                                <a class="nav-link" onclick="goTo('admin.html')" style="display:none" data-i18n="tab_admin">⚙️ Admin</a>
+                            </div>
+                            <div class="signature">Créé par MR. AZIZ Mohamed Rostom © 2026</div>
+                            </div>
+                            <div class="guide-container" id="guideContent">
+                            </div>
+                        </div>
+                        <div class="modal-overlay" id="settingsModal">
+                            <div class="modal">
+                                <button class="modal-close" id="modalCloseBtn" onclick="document.getElementById('settingsModal')?.classList.remove('open');">&times;</button>
+                                <h2>⚙️ <span data-i18n="settingsTitle">Paramètres IA</span>
+                                </h2>
+                                <p class="desc" data-i18n="settingsDesc">Configurez vos clés API et choisissez le modèle par défaut.</p>
+                                <div class="field-group">
+                                    <label data-i18n="openrouterKeyLabel">🔑 Clé API OpenRouter</label>
+                                    <div class="hint" data-i18n="openrouterKeyHint">Pour utiliser DeepSeek, Llama 3.3 via OpenRouter.</div>
+                                        <input type="text" id="openrouterApiKeyInput" placeholder="sk-or-v1-...">
+                                        <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
+                                            <button class="btn btn-secondary" id="verifyORKeyBtn">🔍 <span data-i18n="verifyBtn">Vérifier</span>
+                                            </button>
+                                            <span id="verifyORResult" class="verify-result">
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="field-group">
+                                        <label data-i18n="groqKeyLabel">⚡ Clé API Groq</label>
+                                        <div class="hint" data-i18n="groqKeyHint">Pour utiliser les modèles Groq (GPT OSS, Mixtral, DeepSeek).</div>
+                                            <input type="text" id="groqApiKeyInput" placeholder="gsk_...">
+                                            <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
+                                                <button class="btn btn-secondary" id="verifyGroqKeyBtn">🔍 <span data-i18n="verifyBtn">Vérifier</span>
+                                                </button>
+                                                <span id="verifyGroqResult" class="verify-result">
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="field-group">
+                                            <label data-i18n="geminiKeyLabel">✦ Clé API Google Gemini</label>
+                                            <div class="hint" data-i18n="geminiKeyHint">Pour utiliser Gemini 1.5 Flash/Pro (gratuit).</div>
+                                                <input type="text" id="geminiApiKeyInput" placeholder="AIza...">
+                                                <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
+                                                    <button class="btn btn-secondary" id="verifyGeminiKeyBtn">🔍 <span data-i18n="verifyBtn">Vérifier</span>
+                                                    </button>
+                                                    <span id="verifyGeminiResult" class="verify-result">
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="field-group" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+                                                <label>📧 <span data-i18n="emailjsLabel">EmailJS — Envoi d'invitations</span>
+                                                </label>
+                                                <div class="hint" data-i18n="emailjsHint">Créez un compte gratuit sur emailjs.com → connectez votre email → copiez vos clés ici.</div>
+                                                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                                                        <div>
+                                                            <label style="font-size:0.75rem;">Public Key</label>
+                                                            <input type="text" id="emailjsPublicKey" placeholder="ex: xxxxxxxxxxxxxxx" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;">
+                                                        </div>
+                                                        <div>
+                                                            <label style="font-size:0.75rem;">Service ID</label>
+                                                            <input type="text" id="emailjsServiceId" placeholder="service_xxxxxxx" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;">
+                                                        </div>
+                                                        <div>
+                                                            <label style="font-size:0.75rem;">Template ID</label>
+                                                            <input type="text" id="emailjsTemplateId" placeholder="template_xxxxxxx" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;">
+                                                        </div>
+                                                        <div>
+                                                            <label style="font-size:0.75rem;">Clé API (privée)</label>
+                                                            <input type="password" id="emailjsApiKey" placeholder="Pour créer le template" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;">
+                                                        </div>
+                                                        <div style="display:flex;align-items:flex-end;gap:4px;">
+                                                            <button class="btn btn-secondary" onclick="testEmailJS()" style="font-size:11px;">🔍 Tester</button>
+                                                            <button class="btn btn-secondary" onclick="createEmailJSTemplate()" style="font-size:11px;">⚙️ Créer le template</button>
+                                                            <span id="emailjsTestResult" style="font-size:0.75rem;margin-left:4px;">
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="model-selector">
+                                                    <div class="model-group-title" data-i18n="modelSelection">Modèle à utiliser</div>
+                                                        <label>
+                                                        <input type="radio" name="modelChoice" value="auto" checked>
+                                                        <span data-i18n="modelAuto">☑ Auto (Gemini → Groq → OpenRouter)</span>
+                                                        </label>
+                                                        <label>
+                                                        <input type="radio" name="modelChoice" value="gemini-flash">
+                                                        <span data-i18n="modelGeminiFlash">☐ Gemini 1.5 Flash</span>
+                                                        </label>
+                                                        <label>
+                                                        <input type="radio" name="modelChoice" value="gemini-pro">
+                                                        <span data-i18n="modelGeminiPro">☐ Gemini 1.5 Pro</span>
+                                                        </label>
+                                                        <label>
+                                                        <input type="radio" name="modelChoice" value="deepseek-v3">
+                                                        <span data-i18n="modelV3">☐ DeepSeek V3 (OpenRouter)</span>
+                                                        </label>
+                                                        <label>
+                                                        <input type="radio" name="modelChoice" value="deepseek-r1">
+                                                        <span data-i18n="modelR1">☐ DeepSeek R1 (OpenRouter)</span>
+                                                        </label>
+                                                        <label>
+                                                        <input type="radio" name="modelChoice" value="llama3.3">
+                                                        <span data-i18n="modelLlama">☐ Llama 3.3 70B (OpenRouter)</span>
+                                                        </label>
+                                                        <label>
+<input type="radio" name="modelChoice" value="groq-70b"> <span data-i18n="modelGroq70b">☐ Llama 3.3 70B (Groq)</span>
+                                                        </label>
+                                                        
+                                                        <label>
+                                                        <input type="radio" name="modelChoice" value="or-nemotron-nano-free">
+                                                        <span data-i18n="modelNemotronNanoFree">☐ Nemotron 3 Nano 30B (OpenRouter free)</span>
+                                                        </label>
+                                                        <label>
+                                                        <input type="radio" name="modelChoice" value="or-gemma4-free">
+                                                        <span data-i18n="modelGemma4Free">☐ Gemma 4 31B (OpenRouter free)</span>
+                                                        </label>
+                                                        <label>
+                                                        <input type="radio" name="modelChoice" value="or-gptoss20b-free">
+                                                        <span data-i18n="modelGptOss20bFree">☐ GPT OSS 20B (OpenRouter free)</span>
+                                                        </label>
+                                                        <label>
+                                                        <input type="radio" name="modelChoice" value="or-ling3-free">
+                                                        <span data-i18n="modelLing3Free">☐ Ling 3.0 Flash (OpenRouter free)</span>
+                                                        </label>
+                                                        <label>
+                                                        <input type="radio" name="modelChoice" value="or-nemotron-super-free">
+                                                        <span data-i18n="modelNemotronSuperFree">☐ Nemotron 3 Super 120B (OpenRouter free)</span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="btn-row">
+                                                        <button class="btn btn-primary" id="modalSaveBtn">💾 <span data-i18n="saveBtn">Enregistrer</span>
+                                                        </button>
+                                                        <button class="btn btn-danger" id="modalClearBtn">🗑 <span data-i18n="clearBtn">Effacer tout</span>
+                                                        </button>
+                                                        <button class="btn btn-secondary" id="modalCancelBtn" onclick="document.getElementById('settingsModal')?.classList.remove('open');">
+                                                        <span data-i18n="cancelBtn">Annuler</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-overlay preso-modal" id="gammaModal">
+                                                <div class="modal">
+                                                    <button class="modal-close" id="gammaModalClose">&times;</button>
+                                                    <h2>🎨 Présentation interactive</h2>
+                                                    <div style="display:flex; gap:6px; flex-wrap:wrap; margin:8px 0 4px;" id="gammaThemeBar">
+                                                        <span style="font-size:11px; font-weight:600; color:var(--text-muted); align-self:center;">🎨 Thème :</span>
+                                                    </div>
+                                                    <div id="gammaContent">
+                                                        <div class="slide-container" id="gammaSlides">
+                                                        </div>
+                                                        <div class="preso-nav">
+                                                            <button class="btn btn-secondary" id="gammaPrev">◀ Précédent</button>
+                                                            <span class="preso-counter" id="gammaCounter">1 / 0</span>
+                                                            <button class="btn btn-secondary" id="gammaNext">Suivant ▶</button>
+                                                        </div>
+                                                        <div class="preso-export">
+                                                            <button class="btn btn-secondary" onclick="exportGammaPDF()">📄 Exporter PDF</button>
+                                                            <button class="btn btn-secondary" onclick="exportGammaHTML()">📄 Exporter HTML (slides)</button>
+                                                            <button class="btn btn-secondary" onclick="exportGammaPPTX()">📊 Exporter PPTX</button>
+                                                            <button class="btn btn-secondary" onclick="regenerateAllImages()" style="font-size:12px;">🔄 Régénérer images</button>
+                                                            <button class="btn btn-secondary" onclick="saveGammaPresentation()">💾 <span data-i18n="savePresentationBtn">Sauvegarder la présentation</span>
+                                                            </button>
+                                                        </div>
+                                                        <div class="gamma-image-search" id="gammaImageSearch">
+                                                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                                                                <span style="font-weight:600;font-size:13px;">🌐 Rechercher une image sur le web</span>
+                                                                <button class="btn-icon-sm" onclick="document.getElementById('gammaImageSearch').style.display='none'" style="position:static;margin-left:auto;background:var(--border);color:var(--text);">✕</button>
+                                                            </div>
+                                                            <div style="display:flex;gap:8px;">
+                                                                <input type="text" id="gammaSearchInput" placeholder="Rechercher une image..." style="margin-bottom:0;">
+                                                                <button class="btn btn-secondary" id="gammaSearchBtn" style="white-space:nowrap;">🔍 Chercher</button>
+                                                            </div>
+                                                            <div class="gamma-search-results" id="gammaSearchResults">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js">
+                                            </script>
+                                            <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js">
+                                            </script>
+                                            <script src="https://unpkg.com/@supabase/supabase-js@2">
+                                            </script>
+                                            <script src="js/supabase.js?v=20260707">
+                                            </script>
+                                            <script src="js/compat.js?v=2">
+                                            </script>
+                                            <script src="js/shared.v2.js?v=1.9.9">
+                                            </script>
+                                            <script>        var GUIDE = {            fr: {                intro: "Bienvenue sur le guide complet d'APC Algérie GÉNÉRATION 3. Cette page vous explique chaque fonctionnalité de la plateforme, pourquoi et comment l'utiliser.",                sections: [                    {                        icon: "🔑", title: "Configurer les clés API",                        link: "aide-cles-api.html", linkLabel: "❓ Voir le guide détaillé des clés API"                    },                    {                        icon: "📝", title: "Générateur de Prompts",                        text: "Cet outil vous aide à construire un prompt professionnel pour concevoir des scénarios pédagogiques selon l'Approche Par Compétences (APC). Chaque champ permet à l'IA de comprendre votre contexte précis.",                        link: "generator.html", linkLabel: "📝 Ouvrir le générateur",                        fields: [                            { name: "Rôle", why: "Définit la personnalité de l'IA (ex: formateur expert en APC). Sans rôle, l'IA n'a pas de cadre." },                            { name: "Mission", why: "Dit à l'IA ce qu'elle doit produire (ex: un scénario pédagogique). C'est l'objectif principal." },                            { name: "Spécialité / Module", why: "Contextualise le contenu dans votre domaine de formation. L'IA adaptera le vocabulaire et les exemples." },                            { name: "Compétence visée", why: "Indique le résultat d'apprentissage attendu. Guide toute la conception pédagogique." },                            { name: "Niveau / Année / Durée", why: "Adapte la difficulté, la profondeur et la longueur du contenu au public cible." },                            { name: "Stagiaires / Espace", why: "Prend en compte l'effectif et l'environnement (atelier, salle de cours, etc.)." },                            { name: "Ressources / Contexte / Difficultés", why: "Donne à l'IA des contraintes réelles : matériel disponible, situation professionnelle, obstacles prévisibles." },                            { name: "AST (Analyse de Situation de Travail)", why: "Pour une approche encore plus concrète : l'IA conçoit à partir d'une situation de travail réelle." }                        ],                        extra: "Cliquez sur une carte d'exemple pour remplir automatiquement tous les champs. Utilisez les boutons 📋 Copier, 📄 DOC, 📄 PDF pour exporter votre prompt."                    },                    {                        icon: "🤖", title: "Assistant IA",                        text: "Un chat intelligent qui répond à vos questions pédagogiques. Contrairement au générateur de prompts (qui produit un prompt à copier ailleurs), l'assistant discute avec vous et génère directement les contenus.",                        link: "assistant.html", linkLabel: "🤖 Ouvrir l'assistant",                        why: [                            "Posez des questions sur l'APC, la pédagogie, ou demandez des conseils.",                            "L'assistant se souvient de l'historique de la conversation.",                            "Vous pouvez choisir le modèle IA dans ⚙️ Paramètres.",                            "Activez la recherche web dans les paramètres du chat pour obtenir des informations récentes.",                            "🎙️ Utilisez la reconnaissance vocale pour dicter vos questions à l'assistant au lieu de les taper."                        ]                    },                    {                        icon: "📄", title: "Document → Présentation",                        text: "Convertissez n'importe quel document (texte, cours, polycopié) en une présentation interactive de qualité professionnelle. Utile pour préparer rapidement un support de cours.",                        link: "from-doc.html", linkLabel: "📄 Ouvrir Document → Présentation",                        why: [                            "Copiez-collez votre texte ou votre document dans la zone de saisie.",                            "Choisissez un thème visuel pour la présentation.",                            "L'IA génère 15 slides avec contenu détaillé et suggestions d'images.",                            "Exportez en PDF, PPTX ou HTML. Les slides sont interactifs."                        ]                    },                    {                        icon: "🎯", title: "Quiz",                        text: "Créez des quiz techniques à choix multiples adaptés à vos modules de formation. Générez automatiquement les questions, publiez le quiz, puis distribuez-le aux apprenants.",                        link: "quiz.html", linkLabel: "🎯 Ouvrir Quiz",                        why: [                            "Entrez un sujet technique et le nombre de questions souhaité.",                            "L'IA génère des questions avec 4 options et une seule réponse correcte.",                            "Publiez le quiz pour obtenir un lien de partage et un code QR.",                            "Distribuez par email : les apprenants reçoivent un code d'accès unique.",                            "Consultez les résultats dans l'onglet 'Résultats' du quiz."                        ],                        subSections: [                            {                                title: "📧 Distribuer par Email (EmailJS)",                                steps: [                                    "Créez un compte gratuit sur emailjs.com.",                                    "Connectez votre adresse email (Gmail, Outlook, etc.) → Email Services.",                                    "Dans ⚙️ Paramètres → section EmailJS, remplissez :",                                    "   • Public Key (Account → API Keys)",                                    "   • Service ID (Email Services → votre service)",                                    "   • Clé API privée (Account → API Keys)",                                    "Cliquez sur ⚙️ Créer le template → le Template ID est rempli automatiquement.",                                    "Cliquez sur 🔍 Tester pour vérifier que tout fonctionne."                                ]                            }                        ]                    },                    {                        icon: "⚙️", title: "Paramètres et personnalisation",                        text: "La plateforme se personnalise selon vos besoins : thème sombre/clair, choix de la langue, sélection du modèle IA par défaut.",                        why: [                            "🌙 Mode sombre/clair : pour travailler confortablement (bouton dans le menu ☰).",                            "🌍 Langue : français, arabe, anglais – la plateforme se traduit instantanément.",                            "🤖 Modèle IA : choisissez le moteur par défaut dans ⚙️ Paramètres (Auto recommandé).",                            "📧 EmailJS : configurez une seule fois pour distribuer les quiz par email.",                            "🧘 Système de pause : après 90 min de travail, un rappel vous invite à faire une pause bien-être."                        ]                    }                ],                footer: "💡 Conseil : commencez par configurer une clé API (Gemini est le plus simple), puis explorez le Générateur de Prompts. Chaque outil est conçu pour vous faire gagner du temps dans la conception de vos formations."            },            ar: {                intro: "مرحباً بك في الدليل الكامل لـ APC Algérie GÉNÉRATION 3. تشرح هذه الصفحة كل وظيفة من وظائف المنصة، ولماذا وكيف تستخدمها.",                sections: [                    {                        icon: "🔑", title: "إعداد مفاتيح API",                        link: "aide-cles-api.html", linkLabel: "❓ عرض دليل مفاتيح API المفصل"                    },                    {                        icon: "📝", title: "مولد البرومبتات",                        text: "تساعدك هذه الأداة على بناء برومبت احترافي لتصميم السيناريوهات البيداغوجية وفقاً للمقاربة بالكفاءات (APC). كل حقل يساعد الذكاء الاصطناعي على فهم سياقك بدقة.",                        link: "generator.html", linkLabel: "📝 فتح المولد",                        fields: [                            { name: "الدور", why: "يحدد شخصية الذكاء الاصطناعي (مثال: خبير تكوين في APC). بدون دور، لا يوجد إطار للذكاء الاصطناعي." },                            { name: "المهمة", why: "تخبر الذكاء الاصطناعي بما يجب إنتاجه (مثال: سيناريو بيداغوجي). هذا هو الهدف الرئيسي." },                            { name: "التخصص / الوحدة", why: "يضع المحتوى في سياق مجال تكوينك. سيكيّف الذكاء الاصطناعي المفردات والأمثلة." },                            { name: "الكفاءة المستهدفة", why: "تشير إلى نتيجة التعلم المتوقعة. توجه عملية التصميم البيداغوجي بأكملها." },                            { name: "المستوى / السنة / المدة", why: "تكيّف الصعوبة والعمق وطول المحتوى مع الجمهور المستهدف." },                            { name: "المتدربون / الفضاء", why: "تراعي عدد المتدربين والبيئة (ورشة، قاعة دراسية، إلخ)." },                            { name: "الموارد / السياق / الصعوبات", why: "تعطي الذكاء الاصطناعي قيوداً واقعية: المواد المتاحة، الوضع المهني، العقبات المتوقعة." },                            { name: "تحليل وضعية العمل (AST)", why: "لمنهج أكثر واقعية: يصمم الذكاء الاصطناعي انطلاقاً من وضعية عمل حقيقية." }                        ],                        extra: "انقر على بطاقة مثال لملء جميع الحقول تلقائياً. استخدم أزرار 📋 نسخ، 📄 DOC، 📄 PDF لتصدير البرومبت."                    },                    {                        icon: "🤖", title: "المساعد الذكي",                        text: "دردشة ذكية تجيب على أسئلتك البيداغوجية. بخلاف مولد البرومبتات (الذي ينتج برومبت لنسخه في مكان آخر)، يتحدث معك المساعد ويولد المحتويات مباشرة.",                        link: "assistant.html", linkLabel: "🤖 فتح المساعد",                        why: [                            "اطرح أسئلة حول APC، البيداغوجيا، أو اطلب النصائح.",                            "يتذكر المساعد تاريخ المحادثة.",                            "يمكنك اختيار نموذج الذكاء الاصطناعي في ⚙️ الإعدادات.",                            "فعّل البحث على الويب في إعدادات الدردشة للحصول على معلومات حديثة.",                            "🎙️ استخدم التعرف الصوتي لإملاء أسئلتك على المساعد بدلاً من كتابتها."                        ]                    },                    {                        icon: "📄", title: "مستند → عرض تقديمي",                        text: "حوّل أي مستند (نص، درس، مطبوعة) إلى عرض تقديمي تفاعلي بجودة احترافية. مفيد لتحضير دعامة درس بسرعة.",                        link: "from-doc.html", linkLabel: "📄 فتح مستند → عرض تقديمي",                        why: [                            "انسخ والصق نصك أو مستندك في منطقة الإدخال.",                            "اختر موضوعاً بصرياً للعرض التقديمي.",                            "يولد الذكاء الاصطناعي 15 شريحة بمحتوى مفصل واقتراحات صور.",                            "صدّر بتنسيق PDF، PPTX أو HTML. الشرائح تفاعلية."                        ]                    },                    {                        icon: "🎯", title: "الاختبارات (Quiz)",                        text: "أنشئ اختبارات تقنية متعددة الخيارات مكيّفة لوحداتك التكوينية. يولّد الأسئلة تلقائياً، وينشر الاختبار، ثم يوزعه على المتعلمين.",                        link: "quiz.html", linkLabel: "🎯 فتح الاختبارات",                        why: [                            "أدخل موضوعاً تقنياً وعدد الأسئلة المطلوب.",                            "يولد الذكاء الاصطناعي أسئلة بأربعة خيارات وإجابة واحدة صحيحة.",                            "انشر الاختبار للحصول على رابط مشاركة ورمز QR.",                            "وزّع عبر البريد الإلكتروني: يتلقى المتعلمون رمز وصول فريد.",                            "اطلع على النتائج في علامة تبويب 'النتائج' في الاختبار."                        ],                        subSections: [                            {                                title: "📧 التوزيع عبر البريد الإلكتروني (EmailJS)",                                steps: [                                    "أنشئ حساباً مجانياً على emailjs.com.",                                    "وصّل بريدك الإلكتروني (Gmail، Outlook، إلخ) ← Email Services.",                                    "في ⚙️ الإعدادات ← قسم EmailJS، املأ:",                                    "   • Public Key (Account → API Keys)",                                    "   • Service ID (Email Services → خدمتك)",                                    "   • Clé API privée (Account → API Keys)",                                    "انقر على ⚙️ إنشاء القالب ← يتم ملء Template ID تلقائياً.",                                    "انقر على 🔍 اختبار للتحقق من أن كل شيء يعمل."                                ]                            }                        ]                    },                    {                        icon: "⚙️", title: "الإعدادات والتخصيص",                        text: "يمكن تخصيص المنصة حسب احتياجاتك: الوضع الداكن/الفاتح، اختيار اللغة، اختيار نموذج الذكاء الاصطناعي الافتراضي.",                        why: [                            "🌙 الوضع الداكن/الفاتح: للعمل براحة (الزر في القائمة ☰).",                            "🌍 اللغة: الفرنسية، العربية، الإنجليزية – تُترجم المنصة فوراً.",                            "🤖 نموذج الذكاء الاصطناعي: اختر المحرك الافتراضي في ⚙️ الإعدادات (Auto موصى به).",                            "📧 EmailJS: اضبطه مرة واحدة لتوزيع الاختبارات عبر البريد الإلكتروني.",                            "🧘 نظام الاستراحة: بعد 90 دقيقة من العمل، يظهر تذكير يدعوك لأخذ استراحة."                        ]                    }                ],                footer: "💡 نصيحة: ابدأ بتكوين مفتاح API (Gemini هو الأسهل)، ثم استكشف مولد البرومبتات. كل أداة مصممة لتوفير وقتك في تصميم تكويناتك."            },            en: {                intro: "Welcome to the complete guide for APC Algérie GÉNÉRATION 3. This page explains every feature of the platform, why and how to use it.",                sections: [                    {                        icon: "🔑", title: "Configure API Keys",                        link: "aide-cles-api.html", linkLabel: "❓ View the detailed API keys guide"                    },                    {                        icon: "📝", title: "Prompt Generator",                        text: "This tool helps you build a professional prompt to design pedagogical scenarios according to the Competency-Based Approach (CBA/APC). Each field helps the AI understand your specific context.",                        link: "generator.html", linkLabel: "📝 Open the generator",                        fields: [                            { name: "Role", why: "Defines the AI's persona (e.g., expert trainer in APC). Without a role, the AI has no framework." },                            { name: "Mission", why: "Tells the AI what to produce (e.g., a pedagogical scenario). This is the main objective." },                            { name: "Specialty / Module", why: "Contextualizes content in your training field. The AI will adapt vocabulary and examples." },                            { name: "Target Competency", why: "Indicates the expected learning outcome. Guides the entire pedagogical design." },                            { name: "Level / Year / Duration", why: "Adapts difficulty, depth, and content length to the target audience." },                            { name: "Trainees / Space", why: "Accounts for class size and environment (workshop, classroom, etc.)." },                            { name: "Resources / Context / Difficulties", why: "Gives the AI real constraints: available materials, professional situation, foreseeable obstacles." },                            { name: "WSA (Work Situation Analysis)", why: "For a more concrete approach: the AI designs from a real work situation." }                        ],                        extra: "Click on an example card to automatically fill all fields. Use 📋 Copy, 📄 DOC, 📄 PDF buttons to export your prompt."                    },                    {                        icon: "🤖", title: "AI Assistant",                        text: "An intelligent chat that answers your pedagogical questions. Unlike the prompt generator (which produces a prompt to copy elsewhere), the assistant talks with you and directly generates content.",                        link: "assistant.html", linkLabel: "🤖 Open the assistant",                        why: [                            "Ask questions about CBA, pedagogy, or request advice.",                            "The assistant remembers the conversation history.",                            "You can choose the AI model in ⚙️ Settings.",                            "Enable web search in chat settings for up-to-date information.",                            "🎙️ Use voice recognition to dictate your questions to the assistant instead of typing."                        ]                    },                    {                        icon: "📄", title: "Document → Presentation",                        text: "Convert any document (text, course, handout) into an interactive professional-quality presentation. Useful for quickly preparing teaching materials.",                        link: "from-doc.html", linkLabel: "📄 Open Document → Presentation",                        why: [                            "Copy-paste your text or document into the input area.",                            "Choose a visual theme for the presentation.",                            "The AI generates 15 slides with detailed content and image suggestions.",                            "Export as PDF, PPTX, or HTML. Slides are interactive."                        ]                    },                    {                        icon: "🎯", title: "Quiz",                        text: "Create technical multiple-choice quizzes adapted to your training modules. Automatically generate questions, publish the quiz, then distribute it to learners.",                        link: "quiz.html", linkLabel: "🎯 Open Quiz",                        why: [                            "Enter a technical topic and the desired number of questions.",                            "The AI generates questions with 4 options and one correct answer.",                            "Publish the quiz to get a share link and QR code.",                            "Distribute by email: learners receive a unique access code.",                            "View results in the 'Results' tab of the quiz."                        ],                        subSections: [                            {                                title: "📧 Distribute by Email (EmailJS)",                                steps: [                                    "Create a free account at emailjs.com.",                                    "Connect your email address (Gmail, Outlook, etc.) → Email Services.",                                    "In ⚙️ Settings → EmailJS section, fill in:",                                    "   • Public Key (Account → API Keys)",                                    "   • Service ID (Email Services → your service)",                                    "   • Private API Key (Account → API Keys)",                                    "Click ⚙️ Create Template → Template ID is filled automatically.",                                    "Click 🔍 Test to verify everything works."                                ]                            }                        ]                    },                    {                        icon: "⚙️", title: "Settings and customization",                        text: "The platform can be customized to your needs: dark/light theme, language selection, default AI model choice.",                        why: [                            "🌙 Dark/Light mode: work comfortably (button in ☰ menu).",                            "🌍 Language: French, Arabic, English – the platform translates instantly.",                            "🤖 AI model: choose the default engine in ⚙️ Settings (Auto recommended).",                            "📧 EmailJS: configure once to distribute quizzes by email.",                            "🧘 Break reminder: after 90 min of work, a prompt invites you to take a wellness break."                        ]                    }                ],                footer: "💡 Tip: start by configuring an API key (Gemini is easiest), then explore the Prompt Generator. Each tool is designed to save you time in designing your training."            }        };        function renderGuide() {            var lang = typeof currentLang !== 'undefined' ? currentLang : 'fr';            var isAr = lang === 'ar', isEn = lang === 'en';            document.getElementById('pageSub').textContent = isAr ? 'الدليل الكامل' : isEn ? 'Complete guide' : 'Guide complet';            var c = GUIDE[lang] || GUIDE.fr;            var h = document.getElementById('guideContent');            var html = '<p class="guide-intro">' + c.intro + '</p>';            for (var si = 0; si < c.sections.length; si++) {                var s = c.sections[si];                html += '<div class="guide-card">';                html += '<h2>' + s.icon + ' ' + s.title + '</h2>';                html += '<p>' + s.text + '</p>';                if (s.why && s.why.length) {                    html += '<ul>';                    for (var wi = 0; wi < s.why.length; wi++) html += '<li>' + s.why[wi] + '</li>';                    html += '</ul>';                }                if (s.fields && s.fields.length) {                    for (var fi = 0; fi < s.fields.length; fi++) {                        html += '<div class="field-box"><strong>' + (fi+1) + '. ' + s.fields[fi].name + '</strong><span>' + s.fields[fi].why + '</span></div>';                    }                }                if (s.extra) html += '<p style="font-size:0.88rem;color:var(--text-muted);background:var(--bg);padding:12px 16px;border-radius:8px;margin-top:10px;">' + s.extra + '</p>';                if (s.link) html += '<a href="' + s.link + '" class="btn-guide" style="display:inline-block;margin-top:10px;">' + s.linkLabel + '</a>';                if (s.subSections && s.subSections.length) {                    for (var subi = 0; subi < s.subSections.length; subi++) {                        var sub = s.subSections[subi];                        html += '<h3>' + sub.title + '</h3>';                        if (sub.steps) {                            for (var sti = 0; sti < sub.steps.length; sti++) {                                html += '<div class="step"><div class="num">' + (sti+1) + '</div><div class="content"><span>' + sub.steps[sti] + '</span></div></div>';                            }                        }                    }                }                html += '</div>';            }            html += '<div class="guide-card" style="text-align:center;background:var(--bg);border-color:var(--accent);"><p style="font-size:0.95rem;color:var(--text);line-height:1.7;">' + c.footer + '</p></div>';            h.innerHTML = html;        }        function toggleTheme() {            var isDark = !document.body.classList.contains('dark');            document.body.classList.toggle('dark', isDark);            localStorage.setItem('theme', isDark ? 'dark' : 'light');            document.getElementById('themeLabel').textContent = isDark ? 'Mode sombre' : 'Mode clair';        }        renderGuide();    </script>
+                                </body>
+                            </html>

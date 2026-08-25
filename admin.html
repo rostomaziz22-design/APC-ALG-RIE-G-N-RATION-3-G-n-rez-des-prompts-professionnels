@@ -1,0 +1,957 @@
+﻿<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' data: https://cdnjs.cloudflare.com; connect-src 'self' https://*.supabase.co https://openrouter.ai https://api.groq.com https://generativelanguage.googleapis.com https://api.emailjs.com https://api.ipify.org https://ipinfo.io https://ip-api.com; img-src 'self' data: https:; media-src 'self' https:; frame-ancestors 'none'; base-uri 'self';">
+        <title>APC Algérie G3 · Administration</title>
+        <link rel="stylesheet" href="css/style.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+        <script>var l=localStorage.getItem('lang');if(l){document.documentElement.lang=l;if(l==='ar')document.documentElement.dir='rtl';}</script>
+        <style>        .admin-container { max-width: 900px; margin: 0 auto; padding: 24px 16px; }        .admin-card { background: var(--card); border-radius: 16px; padding: 24px; margin-bottom: 20px; border: 1px solid var(--border); }        .admin-card h2 { margin: 0 0 16px; font-size: 1.2rem; color: var(--title); display: flex; align-items: center; gap: 8px; }        .admin-card label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }        .admin-card input, .admin-card select { width: 100%; padding: 10px 12px; border: 2px solid var(--border); border-radius: 10px; font-size: 0.9rem; background: var(--bg); color: var(--text); margin-bottom: 12px; box-sizing: border-box; }        .admin-card input:focus, .admin-card select:focus { border-color: #0077CC; outline: none; }        .admin-card .row { display: flex; gap: 12px; }        .admin-card .row > * { flex: 1; }        .btn { padding: 10px 20px; border: none; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }        .btn-primary { background: linear-gradient(135deg, #0077CC, #00B4D8); color: #fff; }        .btn-secondary { background: var(--border); color: var(--text); }        .btn-danger { background: #e74c3c; color: #fff; }        .btn-sm { padding: 6px 14px; font-size: 0.8rem; }        .result-msg { padding: 10px 14px; border-radius: 8px; margin-top: 12px; font-size: 0.85rem; display: none; }        .result-msg.success { display: block; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }        .result-msg.error { display: block; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }        .result-msg.info { display: block; background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }        th { text-align: left; padding: 8px 10px; border-bottom: 2px solid var(--border); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }        td { padding: 8px 10px; border-bottom: 1px solid var(--border); }        .badge-role { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }        .badge-admin { background: #ffeaa7; color: #6b5200; }        .badge-inspecteur { background: #81ecec; color: #005a5a; }        .badge-formateur { background: #dfe6e9; color: #2d3436; }        .csv-zone { border: 2px dashed var(--border); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: 0.2s; }        .csv-zone:hover { border-color: #0077CC; background: rgba(0,119,204,0.05); }        .csv-zone textarea { width: 100%; min-height: 120px; border: none; background: transparent; color: var(--text); font-size: 0.85rem; resize: vertical; margin-top: 8px; }        .csv-zone textarea:focus { outline: none; }        .csv-hint { font-size: 0.78rem; color: var(--text-muted); margin-top: 6px; }        .loading-spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: #0077CC; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 6px; }        .count-badge { background: var(--border); border-radius: 20px; padding: 2px 10px; font-size: 0.75rem; color: var(--text-muted); }        @keyframes spin { to { transform: rotate(360deg); } }        .hidden { display: none !important; }        #adminLoader { text-align: center; padding: 60px 0; }        #adminLoader .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: #0077CC; border-radius: 50%; animation: spin 0.6s linear infinite; margin: 0 auto 16px; }        #adminContent { display: none; }        .service-role-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 10px; padding: 12px 16px; font-size: 0.85rem; margin-bottom: 16px; display: none; }        .service-role-warning code { background: #ffeeba; padding: 2px 6px; border-radius: 4px; }    </style>
+    </head>
+    <body>
+        <script>if(localStorage.getItem('theme')!=='light')document.body.classList.add('dark');</script>
+        <div id="apcCompatBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(135deg,#E65100,#FF8F00);color:#fff;padding:10px 16px;text-align:center;font-size:13px;font-weight:500;box-shadow:0 2px 12px rgba(0,0,0,.3);align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;">
+            <i class="fas fa-exclamation-triangle" style="font-size:16px;">
+            </i>
+            <span>Mode de compatibilité activé pour votre navigateur. Certaines icônes peuvent être différentes.</span>
+            <button id="apcCompatBannerClose" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);color:#fff;padding:4px 14px;border-radius:14px;font-size:12px;cursor:pointer;">OK</button>
+        </div>
+        <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()">
+        </div>
+        <div class="drawer" id="drawer">
+            <div class="drawer-header">
+                <span class="drawer-title">☰ Menu</span>
+                <button class="btn-icon drawer-close" onclick="closeDrawer()">✕</button>
+            </div>
+            <div class="drawer-section">
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('index.html')">
+                <span data-i18n="tab_home">🏠 Accueil</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('generator.html')">
+                <span data-i18n="tab_generator">📝 Générateur de Prompts</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('assistant.html')">
+                <span data-i18n="tab_assistant">🤖 Assistant IA</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('from-doc.html')">
+                <span data-i18n="tab_fromdoc">📄 Document → Présentation</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('quiz.html')">
+                <span data-i18n="tab_quiz">🎯 Quiz</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('challenges.html')">
+                <span data-i18n="tab_challenge">🎮 Challenges</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('games.html')"><span data-i18n="tab_games">🎮 Jeux</span></button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('aide-cles-api.html')">
+                <span data-i18n="tab_help">❓ Aide Clés API</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('about.html')">
+                <span data-i18n="tab_about">ℹ️ À propos</span>
+                </button>
+                <button class="drawer-nav-btn nav-admin-link" onclick="closeDrawer();goTo('admin.html');closeDrawer();" style="display:none">
+                <span data-i18n="tab_admin">⚙️ Admin</span>
+                </button>
+            </div>
+            <div class="drawer-divider">
+            </div>
+            <div class="drawer-section">
+                <button id="settingsBtn" class="drawer-nav-btn" onclick="loadKeysIntoModal();document.getElementById('settingsModal')?.classList.add('open');closeDrawer();">⚙️ <span data-i18n="settingsLabel">Paramètres</span>
+                <span id="apiBadge" class="badge missing">●</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();openEditProfile()">👤 <span>Modifier mon profil</span>
+                </button>
+                <button id="themeToggle" class="drawer-nav-btn" onclick="toggleTheme()">🌙 <span id="themeLabel">Mode sombre</span>
+                </button>
+                <div class="drawer-lang-row">
+                    <span style="font-size:12px;color:var(--text-muted);margin-bottom:4px;display:block;">Langue :</span>
+                    <div style="display:flex;gap:4px;">
+                        <button id="btnFR" class="btn-icon active-lang" onclick="setLang('fr')">🇫🇷 FR</button>
+                        <button id="btnAR" class="btn-icon" onclick="setLang('ar')">🇩🇿 AR</button>
+                        <button id="btnEN" class="btn-icon" onclick="setLang('en')">🇬🇧 EN</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="hero">
+                <div class="hero-ministere" data-i18n="ministere">Ministère de la Formation et de l'Enseignement Professionnels</div>
+                    <img class="hero-logo-ministere" src="https://mvet.gov.dz/wp-content/uploads/2024/03/logo-mfep-1.png" alt="Ministère de la Formation et de l'Enseignement Professionnels">
+                    <div class="top-bar">
+                        <button class="btn-icon menu-btn" onclick="toggleDrawer()">☰</button>
+                        <span class="auth-state">
+                        </span>
+                        <button class="btn-icon" onclick="document.getElementById('srKeyModal').classList.add('open')" style="background:var(--card);padding:8px 14px;border-radius:10px;border:1px solid var(--border);cursor:pointer;color:var(--text);">🔑 Clé Admin</button>
+                    </div>
+                    <div class="hero-title-row">
+                        <div class="hero-text-group">
+                            <h1>APC ALGÉRIE <span>GÉNÉRATION 3</span>
+                            </h1>
+                            <div class="hero-sub">Administration des comptes</div>
+                            </div>
+                            <div class="hero-flag-video">
+                                <video src="https://videos.pexels.com/video-files/13859860/13859860-hd_1280_720_25fps.mp4" autoplay loop muted playsinline>
+                                </video>
+                            </div>
+                        </div>
+                        <div class="hero-desc" data-i18n="headerDesc">Une IA pédagogique qui génère automatiquement des prompts professionnels, des scénarios pédagogiques, des présentations, des évaluations, des activités de gamification et des ressources conformes à l'Approche Par Compétences (APC) Algérie .</div>
+                            <div class="nav-links">
+                                <a class="nav-link" onclick="goTo('index.html')" data-i18n="tab_home">🏠 Accueil</a>
+                                <a class="nav-link" onclick="goTo('generator.html')" data-i18n="tab_generator">📝 Générateur de Prompts</a>
+                                <a class="nav-link" onclick="goTo('assistant.html')" data-i18n="tab_assistant">🤖 Assistant IA</a>
+                                <a class="nav-link" onclick="goTo('from-doc.html')" data-i18n="tab_fromdoc">📄 Document → Présentation</a>
+                                <a class="nav-link" onclick="goTo('quiz.html')" data-i18n="tab_quiz">🎯 Quiz</a>
+                                <a class="nav-link" onclick="goTo('challenges.html')" data-i18n="tab_challenge">🎮 Challenges</a>
+                                <a class="nav-link" onclick="goTo('games.html')" data-i18n="tab_games">🎮 Jeux</a>
+                                <a class="nav-link" onclick="goTo('aide-cles-api.html')" data-i18n="tab_help">❓ Aide Clés API</a>
+                                <a class="nav-link" onclick="goTo('about.html')" data-i18n="tab_about">ℹ️ À propos</a>
+                                <a class="nav-link" onclick="goTo('admin.html')" style="display:none" data-i18n="tab_admin">⚙️ Admin</a>
+                            </div>
+                            <div class="signature">Créé par MR. AZIZ Mohamed Rostom © 2026</div>
+                            </div>
+                            <div class="admin-container" id="adminPage">
+                                <div id="adminLoader">
+                                    <div class="spinner">
+                                    </div>
+                                    <div style="color: var(--text-muted);">Vérification des droits...</div>
+                                    </div>
+                                    <div id="adminContent">
+                                        <div class="service-role-warning" id="serviceRoleWarning">                    ⚠️ Vous devez configurer la <strong>clé service_role</strong> Supabase pour créer des utilisateurs.                    Allez dans <strong>Paramètres → 🔑 Clé Service Role</strong> pour l'ajouter.                </div>
+                                            <div class="admin-card" id="createSingleCard">
+                                                <h2>👤 Créer un compte</h2>
+                                                <div class="row">
+                                                    <div>
+                                                        <label>Email</label>
+                                                        <input type="email" id="newEmail" placeholder="email@exemple.com">
+                                                    </div>
+                                                    <div>
+                                                        <label>Mot de passe</label>
+                                                        <input type="password" id="newPassword" placeholder="••••••••">
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div>
+                                                        <label>Nom complet</label>
+                                                        <input type="text" id="newFullName" placeholder="Prénom Nom">
+                                                    </div>
+                                                    <div>
+                                                        <label>Rôle</label>
+                                                        <select id="newRole">
+                                                            <option value="formateur">Formateur</option>
+                                                            <option value="inspecteur">Inspecteur</option>
+                                                            <option value="admin">Admin</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <button class="btn btn-primary" onclick="createSingleUser()">➕ Créer le compte</button>
+                                                <div class="result-msg" id="singleResult">
+                                                </div>
+                                            </div>
+                                            <div class="admin-card" id="bulkCard">
+                                                <h2>📋 Import en masse (CSV)</h2>
+                                                <div class="csv-zone" id="csvZone">
+                                                    <div style="font-size: 2rem; margin-bottom: 8px;">📄</div>
+                                                        <div style="font-weight: 600; margin-bottom: 4px;">Collez vos données CSV</div>
+                                                            <div class="csv-hint">email;mot de passe;nom;rôle (un par ligne)</div>
+                                                                <textarea id="csvInput" placeholder="formateur1@email.com;pass123;Ahmed Benali;formateur&#10;inspecteur1@email.com;pass456;Salim Khaled;inspecteur">
+                                                                </textarea>
+                                                            </div>
+                                                            <div style="margin-top: 12px; display: flex; gap: 8px;">
+                                                                <button class="btn btn-primary" onclick="bulkImport()">📥 Importer</button>
+                                                                <button class="btn btn-secondary" onclick="document.getElementById('csvInput').value=''">🗑 Effacer</button>
+                                                            </div>
+                                                            <div class="result-msg" id="bulkResult">
+                                                            </div>
+                                                            <div class="result-msg" id="bulkProgress" style="display:none;">
+                                                            </div>
+                                                                         </div>
+                                                                            <div class="admin-card" id="sessionsCard">
+                                                                                <h2>🟢 Sessions actives <span style="font-size:0.8rem;color:var(--text-muted);font-weight:400;" id="sessionsCount"></span></h2>
+                                                                                <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                                                                                    <button class="btn btn-sm btn-primary" onclick="loadActivityLog()">🔄 Actualiser</button>
+                                                                                    <a href="admin-sessions.html" class="btn btn-sm btn-secondary" style="text-decoration:none;">⛶ Pleine page</a>
+                                                                                </div>
+                                                                                <div id="sessionsContent" style="font-size:0.85rem;display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto;padding-right:4px;">Cliquez sur Actualiser.</div>
+                                                                            </div>
+                                                                          <div class="admin-card" id="activityCard">
+                                                                              <h2>📊 Journal d'Activité</h2>
+                                                                              <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                                                                                  <button class="btn btn-sm btn-primary" onclick="loadActivityLog()">🔄 Rafraîchir</button>
+                                                                                  <span style="font-size:0.8rem;color:var(--text-muted);" id="activityCount">—</span>
+                                                                                  <button class="btn btn-sm btn-secondary" id="enterFsBtn" onclick="document.getElementById('activityCard').requestFullscreen()" title="Plein écran" style="margin-left:auto;">⛶ Plein écran</button>
+                                                                                  <button class="btn btn-sm btn-secondary" id="exitFsBtn" onclick="document.exitFullscreen()" title="Quitter le plein écran" style="display:none;margin-left:auto;">✕ Quitter</button>
+                                                                              </div>
+                                                                               <div id="logFilters" style="margin-bottom:8px;display:none;gap:6px;flex-wrap:wrap;align-items:center;">
+                                                                                   <input id="logSearch" type="text" placeholder="🔍 Rechercher email / nom..." oninput="renderActivityLog()" style="flex:1;min-width:140px;padding:6px 10px;border:2px solid var(--border);border-radius:8px;font-size:.8rem;background:var(--bg);color:var(--text);">
+                                                                                   <select id="logFilterEvent" onchange="renderActivityLog()" style="padding:6px 10px;border:2px solid var(--border);border-radius:8px;font-size:.8rem;background:var(--bg);color:var(--text);">
+                                                                                       <option value="">Tous les événements</option>
+                                                                                       <option value="login">🔓 Connexion</option>
+                                                                                       <option value="logout">🔒 Déconnexion</option>
+                                                                                       <option value="profile_update">✏️ Mise à jour</option>
+                                                                                   </select>
+                                                                                    <span style="font-size:.8rem;color:var(--text-muted);">Du</span>
+                                                                                    <span style="position:relative;display:inline-flex;align-items:center;">
+                                                                                        <input id="logDateFrom" type="date" onchange="renderActivityLog()" style="padding:5px 8px;padding-right:26px;border:2px solid var(--border);border-radius:8px;font-size:.8rem;background:var(--bg);color:var(--text);">
+                                                                                        <button type="button" onclick="document.getElementById('logDateFrom').showPicker()" style="position:absolute;right:2px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:2px;font-size:1rem;line-height:1;">📅</button>
+                                                                                    </span>
+                                                                                    <span style="font-size:.8rem;color:var(--text-muted);">Au</span>
+                                                                                    <span style="position:relative;display:inline-flex;align-items:center;">
+                                                                                        <input id="logDateTo" type="date" onchange="renderActivityLog()" style="padding:5px 8px;padding-right:26px;border:2px solid var(--border);border-radius:8px;font-size:.8rem;background:var(--bg);color:var(--text);">
+                                                                                        <button type="button" onclick="document.getElementById('logDateTo').showPicker()" style="position:absolute;right:2px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:2px;font-size:1rem;line-height:1;">📅</button>
+                                                                                    </span>
+                                                                                    <button type="button" onclick="var d=new Date();document.getElementById('logDateFrom').value=d.toISOString().slice(0,10);document.getElementById('logDateTo').value=d.toISOString().slice(0,10);renderActivityLog();" style="padding:5px 10px;border:2px solid var(--border);border-radius:8px;font-size:.8rem;background:var(--bg);color:var(--text);cursor:pointer;">📅 Auj</button>
+                                                                                    <button type="button" onclick="document.getElementById('logSearch').value='';document.getElementById('logFilterEvent').value='';document.getElementById('logDateFrom').value='';document.getElementById('logDateTo').value='';document.getElementById('logSort').value='desc';renderActivityLog();" style="padding:5px 10px;border:2px solid var(--border);border-radius:8px;font-size:.8rem;background:var(--bg);color:var(--text);cursor:pointer;">✕ Réinitialiser</button>
+                                                                                    <select id="logSort" onchange="renderActivityLog()" style="padding:6px 10px;border:2px solid var(--border);border-radius:8px;font-size:.8rem;background:var(--bg);color:var(--text);">
+                                                                                        <option value="desc">📅 Plus récent</option>
+                                                                                        <option value="asc">📅 Plus ancien</option>
+                                                                                    </select>
+                                                                                </div>
+                                                                              <div style="overflow-x:auto;max-height:400px;overflow-y:auto;">
+                                                                                  <table>
+                                                                                     <thead>
+                                                                                          <tr>
+                                                                                              <th>Email</th>
+                                                                                              <th>Nom complet</th>
+                                                                                              <th>Événement</th>
+                                                                                              <th>Appareil</th>
+                                                                                              <th>IP</th>
+                                                                                              <th>Région</th>
+                                                                                              <th>Date/Heure</th>
+                                                                                              <th>Détails</th>
+                                                                                          </tr>
+                                                                                      </thead>
+                                                                                      <tbody id="activityTableBody">
+                                                                                          <tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:20px;">Cliquez sur Rafraîchir</td></tr>
+                                                                                     </tbody>
+                                                                                 </table>
+                                                                             </div>
+                                                                             <div style="margin-top:16px;display:flex;align-items:center;gap:8px;"><button class="btn btn-sm btn-primary" onclick="loadActivityLog()">🔄 Rafraîchir</button><span style="font-size:0.8rem;color:var(--text-muted);">Stats par utilisateur</span></div><div style="margin-top:8px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;" id="activityStats">
+                                                                             </div>
+                                                                             <div class="result-msg" id="activityResult">
+                                                                             </div>
+                                                                         </div>
+                                                                         <div class="admin-card" id="listCard">
+                                                                             <h2>👥 Utilisateurs <span class="count-badge" id="userCount">0</span> <button class="btn btn-sm btn-primary" onclick="loadUsers()" style="margin-left:8px;vertical-align:middle;">🔄 Rafraîchir</button>
+                                                            </h2>
+                                                            <div style="overflow-x: auto;">
+                                                                <table>
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>Email</th>
+                                                                                <th>Nom</th>
+                                                                                    <th>Rôle</th>
+                                                                                        <th>Créé le</th>
+                                                                                            <th>
+                                                                                            </th>
+                                                                                            <th>
+                                                                                            </th>
+                                                                                            <th>
+                                                                                            </th>
+                                                                                        </tr>
+                                                                                    </thead>
+                                                                                    <tbody id="userTableBody">
+                                                                                    </tbody>
+                                                                                </table>
+                                                                            </div>
+                                                                            <div class="result-msg" id="listResult">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-overlay" id="settingsModal">
+                                                                <div class="modal">
+                                                                    <button class="modal-close" id="modalCloseBtn" onclick="document.getElementById('settingsModal')?.classList.remove('open');">&times;</button>
+                                                                    <h2>⚙️ <span data-i18n="settingsTitle">Paramètres IA</span>
+                                                                    </h2>
+                                                                    <p class="desc" data-i18n="settingsDesc">Configurez vos clés API et choisissez le modèle par défaut.</p>
+                                                                    <div class="field-group">
+                                                                        <label data-i18n="openrouterKeyLabel">🔑 Clé API OpenRouter</label>
+                                                                        <div class="hint" data-i18n="openrouterKeyHint">Pour utiliser DeepSeek, Llama 3.3 via OpenRouter.</div>
+                                                                            <input type="text" id="openrouterApiKeyInput" placeholder="sk-or-v1-...">
+                                                                            <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
+                                                                                <button class="btn btn-secondary" id="verifyORKeyBtn">🔍 <span data-i18n="verifyBtn">Vérifier</span>
+                                                                                </button>
+                                                                                <span id="verifyORResult" class="verify-result">
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="field-group">
+                                                                            <label data-i18n="groqKeyLabel">⚡ Clé API Groq</label>
+                                                                            <div class="hint" data-i18n="groqKeyHint">Pour utiliser les modèles Groq (GPT OSS, Mixtral, DeepSeek).</div>
+                                                                                <input type="text" id="groqApiKeyInput" placeholder="gsk_...">
+                                                                                <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
+                                                                                    <button class="btn btn-secondary" id="verifyGroqKeyBtn">🔍 <span data-i18n="verifyBtn">Vérifier</span>
+                                                                                    </button>
+                                                                                    <span id="verifyGroqResult" class="verify-result">
+                                                                                    </span>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="field-group">
+                                                                                <label data-i18n="geminiKeyLabel">✦ Clé API Google Gemini</label>
+                                                                                <div class="hint" data-i18n="geminiKeyHint">Pour utiliser Gemini 1.5 Flash/Pro (gratuit).</div>
+                                                                                    <input type="text" id="geminiApiKeyInput" placeholder="AIza...">
+                                                                                    <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
+                                                                                        <button class="btn btn-secondary" id="verifyGeminiKeyBtn">🔍 <span data-i18n="verifyBtn">Vérifier</span>
+                                                                                        </button>
+                                                                                        <span id="verifyGeminiResult" class="verify-result">
+                                                                                        </span>
+                                                                                    </div>
+                                                                                </div>
+                                                                                    <div class="model-selector admin-only">
+                                                                                    <div class="model-group-title" data-i18n="modelSelection">Modèle à utiliser</div>
+                                                                                        <label>
+                                                                                        <input type="radio" name="modelChoice" value="auto" checked>
+                                                                                        <span data-i18n="modelAuto">☑ Auto (Gemini → Groq → OpenRouter)</span>
+                                                                                        </label>
+                                                                                        <label>
+                                                                                        <input type="radio" name="modelChoice" value="gemini-flash">
+                                                                                        <span data-i18n="modelGeminiFlash">☐ Gemini 2.0 Flash</span>
+                                                                                        </label>
+                                                                                        <label>
+                                                                                        <input type="radio" name="modelChoice" value="gemini-pro">
+                                                                                        <span data-i18n="modelGeminiPro">☐ Gemini 2.5 Pro</span>
+                                                                                        </label>
+                                                                                        <label>
+                                                                                        <input type="radio" name="modelChoice" value="deepseek-v3">
+                                                                                        <span data-i18n="modelV3">☐ DeepSeek V3 (OpenRouter)</span>
+                                                                                        </label>
+                                                                                        <label>
+                                                                                        <input type="radio" name="modelChoice" value="deepseek-r1">
+                                                                                        <span data-i18n="modelR1">☐ DeepSeek R1 (OpenRouter)</span>
+                                                                                        </label>
+                                                                                        <label>
+                                                                                        <input type="radio" name="modelChoice" value="llama3.3">
+                                                                                        <span data-i18n="modelLlama">☐ Llama 3.3 70B (OpenRouter)</span>
+                                                                                        </label>
+                                                                                        <label>
+<input type="radio" name="modelChoice" value="groq-70b"> <span data-i18n="modelGroq70b">☐ Llama 3.3 70B (Groq)</span>
+                                                                                        </label>
+                                                                                        
+                                                                                        <label>
+                                                                                        <input type="radio" name="modelChoice" value="or-nemotron-nano-free">
+                                                                                        <span data-i18n="modelNemotronNanoFree">☐ Nemotron 3 Nano 30B (OpenRouter free)</span>
+                                                                                        </label>
+                                                                                        <label>
+                                                                                        <input type="radio" name="modelChoice" value="or-gemma4-free">
+                                                                                        <span data-i18n="modelGemma4Free">☐ Gemma 4 31B (OpenRouter free)</span>
+                                                                                        </label>
+                                                                                        <label>
+                                                                                        <input type="radio" name="modelChoice" value="or-gptoss20b-free">
+                                                                                        <span data-i18n="modelGptOss20bFree">☐ GPT OSS 20B (OpenRouter free)</span>
+                                                                                        </label>
+                                                                                        <label>
+                                                                                        <input type="radio" name="modelChoice" value="or-ling3-free">
+                                                                                        <span data-i18n="modelLing3Free">☐ Ling 3.0 Flash (OpenRouter free)</span>
+                                                                                        </label>
+                                                                                        <label>
+                                                                                        <input type="radio" name="modelChoice" value="or-nemotron-super-free">
+                                                                                        <span data-i18n="modelNemotronSuperFree">☐ Nemotron 3 Super 120B (OpenRouter free)</span>
+                                                                                        </label>
+                                                                                    </div>
+                                                                                    <div class="free-mode-row">
+                                                                                        <label class="free-mode-label"><input type="checkbox" id="freeModeToggle"> 🔓 Mode libre (tous sujets)</label>
+                                                                                    </div>
+                                                                                    <div class="free-mode-row">
+                                                                                        <label class="free-mode-label"><input type="checkbox" id="axonToggle"> 🧠 AXON Intelligence (mémoire évolutive)</label>
+                                                                                    </div>
+                                                                                    <div class="btn-row">
+                                                                                        <button class="btn btn-primary" id="modalSaveBtn">💾 <span data-i18n="saveBtn">Enregistrer</span>
+                                                                                        </button>
+                                                                                        <button class="btn btn-danger" id="modalClearBtn">🗑 <span data-i18n="clearBtn">Effacer tout</span>
+                                                                                        </button>
+                                                                                        <button class="btn btn-secondary" id="modalCancelBtn" onclick="document.getElementById('settingsModal')?.classList.remove('open');">
+                                                                                        <span data-i18n="cancelBtn">Annuler</span>
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="modal-overlay" id="srKeyModal">
+                                                                                <div class="modal-content" style="max-width: 480px;">
+                                                                                    <button class="modal-close" onclick="closeSrModal()">&times;</button>
+                                                                                    <h3 style="color:var(--title);margin:0 0 16px;">🔑 Clé Service Role Supabase</h3>
+                                                                                    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:12px;">                Cette clé est nécessaire pour créer des utilisateurs. Trouvez-la dans :                <strong>Supabase Dashboard → Settings → API → service_role key</strong>
+                                                                                    </p>
+                                                                                    <label>Clé service_role</label>
+                                                                                    <input type="password" id="srKeyInput" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:10px;font-size:0.9rem;background:var(--bg);color:var(--text);margin-bottom:12px;box-sizing:border-box;">
+                                                                                    <button class="btn btn-primary" onclick="saveSrKey()">💾 Enregistrer</button>
+                                                                                    <div class="result-msg" id="srKeyResult">
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="modal-overlay" id="editUserModal">
+                                                                                <div class="modal-content" style="max-width:480px;">
+                                                                                    <button class="modal-close" onclick="document.getElementById('editUserModal').classList.remove('open')">&times;</button>
+                                                                                    <h3 style="color:var(--title);margin:0 0 16px;">✏️ Modifier l'utilisateur</h3>
+                                                                                    <input type="hidden" id="editUserId">
+                                                                                    <label>Email</label>
+                                                                                    <input type="email" id="editEmail" readonly style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--text);margin-bottom:12px;box-sizing:border-box;opacity:.6;">
+                                                                                    <label>Nom complet</label>
+                                                                                    <input type="text" id="editFullName" style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--text);margin-bottom:12px;box-sizing:border-box;">
+                                                                                    <label>Nom en arabe</label>
+                                                                                    <input type="text" id="editNameAr" dir="rtl" style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--text);margin-bottom:12px;box-sizing:border-box;">
+                                                                                    <label>Spécialité</label>
+                                                                                    <input type="text" id="editSpecialite" style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--text);margin-bottom:12px;box-sizing:border-box;">
+                                                                                    <label>Rôle</label>
+                                                                                    <select id="editRole" style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--text);margin-bottom:16px;box-sizing:border-box;">
+                                                                                        <option value="formateur">Formateur</option>
+                                                                                        <option value="inspecteur">Inspecteur</option>
+                                                                                        <option value="admin">Admin</option>
+                                                                                    </select>
+                                                                                    <label style="margin-top:8px;display:block;font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;">Nouveau mot de passe <span style="color:var(--text-muted);font-weight:400;text-transform:none;letter-spacing:0;">(laisser vide pour ne pas changer)</span>
+                                                                                    </label>
+                                                                                    <input type="password" id="editPassword" placeholder="••••••••" style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--text);margin-bottom:16px;box-sizing:border-box;">
+                                                                                    <button class="btn btn-primary" onclick="saveEditUser()" style="width:100%;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#0077CC,#00B4D8);color:#fff;font-weight:600;cursor:pointer;">💾 Enregistrer les modifications</button>
+                                                                                    <div class="result-msg" id="editResult">
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="modal-overlay" id="profileOverlay">
+                                                                                <div class="modal" style="max-width:420px;">
+                                                                                    <button class="modal-close" onclick="document.getElementById('profileOverlay').classList.remove('open')">&times;</button>
+                                                                                    <h2 style="margin:0 0 12px;font-size:1.1rem;">👤 Modifier mon profil</h2>
+                                                                                    <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:20px;display:none;"></p>
+                                                                                    <div class="field-group">
+                                                                                        <label>Nom complet</label>
+                                                                                        <input type="text" id="profileFullName" placeholder="Prénom Nom" style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--text);margin-bottom:14px;box-sizing:border-box;">
+                                                                                    </div>
+                                                                                    <div class="field-group">
+                                                                                        <label>Nom en arabe</label>
+                                                                                        <input type="text" id="profileNameAr" placeholder="الاسم الكامل بالعربية" style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--text);margin-bottom:14px;box-sizing:border-box;" dir="rtl">
+                                                                                    </div>
+                                                                                    <div class="field-group">
+                                                                                        <label>Spécialité</label>
+                                                                                        <input type="text" id="profileSpecialite" placeholder="Votre spécialité" style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--text);margin-bottom:14px;box-sizing:border-box;">
+                                                                                    </div>
+                                                                                    <div class="result-msg" id="profileResult" style="display:none;padding:8px 12px;border-radius:8px;font-size:.82rem;margin-bottom:12px;background:#f8d7da;color:#721c24;border:1px solid #f5c6cb;">
+                                                                                    </div>
+                                                                                    <button class="btn btn-primary" onclick="saveProfileCompletion()" style="width:100%;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#0077CC,#00B4D8);color:#fff;font-weight:600;cursor:pointer;">💾 Enregistrer</button>
+                                                                                </div>
+                                                                            </div>
+                                                                            <script src="https://unpkg.com/@supabase/supabase-js@2">
+                                                                            </script>
+                                                                            <script src="js/supabase.js?v=20260707">
+                                                                            </script>
+                                                                            <script src="js/compat.js?v=2">
+                                                                            </script>
+                                                                            <script src="js/shared.v2.js?v=1.9.9">
+                                                                            </script>
+                                                                                                                                                         <script>
+                                                                                 const ADMIN_PROJECT = 'zheglrzqzwopcfsdbztc';
+                                                                                  var srKeyMemory = localStorage.getItem('sb_sr_key') || sessionStorage.getItem('sb_sr_key') || '';
+                                                                                  function getSrKey() { return srKeyMemory || ''; }
+                                                                                  function setSrKey(key) {
+                                                                                      if (key && key.length > 20) {
+                                                                                          srKeyMemory = key.trim();
+                                                                                          localStorage.setItem('sb_sr_key', key.trim());
+                                                                                          sessionStorage.setItem('sb_sr_key', key.trim());
+                                                                                      } else {
+                                                                                          srKeyMemory = '';
+                                                                                          localStorage.removeItem('sb_sr_key');
+                                                                                          sessionStorage.removeItem('sb_sr_key');
+                                                                                      }
+                                                                                  }
+                                                                                 function closeSrModal() { document.getElementById('srKeyModal')?.classList.remove('open'); }
+                                                                                 async function initAdmin() {
+                                                                                     if (!supabaseClient) { await new Promise(r => setTimeout(r, 500)); initSupabase(); }
+                                                                                     const loader = document.getElementById('adminLoader');
+                                                                                     const content = document.getElementById('adminContent');
+                                                                                     if (!currentUser) {
+                                                                                         loader.innerHTML = `<div style="font-size:2rem;margin-bottom:12px;">🔒</div>
+                                                                                                                                                             <div style="color:var(--text-muted);">Vous devez être connecté.</div>
+                                                                                                                                                                 <button class="btn btn-primary" style="margin-top:16px;" onclick="closeDrawer();goTo('login.html')">Se connecter</button>`;
+                                                                                         return;
+                                                                                     }
+                                                                                     await loadProfile();
+                                                                                     if (!currentProfile || currentProfile.role !== 'admin') {
+                                                                                         loader.innerHTML =`<div style="font-size:2rem;margin-bottom:12px;">⛔</div>
+                                                                                                                                                                 <div style="color:#e74c3c;font-weight:600;">Accès réservé aux administrateurs.</div>
+                                                                                                                                                                     <div style="margin-top:12px;font-size:0.85rem;color:var(--text-muted);">Redirection...</div>`;
+                                                                                         setTimeout(function() { window.location.href = 'index.html'; }, 2000);
+                                                                                         return;
+                                                                                     }
+                                                                                      loader.style.display = 'none';
+                                                                                      content.style.display = 'block';
+                                                                                      checkSrKey();
+                                                                                      loadUsers();
+                                                                                      loadActivityLog();
+                                                                                 }
+                                                                                 function checkSrKey() {
+                                                                                     const warn = document.getElementById('serviceRoleWarning');
+                                                                                     const has = getSrKey().length > 20;
+                                                                                     warn.style.display = has ? 'none' : 'block';
+                                                                                 }
+                                                                                    var _logsData = null;
+                                                                                    var _usersMapData = null;
+
+                                                                                    function renderSessions() {
+                                                                                        var el = document.getElementById('sessionsContent');
+                                                                                        var countEl = document.getElementById('sessionsCount');
+                                                                                        if (!_logsData || !_usersMapData) { el.innerHTML = 'Cliquez sur Rafraîchir.'; countEl.textContent = ''; return; }
+                                                                                        var srKey = getSrKey();
+                                                                                        if (!srKey) { el.innerHTML = 'Configurez la clé service_role.'; return; }
+                                                                                        var cutoff = new Date(Date.now() - 120000).toISOString();
+                                                                                        fetch('https://' + ADMIN_PROJECT + '.supabase.co/rest/v1/profiles?select=id,full_name,last_active&last_active=gt.' + cutoff + '&order=last_active.desc', {
+                                                                                            headers: { 'Authorization': 'Bearer ' + srKey, 'apikey': SUPABASE_ANON_KEY }
+                                                                                         }).then(function(r) { return r.json(); }).then(function(profs) {
+                                                                                             var html = '';
+                                                                                             countEl.textContent = '(' + (profs||[]).length + ')';
+                                                                                             if (!profs || profs.length === 0) {
+                                                                                                 html = '<div style="text-align:center;padding:20px;color:var(--text-muted);">😴 Personne actuellement sur la plateforme</div>';
+                                                                                             } else {
+                                                                                                 profs.forEach(function(p) {
+                                                                                                     var u = _usersMapData[p.id] || {};
+                                                                                                     var name = p.full_name || u.full_name || u.email || p.id.slice(0,8);
+                                                                                                     var since = p.last_active ? new Date(p.last_active).toLocaleString('fr-FR') : '—';
+                                                                                                     html += '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--border);border-radius:10px;background:var(--bg);box-shadow:0 1px 3px rgba(0,0,0,.06);">'
+                                                                                                         + '<span style="width:10px;height:10px;border-radius:50%;background:#28a745;box-shadow:0 0 6px rgba(40,167,69,.5);flex-shrink:0;"></span>'
+                                                                                                         + '<span style="flex:1;font-weight:600;font-size:0.88rem;">' + name + '</span>'
+                                                                                                         + '<span style="color:var(--text-muted);font-size:0.75rem;">📌 ' + since + '</span>'
+                                                                                                         + '</div>';
+                                                                                                 });
+                                                                                             }
+                                                                                            el.innerHTML = html;
+                                                                                        }).catch(function(e) {
+                                                                                            el.innerHTML = '<span style="color:var(--text-muted);">Erreur chargement : ' + e.message + '</span>';
+                                                                                        });
+                                                                                    }
+
+                                                                                    function renderActivityLog() {
+                                                                                       var tbody = document.getElementById('activityTableBody');
+                                                                                       var countEl = document.getElementById('activityCount');
+                                                                                       var statsEl = document.getElementById('activityStats');
+                                                                                        var search = (document.getElementById('logSearch').value || '').toLowerCase().trim();
+                                                                                        var filterEvent = document.getElementById('logFilterEvent').value;
+                                                                                        var dateFrom = document.getElementById('logDateFrom').value;
+                                                                                        var dateTo = document.getElementById('logDateTo').value;
+                                                                                        var fromTs = dateFrom ? new Date(dateFrom + 'T00:00:00').getTime() : 0;
+                                                                                        var toTs = dateTo ? new Date(dateTo + 'T23:59:59').getTime() : Infinity;
+                                                                                        var sortOrder = document.getElementById('logSort').value;
+                                                                                        if (!_logsData || !_usersMapData) return;
+                                                                                        var filtered = _logsData.filter(function(l) {
+                                                                                            if (filterEvent && l.event_type !== filterEvent) return false;
+                                                                                            var ts = l.created_at ? new Date(l.created_at).getTime() : 0;
+                                                                                            if (fromTs && ts < fromTs) return false;
+                                                                                            if (isFinite(toTs) && ts > toTs) return false;
+                                                                                            if (!search) return true;
+                                                                                            var u = _usersMapData[l.user_id] || {};
+                                                                                            return (u.email && u.email.toLowerCase().includes(search)) || (u.full_name && u.full_name.toLowerCase().includes(search));
+                                                                                        });
+                                                                                       if (sortOrder === 'asc') {
+                                                                                           filtered = filtered.slice().sort(function(a,b) { return (a.created_at||'').localeCompare(b.created_at||''); });
+                                                                                       }
+                                                                                       countEl.textContent = filtered.length + '/' + _logsData.length + ' entrées';
+                                                                                       if (filtered.length === 0) {
+                                                                                           tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:20px;">Aucun résultat</td></tr>';
+                                                                                           statsEl.innerHTML = '';
+                                                                                           return;
+                                                                                       }
+                                                                                       var userStats = {};
+                                                                                       filtered.forEach(function(l) {
+                                                                                           var uid = l.user_id;
+                                                                                           var u = _usersMapData[uid] || {};
+                                                                                           if (!userStats[uid]) userStats[uid] = { email: u.email || uid, name: u.full_name || '', logins: 0, logouts: 0, updates: 0, lastLogin: '' };
+                                                                                           if (l.event_type === 'login') { userStats[uid].logins++; if (l.created_at > userStats[uid].lastLogin) userStats[uid].lastLogin = l.created_at; }
+                                                                                           if (l.event_type === 'logout') userStats[uid].logouts++;
+                                                                                           if (l.event_type === 'profile_update') userStats[uid].updates++;
+                                                                                       });
+                                                                                       tbody.innerHTML = filtered.map(function(l) {
+                                                                                           var u = _usersMapData[l.user_id] || {};
+                                                                                           var email = u.email || '';
+                                                                                           var name = u.full_name || '';
+                                                                                           var ev = l.event_type === 'login' ? '<span style="color:#28a745;">🔓 Connexion</span>' : l.event_type === 'logout' ? '<span style="color:#dc3545;">🔒 Déconnexion</span>' : '<span style="color:#ffc107;">✏️ Mise à jour profil</span>';
+                                                                                           var dt = l.created_at ? new Date(l.created_at).toLocaleString('fr-FR') : '—';
+                                                                                           var details = l.details || {};
+                                                                                           var device = details.user_agent || '';
+                                                                                           var ip = details.ip || '—';
+                                                                                           var region = details.region || '—';
+                                                                                           var det = '';
+                                                                                           if (l.event_type === 'profile_update' && details.changes) {
+                                                                                               var c = details.changes;
+                                                                                               det = Object.keys(c).map(function(k) { return k + ': ' + (c[k].from || 'vide') + ' → ' + (c[k].to || 'vide'); }).join('<br>');
+                                                                                           }
+return '<tr><td style="font-size:0.8rem;" data-label="Email">' + email + '</td><td data-label="Nom">' + name + '</td><td data-label="Événement">' + ev + '</td>'
+                                                                                                + '<td style="font-size:0.7rem;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + esc(details.user_agent||'') + '" data-label="Appareil">' + esc(device) + '</td>'
+                                                                                                + '<td style="font-size:0.75rem;font-family:monospace;" data-label="IP">' + ip + '</td>'
+                                                                                                + '<td style="font-size:0.75rem;" data-label="Région">' + region + '</td>'
+                                                                                                + '<td style="font-size:0.8rem;white-space:nowrap;" data-label="Date/Heure">' + dt + '</td>'
+                                                                                                + '<td style="font-size:0.8rem;max-width:200px;overflow:hidden;" data-label="Détails">' + det + '</td></tr>';
+                                                                                       }).join('');
+                                                                                       var statsHtml = Object.keys(userStats).map(function(uid) {
+                                                                                           var s = userStats[uid];
+                                                                                           var last = s.lastLogin ? new Date(s.lastLogin).toLocaleString('fr-FR') : 'jamais';
+                                                                                           return '<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:0.8rem;line-height:1.6;"><strong>' + s.name + '</strong> <span style="color:var(--text-muted);font-size:0.75rem;">(' + s.email + ')</span><br>🔓 ' + s.logins + ' · 🔒 ' + s.logouts + ' · ✏️ ' + s.updates + ' · 🕐 ' + last + '</div>';
+                                                                                       }).join('');
+                                                                                       statsEl.innerHTML = statsHtml;
+                                                                                   }
+
+                                                                                   async function loadActivityLog() {
+                                                                                       const srKey = getSrKey();
+                                                                                       const tbody = document.getElementById('activityTableBody');
+                                                                                       const countEl = document.getElementById('activityCount');
+                                                                                       const statsEl = document.getElementById('activityStats');
+                                                                                        if (!srKey) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:20px;">Configurez la clé service_role</td></tr>'; return; }
+                                                                                        try {
+                                                                                            var [logResp, authResp, profResp] = await Promise.all([
+                                                                                                fetch('https://' + ADMIN_PROJECT + '.supabase.co/rest/v1/user_activity_log?order=created_at.desc&limit=200', {
+                                                                                                    headers: { 'Authorization': 'Bearer ' + srKey, 'apikey': SUPABASE_ANON_KEY }
+                                                                                                }),
+                                                                                                fetch('https://' + ADMIN_PROJECT + '.supabase.co/auth/v1/admin/users', {
+                                                                                                    headers: { 'Authorization': 'Bearer ' + srKey, 'apikey': SUPABASE_ANON_KEY }
+                                                                                                }),
+                                                                                                fetch('https://' + ADMIN_PROJECT + '.supabase.co/rest/v1/profiles?select=id,full_name', {
+                                                                                                    headers: { 'Authorization': 'Bearer ' + srKey, 'apikey': SUPABASE_ANON_KEY }
+                                                                                                })
+                                                                                            ]);
+                                                                                            if (!logResp.ok) throw new Error('Erreur chargement logs (' + logResp.status + ')');
+                                                                                            _logsData = await logResp.json();
+                                                                                            _usersMapData = {};
+                                                                                            var profMap = {};
+                                                                                            if (profResp.ok) {
+                                                                                                var profs = await profResp.json();
+                                                                                                (profs || []).forEach(function(p) { profMap[p.id] = p.full_name || ''; });
+                                                                                            }
+                                                                                            if (authResp.ok) {
+                                                                                                var authData = await authResp.json();
+                                                                                                (authData.users || []).forEach(function(u) {
+                                                                                                    var meta = u.user_metadata || {};
+                                                                                                    var fn = meta.full_name || profMap[u.id] || '';
+                                                                                                    _usersMapData[u.id] = { email: u.email || '—', full_name: fn };
+                                                                                                });
+                                                                                            }
+                                                                                            renderActivityLog();
+                                                                                            renderSessions();
+                                                                                         } catch (e) {
+                                                                                            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#e74c3c;padding:20px;">❌ ' + e.message + '</td></tr>';
+                                                                                       }
+                                                                                   }
+                                                                                   function saveSrKey() {
+                                                                                     const val = document.getElementById('srKeyInput').value.trim();
+                                                                                     const el = document.getElementById('srKeyResult');
+                                                                                     if (!val || val.length < 20) {
+                                                                                         el.textContent = '❌ Clé invalide. Vérifiez dans Supabase Dashboard.';
+                                                                                         el.className = 'result-msg error'; return;
+                                                                                     }
+                                                                                     setSrKey(val);
+                                                                                     el.textContent = '✅ Clé service_role enregistrée !';
+                                                                                     el.className = 'result-msg success';
+                                                                                     closeSrModal();
+                                                                                     checkSrKey();
+                                                                                 }
+                                                                                 async function createSingleUser() {
+                                                                                     const email = document.getElementById('newEmail').value.trim();
+                                                                                     const pass = document.getElementById('newPassword').value;
+                                                                                     const name = document.getElementById('newFullName').value.trim();
+                                                                                     const role = document.getElementById('newRole').value;
+                                                                                     const el = document.getElementById('singleResult');
+                                                                                     if (!email || !pass) { el.textContent = '❌ Email et mot de passe requis.'; el.className = 'result-msg error'; return; }
+                                                                                     if (pass.length < 8 || !/[A-Z]/.test(pass) || !/[0-9]/.test(pass) || !/[^A-Za-z0-9]/.test(pass)) { el.textContent = '❌ 8 caractères minimum, 1 majuscule, 1 chiffre, 1 caractère spécial requis.'; el.className = 'result-msg error'; return; }
+                                                                                     try {
+                                                                                         el.className = 'result-msg info';
+                                                                                         el.textContent = '⏳ Création en cours...';
+                                                                                         await adminCreateUser(email, pass, name, role);
+                                                                                         el.textContent = '✅ Compte créé avec succès !';
+                                                                                         el.className = 'result-msg success';
+                                                                                         document.getElementById('newEmail').value = '';
+                                                                                         document.getElementById('newPassword').value = '';
+                                                                                         // ... (import batch logic would be here)
+                                                                                     } catch (e) {
+                                                                                         el.textContent = '❌ ' + e.message;
+                                                                                         el.className = 'result-msg error';
+                                                                                     }
+                                                                                 }
+                                                                                 async function loadUsers() {
+                                                                                     const tbody = document.getElementById('userTableBody');
+                                                                                     const countEl = document.getElementById('userCount');
+                                                                                     try {
+                                                                                         const srKey = getSrKey();
+                                                                                         if (!srKey) { tbody.innerHTML = `<tr>
+                                                                                                                                                                         <td colspan="7" style="text-align:center;color:var(--text-muted);padding:20px;">Configurez la clé service_role pour voir les utilisateurs</td>
+                                                                                                                                                                         </tr>`; return; }
+                                                                                         const resp = await fetch('https://' + ADMIN_PROJECT + '.supabase.co/auth/v1/admin/users', {
+                                                                                             headers: {
+                                                                                                 'Authorization': 'Bearer ' + srKey,
+                                                                                                 'apikey': SUPABASE_ANON_KEY
+                                                                                             }
+                                                                                         });
+                                                                                         if (!resp.ok) throw new Error('Erreur chargement (' + resp.status + ')');
+                                                                                         const data = await resp.json();
+                                                                                         const users = data.users || [];
+                                                                                         countEl.textContent = users.length;
+                                                                                         if (users.length === 0) {
+                                                                                             tbody.innerHTML = `<tr>
+                                                                                                                                                                         <td colspan="7" style="text-align:center;color:var(--text-muted);padding:20px;">Aucun utilisateur</td>
+                                                                                                                                                                         </tr>`;
+                                                                                             return;
+                                                                                         }
+                                                                                         tbody.innerHTML = users.map(u => {
+                                                                                             const meta = u.user_metadata || {};
+                                                                                             const date = u.created_at ? new Date(u.created_at).toLocaleDateString('fr-FR') : '—';
+                                                                                             var safeEmail = document.createElement('div');
+                                                                                             safeEmail.textContent = u.email || '—';
+                                                                                             var safeName = document.createElement('div');
+                                                                                             safeName.textContent = meta.full_name || '—';
+                                                                                             var safeRole = document.createElement('div');
+                                                                                             safeRole.textContent = meta.role || 'formateur';
+                                                                                             return `<tr>
+                                                                                                                                                                         <td>${safeEmail.innerHTML}</td>
+                                                                                                                                                                             <td>${safeName.innerHTML}</td>
+                                                                                                                                                                                 <td>
+                                                                                                                                                                                     <span class="badge-role badge-${safeRole.innerHTML}">${safeRole.innerHTML}</span>
+                                                                                                                                                                                 </td>
+                                                                                                                                                                                 <td>${date}</td>
+                                                                                                                      <td>
+                                                                                                                          <button class="btn btn-secondary btn-sm" onclick="editUser('${u.id}')">✏️</button>
+                                                                                                                      </td>
+                                                                                                                      <td>
+                                                                                                                          <button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}','${u.email.replace(/'/g, "\\'")}')">🗑</button>
+                                                                                                                      </td>
+                                                                                                                      <td>
+                                                                                                                          <button class="btn btn-sm" style="background:var(--border);color:var(--text-muted);padding:6px 10px;" onclick="resetUserInfo('${u.id}','${u.email.replace(/'/g, "\\'")}')" title="Réinitialiser les informations">🔄</button>
+                                                                                                                      </td>
+                                                                                                                  </tr>`;
+                                                                                         }).join('');
+                                                                                     } catch (e) {
+                                                                                         tbody.innerHTML = `<tr>
+                                                                                                                                                                                 <td colspan="7" style="text-align:center;color:#e74c3c;padding:20px;">❌ ${e.message}</td>
+                                                                                                                                                                                 </tr>`;
+                                                                                     }
+                                                                                 }
+                                                                                 async function deleteUser(id, email) {
+                                                                                     if (!confirm(`Supprimer ${email} ?`)) return;
+                                                                                     const srKey = getSrKey();
+                                                                                     if (!srKey) return;
+                                                                                     try {
+                                                                                         const resp = await fetch('https://' + ADMIN_PROJECT + '.supabase.co/auth/v1/admin/users/' + id, {
+                                                                                             method: 'DELETE',
+                                                                                             headers: {
+                                                                                                 'Authorization': 'Bearer ' + srKey,
+                                                                                                 'apikey': SUPABASE_ANON_KEY
+                                                                                             }
+                                                                                         });
+                                                                                         if (!resp.ok) throw new Error('Erreur suppression (' + resp.status + ')');
+                                                                                         loadUsers();
+                                                                                         document.getElementById('listResult').textContent = '✅ ' + email + ' supprimé.';
+                                                                                         document.getElementById('listResult').className = 'result-msg success';
+                                                                                     } catch (e) {
+                                                                                         document.getElementById('listResult').textContent = '❌ ' + e.message;
+                                                                                         document.getElementById('listResult').className = 'result-msg error';
+                                                                                     }
+                                                                                 }
+                                                                                  async function resetUserInfo(id, email) {
+                                                                                      if (!confirm(`Réinitialiser les informations de ${email} ?\n\nLe nom, le nom en arabe et la spécialité seront effacés.`)) return;
+                                                                                      const srKey = getSrKey();
+                                                                                      if (!srKey) return;
+                                                                                      var el = document.getElementById('listResult');
+                                                                                      try {
+                                                                                          var pResp = await fetch('https://' + ADMIN_PROJECT + '.supabase.co/rest/v1/profiles?id=eq.' + id, {
+                                                                                              method: 'PATCH',
+                                                                                              headers: {
+                                                                                                  'Authorization': 'Bearer ' + srKey,
+                                                                                                  'apikey': SUPABASE_ANON_KEY,
+                                                                                                  'Content-Type': 'application/json',
+                                                                                                  'Prefer': 'return=minimal'
+                                                                                              },
+                                                                                              body: JSON.stringify({ full_name: '', full_name_ar: '', specialite: '' })
+                                                                                          });
+                                                                                          if (!pResp.ok) throw new Error('Erreur réinitialisation profil (' + pResp.status + ')');
+                                                                                          var aResp = await fetch('https://' + ADMIN_PROJECT + '.supabase.co/auth/v1/admin/users/' + id, {
+                                                                                              method: 'PUT',
+                                                                                              headers: {
+                                                                                                  'Authorization': 'Bearer ' + srKey,
+                                                                                                  'apikey': SUPABASE_ANON_KEY,
+                                                                                                  'Content-Type': 'application/json'
+                                                                                              },
+                                                                                              body: JSON.stringify({ user_metadata: {} })
+                                                                                          });
+                                                                                          if (!aResp.ok) console.warn('Réinitialisation auth metadata ignorée');
+                                                                                          el.textContent = '✅ Informations de ' + email + ' réinitialisées.';
+                                                                                          el.className = 'result-msg success';
+                                                                                          loadUsers();
+                                                                                      } catch (e) {
+                                                                                          el.textContent = '❌ ' + e.message;
+                                                                                          el.className = 'result-msg error';
+                                                                                      }
+                                                                                  }
+                                                                                  async function editUser(id) {
+                                                                                     const srKey = getSrKey();
+                                                                                     if (!srKey) { alert('Clé service_role requise'); return; }
+                                                                                     document.getElementById('editUserId').value = id;
+                                                                                     document.getElementById('editResult').style.display = 'none';
+                                                                                     try {
+                                                                                         const resp = await fetch('https://' + ADMIN_PROJECT + '.supabase.co/rest/v1/profiles?id=eq.' + id, {
+                                                                                             headers: {
+                                                                                                 'Authorization': 'Bearer ' + srKey,
+                                                                                                 'apikey': SUPABASE_ANON_KEY
+                                                                                             }
+                                                                                         });
+                                                                                         var profile = null;
+                                                                                         if (resp.ok) {
+                                                                                             var data = await resp.json();
+                                                                                             if (data && data.length > 0) profile = data[0];
+                                                                                         }
+                                                                                         const authResp = await fetch('https://' + ADMIN_PROJECT + '.supabase.co/auth/v1/admin/users/' + id, {
+                                                                                             headers: {
+                                                                                                 'Authorization': 'Bearer ' + srKey,
+                                                                                                 'apikey': SUPABASE_ANON_KEY
+                                                                                             }
+                                                                                         });
+                                                                                         var userData = null;
+                                                                                         if (authResp.ok) userData = await authResp.json();
+                                                                                         var meta = userData?.user_metadata || {};
+                                                                                         document.getElementById('editEmail').value = userData?.email || profile?.id || '';
+                                                                                         document.getElementById('editFullName').value = profile?.full_name || meta?.full_name || '';
+                                                                                         document.getElementById('editNameAr').value = profile?.full_name_ar || '';
+                                                                                         document.getElementById('editSpecialite').value = profile?.specialite || '';
+                                                                                         document.getElementById('editRole').value = profile?.role || meta?.role || 'formateur';
+                                                                                         document.getElementById('editPassword').value = '';
+                                                                                         document.getElementById('editUserModal').classList.add('open');
+                                                                                     } catch (e) {
+                                                                                         document.getElementById('editResult').textContent = '❌ ' + e.message;
+                                                                                         document.getElementById('editResult').className = 'result-msg error';
+                                                                                         document.getElementById('editResult').style.display = 'block';
+                                                                                     }
+                                                                                 }
+                                                                                 async function saveEditUser() {
+                                                                                     var id = document.getElementById('editUserId').value;
+                                                                                     var fullName = document.getElementById('editFullName').value.trim();
+                                                                                     var nameAr = document.getElementById('editNameAr').value.trim();
+                                                                                     var spec = document.getElementById('editSpecialite').value.trim();
+                                                                                     var role = document.getElementById('editRole').value;
+                                                                                     var el = document.getElementById('editResult');
+                                                                                     var srKey = getSrKey();
+                                                                                     if (!srKey) { el.textContent = '❌ Clé service_role manquante'; el.className = 'result-msg error'; el.style.display = 'block'; return; }
+                                                                                     try {
+                                                                                         var profileBody = { full_name: fullName, role: role };
+                                                                                         if (nameAr) profileBody.full_name_ar = nameAr;
+                                                                                         if (spec) profileBody.specialite = spec;
+                                                                                         var pResp = await fetch('https://' + ADMIN_PROJECT + '.supabase.co/rest/v1/profiles?id=eq.' + id, {
+                                                                                             method: 'PATCH',
+                                                                                             headers: {
+                                                                                                 'Authorization': 'Bearer ' + srKey,
+                                                                                                 'apikey': SUPABASE_ANON_KEY,
+                                                                                                 'Content-Type': 'application/json',
+                                                                                                 'Prefer': 'return=minimal'
+                                                                                             },
+                                                                                             body: JSON.stringify(profileBody)
+                                                                                         });
+                                                                                         if (!pResp.ok) throw new Error('Erreur mise à jour profil (' + pResp.status + ')');
+                                                                                         var authBody = {
+                                                                                             user_metadata: { full_name: fullName, role: role }
+                                                                                         };
+                                                                                         var newPass = document.getElementById('editPassword').value;
+                                                                                         if (newPass && newPass.length >= 6) authBody.password = newPass;
+                                                                                         var aResp = await fetch('https://' + ADMIN_PROJECT + '.supabase.co/auth/v1/admin/users/' + id, {
+                                                                                             method: 'PUT',
+                                                                                             headers: {
+                                                                                                 'Authorization': 'Bearer ' + srKey,
+                                                                                                 'apikey': SUPABASE_ANON_KEY,
+                                                                                                 'Content-Type': 'application/json'
+                                                                                             },
+                                                                                             body: JSON.stringify({
+                                                                                                 user_metadata: { full_name: fullName, role: role }
+                                                                                             })
+                                                                                         });
+                                                                                         if (!aResp.ok) throw new Error('Erreur mise à jour auth (' + aResp.status + ')');
+                                                                                         el.textContent = '✅ Utilisateur mis à jour !';
+                                                                                         el.className = 'result-msg success';
+                                                                                         el.style.display = 'block';
+                                                                                         document.getElementById('editUserModal').classList.remove('open');
+                                                                                         loadUsers();
+                                                                                     } catch (e) {
+                                                                                         el.textContent = '❌ ' + e.message;
+                                                                                         el.className = 'result-msg error';
+                                                                                         el.style.display = 'block';
+                                                                                     }
+                                                                                 }
+                                                                                 
+                                                                                 async function adminCreateUser(email, password, fullName, role) {            const srKey = getSrKey();            if (!srKey) throw new Error('Clé service_role manquante. Configurez-la dans ⚙️ Paramètres Admin.');            const resp = await fetch('https://' + ADMIN_PROJECT + '.supabase.co/auth/v1/admin/users', {                method: 'POST',                headers: {                    'Authorization': 'Bearer ' + srKey,                    'apikey': SUPABASE_ANON_KEY,                    'Content-Type': 'application/json'                },                body: JSON.stringify({                    email: email,                    password: password,                    email_confirm: true,                    user_metadata: { full_name: fullName || email.split('@')[0], role: role || 'formateur' }                })            });            if (!resp.ok) {                const err = await resp.json();                throw new Error(err.msg || err.error_description || err.message || 'Erreur création (' + resp.status + ')');            }            const userData = await resp.json();            if (fullName || (role && role !== 'formateur')) {                await fetch('https://' + ADMIN_PROJECT + '.supabase.co/rest/v1/profiles', {                    method: 'POST',                    headers: {                        'Authorization': 'Bearer ' + srKey,                        'apikey': SUPABASE_ANON_KEY,                        'Content-Type': 'application/json',                        'Prefer': 'return=minimal'                    },                    body: JSON.stringify({                        id: userData.id,                        full_name: fullName || email.split('@')[0],                        role: role || 'formateur'                    })                });            }            return userData;        }
+                                                                                 
+                                                                                 async function bulkImport() {            const raw = document.getElementById('csvInput').value.trim();            const el = document.getElementById('bulkResult');            const progress = document.getElementById('bulkProgress');            if (!raw) { el.textContent = '❌ Collez des données CSV.'; el.className = 'result-msg error'; return; }            const lines = raw.split('\n').filter(l => l.trim());            const srKey = getSrKey();            if (!srKey) { el.textContent = '❌ Clé service_role manquante.'; el.className = 'result-msg error'; return; }            el.style.display = 'none';            progress.style.display = 'block';            progress.className = 'result-msg info';            let success = 0, errors = [];            for (let i = 0; i < lines.length; i++) {                const parts = lines[i].split(';').map(s => s.trim());                const email = parts[0];                const pass = parts[1] || 'Pass123!';                const name = parts[2] || email.split('@')[0];                const role = parts[3] || 'formateur';                progress.innerHTML = `📥 Import en cours... ${i+1}/${lines.length} <span class="loading-spinner">
+                                                                                                                                                                         </span>`;                if (!email || !email.includes('@')) {                    errors.push(`Ligne ${i+1}: email invalide`);                    continue;                }                try {                    await adminCreateUser(email, pass, name, role);                    success++;                } catch (e) {                    errors.push(`Ligne ${i+1} (${email}): ${e.message}`);                }            }            progress.style.display = 'none';            el.style.display = 'block';            el.textContent = `✅ ${success} compte(s) créé(s).${errors.length ? ' ⚠️ ' + errors.length + ' erreur(s). Détails dans la console.' : ''}`;            el.className = 'result-msg ' + (errors.length === 0 ? 'success' : 'info');            if (errors.length) console.error('Erreurs import:', errors);            loadUsers();        }
+                                                                                  document.addEventListener('DOMContentLoaded', () => {
+                                                                                     setTimeout(initAdmin, 300);
+                                                                                     document.addEventListener('keydown', e => {
+                                                                                         if (e.key === 'Escape') closeSrModal();
+                                                                                     });
+                                                                                 });
+                                                                                 document.querySelector('#srKeyModal .modal-overlay')?.addEventListener('click', function(e) {
+                                                                                     if (e.target === this) closeSrModal();
+                                                                                 });
+                                                                              </script>
+
+<style>
+#activityCard table th { position:relative; user-select:none; }
+#activityCard .resize-handle { position:absolute; right:0; top:0; bottom:0; width:6px; cursor:col-resize; z-index:2; border-right:2px solid var(--border); background:transparent; }
+#activityCard .resize-handle:hover,
+#activityCard .resize-handle.active { border-right-color:rgba(0,119,204,.6); background:rgba(0,119,204,.12); }
+#activityCard .resize-handle:active { border-right-color:#0077CC; background:rgba(0,119,204,.2); }
+#activityCard:fullscreen table td,
+#activityCard:fullscreen table th { max-width:none!important; overflow:visible!important; text-overflow:clip!important; white-space:normal!important; word-break:break-all!important; }
+@media(max-width:768px){#activityCard table,#activityCard thead,#activityCard tbody,#activityCard th,#activityCard td,#activityCard tr{display:block}#activityCard thead{display:none}#activityCard tbody tr{margin-bottom:12px;border:1px solid var(--border);border-radius:8px;padding:8px;background:var(--bg)}#activityCard tbody td{padding:4px 8px;border:none;font-size:.7rem;white-space:normal;word-break:break-word}#activityCard tbody td:before{content:attr(data-label);font-weight:600;color:var(--text-muted);display:inline-block;width:90px;flex-shrink:0}#activityCard tbody td{display:flex;gap:4px}#activityCard .overflow-x-auto{max-height:none!important}}
+</style>
+<script>
+(function(){
+  var card = document.getElementById('activityCard');
+  var enterBtn = document.getElementById('enterFsBtn');
+  var exitBtn = document.getElementById('exitFsBtn');
+  var filters = document.getElementById('logFilters');
+
+  function onFsChange() {
+    var fs = document.fullscreenElement;
+    if (fs && (fs === card || fs.contains(card))) {
+      enterBtn.style.display = 'none';
+      exitBtn.style.display = '';
+      if (filters) filters.style.display = 'flex';
+    } else {
+      enterBtn.style.display = '';
+      exitBtn.style.display = 'none';
+      if (filters) filters.style.display = 'none';
+    }
+  }
+  document.addEventListener('fullscreenchange', onFsChange);
+  document.addEventListener('webkitfullscreenchange', onFsChange);
+
+  function initResizer() {
+    var table = card.querySelector('table');
+    if (!table) return;
+    var ths = table.querySelectorAll('thead th');
+    ths.forEach(function(th) {
+      var handle = document.createElement('div');
+      handle.className = 'resize-handle';
+      th.appendChild(handle);
+      handle.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var startX = e.clientX;
+        var startW = th.getBoundingClientRect().width;
+        th.classList.add('dragging');
+        handle.classList.add('active');
+        function onMove(ev) {
+          var diff = ev.clientX - startX;
+          th.style.width = Math.max(40, startW + diff) + 'px';
+        }
+        function onUp() {
+          th.classList.remove('dragging');
+          handle.classList.remove('active');
+          document.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseup', onUp);
+        }
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initResizer);
+  } else {
+    initResizer();
+  }
+})();
+</script>
+
+</body>
+</html>

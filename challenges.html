@@ -1,0 +1,407 @@
+﻿<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://api.duckduckgo.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' data: https://cdnjs.cloudflare.com; connect-src 'self' https://*.supabase.co https://api.openai.com https://api.anthropic.com https://generativelanguage.googleapis.com https://openrouter.ai https://api.groq.com http://localhost:11434 https://api.duckduckgo.com https://api.emailjs.com https://api.ipify.org https://ipinfo.io https://ip-api.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; img-src 'self' data: https:; media-src 'self' https:; frame-ancestors 'none'; base-uri 'self';">
+        <title>APC Algérie G3 · Challenges</title>
+<link rel="stylesheet" href="css/style.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+        <script>var l=localStorage.getItem('lang');if(l){document.documentElement.lang=l;if(l==='ar')document.documentElement.dir='rtl';}</script>
+        <style>        .challenge-learner-mode #platformChrome { display: none !important; }        .challenge-learner-mode .learner-only { display: flex !important; }        .challenge-learner-mode body { background: var(--bg); }    </style>
+    </head>
+    <body>
+        <div id="apcCompatBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(135deg,#E65100,#FF8F00);color:#fff;padding:10px 16px;text-align:center;font-size:13px;font-weight:500;box-shadow:0 2px 12px rgba(0,0,0,.3);align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;">
+            <i class="fas fa-exclamation-triangle" style="font-size:16px;">
+            </i>
+            <span>Mode de compatibilité activé pour votre navigateur. Certaines icônes peuvent être différentes.</span>
+            <button id="apcCompatBannerClose" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);color:#fff;padding:4px 14px;border-radius:14px;font-size:12px;cursor:pointer;">OK</button>
+        </div>
+        <script>if(localStorage.getItem('theme')!=='light')document.body.classList.add('dark');</script>
+        <div id="platformChrome">
+            <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()">
+            </div>
+            <div class="drawer" id="drawer">
+                <div class="drawer-header">
+                    <span class="drawer-title">☰ Menu</span>
+                    <button class="btn-icon drawer-close" onclick="closeDrawer()">✕</button>
+                </div>
+                <div class="drawer-section">
+                    <button class="drawer-nav-btn" onclick="closeDrawer();goTo('index.html')">
+                    <span data-i18n="tab_home">🏠 Accueil</span>
+                    </button>
+                    <button class="drawer-nav-btn" onclick="closeDrawer();goTo('generator.html')">
+                    <span data-i18n="tab_generator">📝 Générateur de Prompts</span>
+                    </button>
+                    <button class="drawer-nav-btn" onclick="closeDrawer();goTo('assistant.html')">
+                    <span data-i18n="tab_assistant">🤖 Assistant IA</span>
+                    </button>
+                    <button class="drawer-nav-btn" onclick="closeDrawer();goTo('from-doc.html')">
+                    <span data-i18n="tab_fromdoc">📄 Document → Présentation</span>
+                    </button>
+                    <button class="drawer-nav-btn" onclick="closeDrawer();goTo('quiz.html')">
+                    <span data-i18n="tab_quiz">🎯 Quiz</span>
+                    </button>
+                    <button class="drawer-nav-btn" onclick="closeDrawer();goTo('challenges.html')">
+                    <span data-i18n="tab_challenge">🎮 Challenges</span>
+                    </button>
+                    <button class="drawer-nav-btn" onclick="closeDrawer();goTo('games.html')"><span data-i18n="tab_games">🎮 Jeux</span></button>
+                    <button class="drawer-nav-btn" onclick="closeDrawer();goTo('aide.html')">
+                    <span data-i18n="tab_guide">📖 Guide complet</span>
+                    </button>
+                    <button class="drawer-nav-btn" onclick="closeDrawer();goTo('aide-cles-api.html')">
+                    <span data-i18n="tab_help">❓ Aide Clés API</span>
+                    </button>
+                    <button class="drawer-nav-btn" onclick="closeDrawer();goTo('about.html')">
+                    <span data-i18n="tab_about">ℹ️ À propos</span>
+                    </button>
+                    <button class="drawer-nav-btn nav-admin-link" onclick="closeDrawer();goTo('admin.html');closeDrawer();" style="display:none">
+                    <span data-i18n="tab_admin">⚙️ Admin</span>
+                    </button>
+                </div>
+                <div class="drawer-divider">
+                </div>
+                <div class="drawer-section">
+                    <button id="settingsBtn" class="drawer-nav-btn" onclick="loadKeysIntoModal();document.getElementById('settingsModal')?.classList.add('open');closeDrawer();">⚙️ <span data-i18n="settingsLabel">Paramètres</span>
+                    <span id="apiBadge" class="badge missing">●</span>
+                    </button>
+                    <button class="drawer-nav-btn" onclick="closeDrawer();document.getElementById('changePwdModal')?.classList.add('open');">🔑 <span data-i18n="changePwdLabel">Changer mot de passe</span>
+                    </button>
+                    <button id="themeToggle" class="drawer-nav-btn" onclick="toggleTheme()">🌙 <span id="themeLabel">Mode sombre</span>
+                    </button>
+                    <div class="drawer-lang-row">
+                        <span style="font-size:12px;color:var(--text-muted);margin-bottom:4px;display:block;">Langue :</span>
+                        <div style="display:flex;gap:4px;">
+                            <button id="btnFR" class="btn-icon active-lang" onclick="setLang('fr')">🇫🇷 FR</button>
+                            <button id="btnAR" class="btn-icon" onclick="setLang('ar')">🇩🇿 AR</button>
+                            <button id="btnEN" class="btn-icon" onclick="setLang('en')">🇬🇧 EN</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container" id="challengePage">
+                <div class="hero">
+                    <div class="hero-ministere" data-i18n="ministere">Ministère de la Formation et de l'Enseignement Professionnels</div>
+                        <img class="hero-logo-ministere" src="https://mvet.gov.dz/wp-content/uploads/2024/03/logo-mfep-1.png" alt="Ministère de la Formation et de l'Enseignement Professionnels">
+                        <div class="top-bar">
+                            <button class="btn-icon menu-btn" onclick="toggleDrawer()">☰</button>
+                            <span class="auth-state">
+                            </span>
+                        </div>
+                        <div class="hero-title-row">
+                            <div class="hero-text-group">
+                                <h1>APC ALGÉRIE <span>GÉNÉRATION 3</span>
+                                </h1>
+                                <div class="hero-sub" data-i18n="headerSub">Formateur 2.0<br>Le formateur augmenté par l'IA<br>Assistant intelligent de conception pédagogique selon l'Approche Par Compétences (APC).</div>
+                                </div>
+                                <div class="hero-flag-video">
+                                    <video src="https://videos.pexels.com/video-files/13859860/13859860-hd_1280_720_25fps.mp4" autoplay loop muted playsinline>
+                                    </video>
+                                </div>
+                            </div>
+                            <div class="hero-desc" data-i18n="challengeDesc">Créez des challenges pédagogiques, compétitions entre équipes, et suivez les classements en direct.</div>
+                                <div class="nav-links">
+                                    <a class="nav-link" onclick="goTo('index.html')" data-i18n="tab_home">🏠 Accueil</a>
+                                    <a class="nav-link" onclick="goTo('generator.html')" data-i18n="tab_generator">📝 Générateur de Prompts</a>
+                                    <a class="nav-link" onclick="goTo('assistant.html')" data-i18n="tab_assistant">🤖 Assistant IA</a>
+                                    <a class="nav-link" onclick="goTo('from-doc.html')" data-i18n="tab_fromdoc">📄 Document → Présentation</a>
+                                    <a class="nav-link" onclick="goTo('quiz.html')" data-i18n="tab_quiz">🎯 Quiz</a>
+                                    <a class="nav-link" onclick="goTo('challenges.html')" data-i18n="tab_challenge">🎮 Challenges</a>
+                                    <a class="nav-link" onclick="goTo('games.html')" data-i18n="tab_games">🎮 Jeux</a>
+                                    <a class="nav-link" onclick="goTo('aide.html')" data-i18n="tab_guide">📖 Guide complet</a>
+                                    <a class="nav-link" onclick="goTo('aide-cles-api.html')" data-i18n="tab_help">❓ Aide Clés API</a>
+                                    <a class="nav-link" onclick="goTo('about.html')" data-i18n="tab_about">ℹ️ À propos</a>
+                                    <a class="nav-link" onclick="goTo('admin.html')" style="display:none" data-i18n="tab_admin">⚙️ Admin</a>
+                                </div>
+                            </div>
+                            <!-- Section 1: Créer depuis l'Assistant IA -->
+                            <div class="card">
+                                <div class="section-head">
+                                    <span class="section-num">1</span>
+                                    <strong data-i18n="challengeFromAssistantTitle">🎮 Créer un Challenge depuis l'Assistant IA</strong>
+                                </div>
+                                <p data-i18n="challengeHint" style="font-size:0.82rem;color:var(--text-muted);margin-bottom:8px;">💡 Générez un challenge directement depuis la dernière réponse de l'Assistant IA. L'IA crée les équipes, les épreuves et les questions automatiquement.</p>
+                                <div id="assistantChallengeList">
+                                </div>
+                            </div>
+                            <!-- Section 2: Création manuelle -->
+                            <div class="card">
+                                <div class="section-head">
+                                    <span class="section-num">2</span>
+                                    <strong data-i18n="challengeManualTitle">✏️ Créer un Challenge manuellement</strong>
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                                    <div class="field-group">
+                                        <label data-i18n="challengeTitleLabel">Titre du challenge</label>
+                                        <input type="text" id="chManualTitle" placeholder="Mon challenge" style="width:100%;padding:8px 12px;border:2px solid var(--border);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--text);box-sizing:border-box;">
+                                    </div>
+                                    <div class="field-group">
+                                        <label data-i18n="challengeThemeLabel">Thème</label>
+                                        <input type="text" id="chManualTheme" placeholder="Réseaux, sécurité, ..." style="width:100%;padding:8px 12px;border:2px solid var(--border);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--text);box-sizing:border-box;">
+                                    </div>
+                                    <div class="field-group">
+                                        <label data-i18n="challengeTypeLabel">Type</label>
+                                        <select id="chManualType" style="width:100%;padding:8px 12px;border:2px solid var(--border);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--text);">
+                                            <option value="group">👥 Par groupes</option>
+                                            <option value="team">👤 Individuel</option>
+                                            <option value="tournament">🏆 Tournoi</option>
+                                        </select>
+                                    </div>
+                                    <div class="field-group">
+                                        <label data-i18n="challengeTeamsLabel">Équipes</label>
+                                        <select id="chManualTeams" style="width:100%;padding:8px 12px;border:2px solid var(--border);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--text);">
+                                            <option value="2">2 équipes</option>
+                                            <option value="3" selected>3 équipes</option>
+                                            <option value="4">4 équipes</option>
+                                            <option value="5">5 équipes</option>
+                                            <option value="0">Aucune (individuel)</option>
+                                        </select>
+                                    </div>
+                                    <div class="field-group">
+                                        <label data-i18n="challengeSpecialtyLabel">Spécialité</label>
+                                        <input type="text" id="chManualSpecialty" placeholder="Ex: Informatique, Soudure, Cuisine..." style="width:100%;padding:8px 12px;border:2px solid var(--border);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--text);box-sizing:border-box;">
+                                    </div>
+                                    <div class="field-group">
+                                        <label data-i18n="challengeObjectiveLabel">Type d'objectif</label>
+                                        <select id="chManualObjective" onchange="onChallengeObjectiveSelect('chManualObjective','chManualObjectiveCustom')" style="width:100%;padding:8px 12px;border:2px solid var(--border);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--text);">
+                                        </select>
+                                        <input type="text" id="chManualObjectiveCustom" placeholder="Tapez votre objectif personnalisé..." style="display:none;width:100%;padding:8px 12px;border:2px solid var(--accent);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--text);box-sizing:border-box;margin-top:6px;">
+                                    </div>
+                                </div>
+                                <div class="btn-row" style="margin-top:12px;">
+                                    <button class="btn btn-primary" onclick="createManualChallenge()" style="background:linear-gradient(135deg,#E65100,#FF8F00);">🎮 Créer le challenge</button>
+                                    <button class="btn btn-secondary" onclick="document.getElementById('chManualTitle').value='';document.getElementById('chManualTheme').value='';showToast('🧹 Formulaire réinitialisé.');">🧹 Réinitialiser</button>
+                                </div>
+                            </div>
+                            <!-- Section 3: Éditeur du challenge -->
+                            <div class="card" id="challengeEditorCard" style="display:none;">
+                                <div id="challengeEditorContainer">
+                                </div>
+                            </div>
+                            <!-- Section 4: Challenges publiés -->
+                            <div class="card" id="publishedChallengesCard" style="display:none;">
+                                <div class="section-head">
+                                    <span class="section-num">3</span>
+                                    <strong data-i18n="challengePublishedTitle">📋 Challenges publiés</strong>
+                                </div>
+                                <div id="publishedChallengeList">
+                                </div>
+                            </div>
+                            <!-- Section 5: Système de Gamification -->
+                            <div class="card" id="gamificationCard">
+                                <div class="section-head">
+                                    <span class="section-num">🎮</span>
+                                    <strong data-i18n="gamificationTitle">🏆 Système de Gamification</strong>
+                                </div>
+                                <div id="gamificationContent">
+                                </div>
+                            </div>
+                        </div>
+                        <footer>
+                            <span data-i18n="footerText">APC Algérie GÉNÉRATION 3 — Formateur 2.0</span>
+                        </footer>
+                    </div>
+                    <!-- Learner UI (mode apprenant) -->
+                    <div id="challengeLearnerUI" class="learner-only" style="display:none;flex-direction:column;min-height:100vh;">
+                        <div id="challengeLearnerContent">
+                        </div>
+                    </div>
+                    <!-- Settings Modal -->
+                    <div class="modal-overlay" id="settingsModal">
+                        <div class="modal">
+                            <button class="modal-close" id="modalCloseBtn" onclick="document.getElementById('settingsModal')?.classList.remove('open');">&times;</button>
+                            <h2>⚙️ <span data-i18n="settingsTitle">Paramètres IA</span>
+                            </h2>
+                            <p class="desc" data-i18n="settingsDesc">Configurez vos clés API et choisissez le modèle par défaut.</p>
+                            <div class="field-group">
+                                <label data-i18n="openrouterKeyLabel">🔑 Clé API OpenRouter</label>
+                                <div class="hint" data-i18n="openrouterKeyHint">Pour utiliser DeepSeek, Llama 3.3 via OpenRouter.</div>
+                                    <input type="text" id="openrouterApiKeyInput" placeholder="sk-or-v1-...">
+                                    <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
+                                        <button class="btn btn-secondary" id="verifyORKeyBtn">🔍 <span data-i18n="verifyBtn">Vérifier</span>
+                                        </button>
+                                        <span id="verifyORResult" class="verify-result">
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="field-group">
+                                    <label data-i18n="groqKeyLabel">⚡ Clé API Groq</label>
+                                    <div class="hint" data-i18n="groqKeyHint">Pour utiliser les modèles Groq (GPT OSS, Mixtral, DeepSeek).</div>
+                                        <input type="text" id="groqApiKeyInput" placeholder="gsk_...">
+                                        <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
+                                            <button class="btn btn-secondary" id="verifyGroqKeyBtn">🔍 <span data-i18n="verifyBtn">Vérifier</span>
+                                            </button>
+                                            <span id="verifyGroqResult" class="verify-result">
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="field-group">
+                                        <label data-i18n="geminiKeyLabel">✦ Clé API Google Gemini</label>
+                                        <div class="hint" data-i18n="geminiKeyHint">Pour utiliser Gemini 2.0 Flash / 2.5 Pro (gratuit).</div>
+                                            <input type="text" id="geminiApiKeyInput" placeholder="AIza...">
+                                            <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
+                                                <button class="btn btn-secondary" id="verifyGeminiKeyBtn">🔍 <span data-i18n="verifyBtn">Vérifier</span>
+                                                </button>
+                                                <span id="verifyGeminiResult" class="verify-result">
+                                                </span>
+                                            </div>
+                                        </div>
+                                            <div class="model-selector admin-only">
+                                            <div class="model-group-title" data-i18n="modelSelection">Modèle à utiliser</div>
+                                                <label>
+                                                <input type="radio" name="modelChoice" value="auto" checked>
+                                                <span data-i18n="modelAuto">☑ Auto (Gemini → Groq → OpenRouter)</span>
+                                                </label>
+                                                <label>
+                                                <input type="radio" name="modelChoice" value="gemini-flash">
+                                                <span data-i18n="modelGeminiFlash">☐ Gemini 2.0 Flash</span>
+                                                </label>
+                                                <label>
+                                                <input type="radio" name="modelChoice" value="gemini-pro">
+                                                <span data-i18n="modelGeminiPro">☐ Gemini 2.5 Pro</span>
+                                                </label>
+                                                <label>
+                                                <input type="radio" name="modelChoice" value="deepseek-v3">
+                                                <span data-i18n="modelV3">☐ DeepSeek V3 (OpenRouter)</span>
+                                                </label>
+                                                <label>
+                                                <input type="radio" name="modelChoice" value="deepseek-r1">
+                                                <span data-i18n="modelR1">☐ DeepSeek R1 (OpenRouter)</span>
+                                                </label>
+                                                <label>
+                                                <input type="radio" name="modelChoice" value="llama3.3">
+                                                <span data-i18n="modelLlama">☐ Llama 3.3 70B (OpenRouter)</span>
+                                                </label>
+                                                <label>
+<input type="radio" name="modelChoice" value="groq-70b"> <span data-i18n="modelGroq70b">☐ Llama 3.3 70B (Groq)</span>
+                                                </label>
+                                                
+                                                <label>
+                                                <input type="radio" name="modelChoice" value="or-nemotron-nano-free">
+                                                <span data-i18n="modelNemotronNanoFree">☐ Nemotron 3 Nano 30B (OpenRouter free)</span>
+                                                </label>
+                                                <label>
+                                                <input type="radio" name="modelChoice" value="or-gemma4-free">
+                                                <span data-i18n="modelGemma4Free">☐ Gemma 4 31B (OpenRouter free)</span>
+                                                </label>
+                                                <label>
+                                                <input type="radio" name="modelChoice" value="or-gptoss20b-free">
+                                                <span data-i18n="modelGptOss20bFree">☐ GPT OSS 20B (OpenRouter free)</span>
+                                                </label>
+                                                <label>
+                                                <input type="radio" name="modelChoice" value="or-ling3-free">
+                                                <span data-i18n="modelLing3Free">☐ Ling 3.0 Flash (OpenRouter free)</span>
+                                                </label>
+                                                <label>
+                                                <input type="radio" name="modelChoice" value="or-nemotron-super-free">
+                                                <span data-i18n="modelNemotronSuperFree">☐ Nemotron 3 Super 120B (OpenRouter free)</span>
+                                                </label>
+                                            </div>
+                                            <div class="field-group" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+                                                <label>📧 <span data-i18n="emailjsLabel">EmailJS — Envoi d'invitations</span>
+                                                </label>
+                                                <div class="hint" data-i18n="emailjsHint">Créez un compte gratuit sur emailjs.com → connectez votre email → copiez vos clés ici.</div>
+                                                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                                                        <div>
+                                                            <label style="font-size:0.75rem;">Public Key</label>
+                                                            <input type="text" id="emailjsPublicKey" placeholder="ex: xxxxxxxxxxxxxxx" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;">
+                                                        </div>
+                                                        <div>
+                                                            <label style="font-size:0.75rem;">Service ID</label>
+                                                            <input type="text" id="emailjsServiceId" placeholder="service_xxxxxxx" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;">
+                                                        </div>
+                                                        <div>
+                                                            <label style="font-size:0.75rem;">Template ID</label>
+                                                            <input type="text" id="emailjsTemplateId" placeholder="template_xxxxxxx" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;">
+                                                        </div>
+                                                        <div>
+                                                            <label style="font-size:0.75rem;">Clé API (privée)</label>
+                                                            <input type="password" id="emailjsApiKey" placeholder="Pour créer le template" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;">
+                                                        </div>
+                                                        <div style="display:flex;align-items:flex-end;gap:4px;">
+                                                            <button class="btn btn-secondary" onclick="testEmailJS()" style="font-size:11px;">🔍 Tester</button>
+                                                            <button class="btn btn-secondary" onclick="createEmailJSTemplate()" style="font-size:11px;">⚙️ Créer le template</button>
+                                                            <span id="emailjsTestResult" style="font-size:0.75rem;margin-left:4px;">
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="field-group" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+                                                    <label>
+                                                    <i class="fas fa-adjust">
+                                                    </i>
+                                                    <span data-i18n="compatLabel">Mode icônes</span>
+                                                    </label>
+                                                    <div class="hint" data-i18n="compatHint">Détecte automatiquement si vos icônes s'affichent correctement et bascule vers une version compatible si nécessaire.</div>
+                                                        <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
+                                                            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+                                                            <input type="radio" name="compatChoice" value="auto" checked>
+                                                            <span data-i18n="compatAuto">Auto (recommandé)</span>
+                                                            </label>
+                                                            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+                                                            <input type="radio" name="compatChoice" value="modern">
+                                                            <span data-i18n="compatModern">Moderne</span>
+                                                            </label>
+                                                            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+                                                            <input type="radio" name="compatChoice" value="compat">
+                                                            <span data-i18n="compatCompat">Compatible</span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="free-mode-row">
+                                                        <label class="free-mode-label"><input type="checkbox" id="freeModeToggle"> 🔓 Mode libre (tous sujets)</label>
+                                                    </div>
+                                                    <div class="free-mode-row">
+                                                        <label class="free-mode-label"><input type="checkbox" id="axonToggle"> 🧠 AXON Intelligence (mémoire évolutive)</label>
+                                                    </div>
+                                                    <div class="btn-row">
+                                                        <button class="btn btn-primary" id="modalSaveBtn">
+                                                        <i class="fas fa-save">
+                                                        </i>
+                                                        <span data-i18n="saveBtn">Enregistrer</span>
+                                                        </button>
+                                                        <button class="btn btn-danger" id="modalClearBtn">🗑 <span data-i18n="clearBtn">Effacer tout</span>
+                                                        </button>
+                                                        <button class="btn btn-secondary" id="modalCancelBtn" onclick="document.getElementById('settingsModal')?.classList.remove('open');">
+                                                        <span data-i18n="cancelBtn">Annuler</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-overlay" id="changePwdModal">
+                                                <div class="modal" style="max-width:400px;">
+                                                    <button class="modal-close" onclick="document.getElementById('changePwdModal').classList.remove('open')">&times;</button>
+                                                    <h2 style="margin:0 0 16px;font-size:1.1rem;">🔑 Changer mot de passe</h2>
+                                                    <div class="field-group">
+                                                        <label>Ancien mot de passe</label>
+                                                        <input type="password" id="oldPassword" placeholder="••••••••" style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--text);margin-bottom:14px;box-sizing:border-box;">
+                                                    </div>
+                                                    <div class="field-group">
+                                                        <label>Nouveau mot de passe</label>
+                                                        <input type="password" id="newPassword1" placeholder="••••••••" style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--text);margin-bottom:14px;box-sizing:border-box;">
+                                                    </div>
+                                                    <div class="field-group">
+                                                        <label>Confirmer le nouveau mot de passe</label>
+                                                        <input type="password" id="newPassword2" placeholder="••••••••" style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:10px;font-size:.9rem;background:var(--bg);color:var(--text);margin-bottom:14px;box-sizing:border-box;">
+                                                    </div>
+                                                    <div class="result-msg" id="changePwdResult" style="display:none;padding:8px 12px;border-radius:8px;font-size:.82rem;margin-bottom:12px;">
+                                                    </div>
+                                                    <button class="btn btn-primary" onclick="changePassword()" style="width:100%;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#0077CC,#00B4D8);color:#fff;font-weight:600;cursor:pointer;">💾 Changer le mot de passe</button>
+                                                </div>
+                                            </div>
+                                            <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js">
+                                            </script>
+                                            <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js">
+                                            </script>
+                                            <script src="https://unpkg.com/@supabase/supabase-js@2">
+                                            </script>
+                                            <script src="js/supabase.js?v=20260707">
+                                            </script>
+                                            <script src="js/compat.js?v=2">
+                                            </script>
+                                            <script src="js/shared.v2.js?v=1.9.9">
+                                            </script>
+                                            <script src="js/challenges.js?v=1.8.7">
+                                            </script>
+                                        </body>
+                                    </html>

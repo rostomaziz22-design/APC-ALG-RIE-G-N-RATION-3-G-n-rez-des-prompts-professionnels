@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="skyV" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0e2a"/><stop offset="100%" stop-color="#0a1a1a"/>
+    </linearGradient>
+    <radialGradient id="sunRays" cx="50%" cy="20%" r="70%">
+      <stop offset="0%" stop-color="#ffd700" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadowFil"><feDropShadow dx="2" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.5"/></filter>
+  </defs>
+  <rect width="800" height="500" fill="url(#skyV)"/>
+  <rect width="800" height="500" fill="url(#sunRays)"/>
+  <!-- Étoiles -->
+  <circle cx="80" cy="50" r="1.5" fill="#fff" opacity="0.8"/>
+  <circle cx="300" cy="30" r="1" fill="#fff" opacity="0.6"/>
+  <circle cx="550" cy="70" r="1.5" fill="#fff" opacity="0.7"/>
+  <circle cx="720" cy="40" r="1" fill="#fff" opacity="0.5"/>
+  <circle cx="150" cy="130" r="1" fill="#fff" opacity="0.6"/>
+  <circle cx="650" cy="90" r="1.2" fill="#fff" opacity="0.7"/>
+  <!-- Rayons lumineux depuis haut -->
+  <line x1="400" y1="0" x2="100" y2="300" stroke="rgba(255,215,0,0.08)" stroke-width="80"/>
+  <line x1="400" y1="0" x2="700" y2="300" stroke="rgba(255,215,0,0.08)" stroke-width="80"/>
+  <!-- Terre intacte -->
+  <ellipse cx="400" cy="500" rx="350" ry="280" fill="#0f6a8a"/>
+  <ellipse cx="400" cy="500" rx="350" ry="280" fill="#1c8fb8" opacity="0.4"/>
+  <ellipse cx="280" cy="300" rx="70" ry="35" fill="#1a7a48" transform="rotate(-10 280 300)"/>
+  <ellipse cx="450" cy="330" rx="60" ry="30" fill="#1a7a48" transform="rotate(15 450 330)"/>
+  <!-- Bouclier hexagonal brillant -->
+  <polygon points="400,140 490,185 490,275 400,320 310,275 310,185" fill="none" stroke="#4de3ff" stroke-width="3" opacity="0.8"/>
+  <polygon points="400,150 475,190 475,270 400,305 325,270 325,190" fill="none" stroke="#4de3ff" stroke-width="1.5" opacity="0.4"/>
+  <polygon points="400,160 460,195 460,265 400,290 340,265 340,195" fill="none" stroke="#7aedff" stroke-width="1" opacity="0.3"/>
+  <!-- Satellites -->
+  <circle cx="320" cy="175" r="4" fill="#fff"/><rect x="317" y="168" width="6" height="14" rx="2" fill="#4de3ff" opacity="0.6"/>
+  <circle cx="480" cy="185" r="4" fill="#fff"/><rect x="477" y="178" width="6" height="14" rx="2" fill="#4de3ff" opacity="0.6"/>
+  <!-- Météorite détruite (éclats) -->
+  <polygon points="520,80 530,60 545,70 535,95" fill="#a0522d" transform="rotate(30 530 75)" opacity="0.6"/>
+  <polygon points="470,60 478,45 490,55 482,70" fill="#a0522d" transform="rotate(-20 480 55)" opacity="0.5"/>
+  <polygon points="550,110 558,98 568,110 558,120" fill="#8b4513" transform="rotate(45 555 110)" opacity="0.4"/>
+  <polygon points="450,95 458,85 465,98 456,105" fill="#a0522d" transform="rotate(-30 458 95)" opacity="0.4"/>
+  <!-- Particules étincelles -->
+  <circle cx="500" cy="70" r="2" fill="#ffd700" opacity="0.8"/>
+  <circle cx="535" cy="55" r="1.5" fill="#ffd700" opacity="0.6"/>
+  <circle cx="465" cy="80" r="1" fill="#ffd700" opacity="0.7"/>
+  <circle cx="555" cy="100" r="1.5" fill="#ffa500" opacity="0.5"/>
+  <!-- Bandeau VICTOIRE -->
+  <rect x="200" y="350" width="400" height="70" rx="10" fill="rgba(0,0,0,0.8)" stroke="#ffd700" stroke-width="3"/>
+  <text x="400" y="385" font-family="Impact,sans-serif" font-size="36" fill="#ffd700" text-anchor="middle" font-weight="bold">VICTOIRE !</text>
+  <text x="400" y="408" font-family="Arial,sans-serif" font-size="14" fill="#dce6ff" text-anchor="middle">Bouclier orbital déployé avec succès</text>
+  <!-- Petite bulle en bas -->
+  <rect x="100" y="440" width="600" height="45" rx="8" fill="rgba(0,0,0,0.7)" stroke="#4de3ff" stroke-width="1"/>
+  <text x="400" y="460" font-family="Georgia,serif" font-size="14" fill="#4de3ff" text-anchor="middle">L'humanité est sauve. La Terre peut continuer à briller.</text>
+  <text x="400" y="476" font-family="Arial,sans-serif" font-size="11" fill="#aaa" text-anchor="middle">Mission accomplie, Commandant.</text>
+</svg>

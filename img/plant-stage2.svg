@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Young plant -->
+  <path d="M100 110 L100 55" stroke="#4a8e2a" stroke-width="3" stroke-linecap="round"/>
+  <path d="M98 110 L98 55" stroke="#6db84a" stroke-width="1.2" stroke-linecap="round" opacity="0.6"/>
+  <ellipse cx="80" cy="65" rx="16" ry="9" fill="#5aae3a" transform="rotate(-25 80 65)"/>
+  <ellipse cx="120" cy="65" rx="16" ry="9" fill="#5aae3a" transform="rotate(25 120 65)"/>
+  <ellipse cx="90" cy="50" rx="12" ry="7" fill="#7acc5a" transform="rotate(-15 90 50)"/>
+  <ellipse cx="110" cy="50" rx="12" ry="7" fill="#7acc5a" transform="rotate(15 110 50)"/>
+  <!-- Veins -->
+  <line x1="80" y1="65" x2="68" y2="60" stroke="#4a8e2a" stroke-width="0.8" opacity="0.5"/>
+  <line x1="120" y1="65" x2="132" y2="60" stroke="#4a8e2a" stroke-width="0.8" opacity="0.5"/>
+</svg>

@@ -1,0 +1,348 @@
+﻿<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+        <title>APC Algérie G3 · Assistant IA</title>
+        <link rel="stylesheet" href="css/style.css?v=20260715">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        <script>var l=localStorage.getItem('lang');if(l){document.documentElement.lang=l;if(l==='ar')document.documentElement.dir='rtl';}</script>
+    </head>
+    <body>
+        <script>if(localStorage.getItem('theme')!=='light')document.body.classList.add('dark');</script>
+        <div id="apcCompatBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(135deg,#E65100,#FF8F00);color:#fff;padding:10px 16px;text-align:center;font-size:13px;font-weight:500;box-shadow:0 2px 12px rgba(0,0,0,.3);align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;">
+            <i class="fas fa-exclamation-triangle" style="font-size:16px;">
+            </i>
+            <span>Mode de compatibilité activé pour votre navigateur. Certaines icônes peuvent être différentes.</span>
+            <button id="apcCompatBannerClose" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);color:#fff;padding:4px 14px;border-radius:14px;font-size:12px;cursor:pointer;">OK</button>
+        </div>
+        <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()">
+        </div>
+        <div class="drawer" id="drawer">
+            <div class="drawer-header">
+                <span class="drawer-title">☰ Menu</span>
+                <button class="btn-icon drawer-close" onclick="closeDrawer()">✕</button>
+            </div>
+            <div class="drawer-section">
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('index.html')">
+                <span data-i18n="tab_home">🏠 Accueil</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('generator.html')">
+                <span data-i18n="tab_generator">📝 Générateur de Prompts</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('assistant.html')">
+                <span data-i18n="tab_assistant">🤖 Assistant IA</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('from-doc.html')">
+                <span data-i18n="tab_fromdoc">📄 Document → Présentation</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('quiz.html')">
+                <span data-i18n="tab_quiz">🎯 Quiz</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('challenges.html')">
+                <span data-i18n="tab_challenge">🎮 Challenges</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('games.html')"><span data-i18n="tab_games">🎮 Jeux</span></button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('aide.html')">
+                <span data-i18n="tab_guide">📖 Guide complet</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('aide-cles-api.html')">
+                <span data-i18n="tab_help">❓ Aide Clés API</span>
+                </button>
+                <button class="drawer-nav-btn" onclick="closeDrawer();goTo('about.html')">
+                <span data-i18n="tab_about">ℹ️ À propos</span>
+                </button>
+                <button class="drawer-nav-btn nav-admin-link" onclick="closeDrawer();goTo('admin.html');closeDrawer();" style="display:none">
+                <span data-i18n="tab_admin">⚙️ Admin</span>
+                </button>
+            </div>
+            <div class="drawer-divider">
+            </div>
+            <div class="drawer-section">
+                <button id="settingsBtn" class="drawer-nav-btn" onclick="loadKeysIntoModal();document.getElementById('settingsModal')?.classList.add('open');closeDrawer();">⚙️ <span data-i18n="settingsLabel">Paramètres</span>
+                <span id="apiBadge" class="badge missing">●</span>
+                </button>
+                <button id="themeToggle" class="drawer-nav-btn" onclick="toggleTheme()">🌙 <span id="themeLabel">Mode sombre</span>
+                </button>
+                <div class="drawer-lang-row">
+                    <span style="font-size:12px;color:var(--text-muted);margin-bottom:4px;display:block;">Langue :</span>
+                    <div style="display:flex;gap:4px;">
+                        <button id="btnFR" class="btn-icon active-lang" onclick="setLang('fr')">🇫🇷 FR</button>
+                        <button id="btnAR" class="btn-icon" onclick="setLang('ar')">🇩🇿 AR</button>
+                        <button id="btnEN" class="btn-icon" onclick="setLang('en')">🇬🇧 EN</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="hero">
+                <div class="hero-ministere" data-i18n="ministere">Ministère de la Formation et de l'Enseignement Professionnels</div>
+                    <img class="hero-logo-ministere" src="https://mvet.gov.dz/wp-content/uploads/2024/03/logo-mfep-1.png" alt="Ministère de la Formation et de l'Enseignement Professionnels" title="Ministère de la Formation et de l'Enseignement Professionnels">
+                    <div class="top-bar">
+                        <button class="btn-icon menu-btn" onclick="toggleDrawer()">☰</button>
+                        <span class="auth-state">
+                        </span>
+                    </div>
+                    <div class="hero-title-row">
+                        <div class="hero-text-group">
+                            <h1>APC ALGÉRIE <span>GÉNÉRATION 3</span>
+                            </h1>
+                            <div class="hero-sub" data-i18n="headerSub">Formateur 2.0<br>Le formateur augmenté par l'IA<br>Assistant intelligent de conception pédagogique selon l'Approche Par Compétences (APC).</div>
+                            </div>
+                            <div class="hero-flag-video">
+                                <video src="https://videos.pexels.com/video-files/13859860/13859860-hd_1280_720_25fps.mp4" autoplay loop muted playsinline>
+                                </video>
+                            </div>
+                        </div>
+                        <div class="hero-desc" data-i18n="headerDesc">Une IA pédagogique qui génère automatiquement des prompts professionnels, des scénarios pédagogiques, des présentations, des évaluations, des activités de gamification et des ressources conformes à l'Approche Par Compétences (APC) Algérie .</div>
+                            <div class="nav-links">
+                                <a class="nav-link" onclick="goTo('index.html')" data-i18n="tab_home">🏠 Accueil</a>
+                                <a class="nav-link" onclick="goTo('generator.html')" data-i18n="tab_generator">📝 Générateur de Prompts</a>
+                                <a class="nav-link" onclick="goTo('assistant.html')" data-i18n="tab_assistant">🤖 Assistant IA</a>
+                                <a class="nav-link" onclick="goTo('from-doc.html')" data-i18n="tab_fromdoc">📄 Document → Présentation</a>
+                                <a class="nav-link" onclick="goTo('quiz.html')" data-i18n="tab_quiz">🎯 Quiz</a>
+                                <a class="nav-link" onclick="goTo('challenges.html')" data-i18n="tab_challenge">🎮 Challenges</a>
+                                <a class="nav-link" onclick="goTo('games.html')" data-i18n="tab_games">🎮 Jeux</a>
+                                <a class="nav-link" onclick="goTo('aide.html')" data-i18n="tab_guide">📖 Guide complet</a>
+                                <a class="nav-link" onclick="goTo('aide-cles-api.html')" data-i18n="tab_help">❓ Aide Clés API</a>
+                                <a class="nav-link" onclick="goTo('about.html')" data-i18n="tab_about">ℹ️ À propos</a>
+                                <a class="nav-link" onclick="goTo('admin.html')" style="display:none" data-i18n="tab_admin">⚙️ Admin</a>
+                            </div>
+                        </div>
+                        <div class="ai-layout">
+                            <div class="ai-sidebar-overlay" id="aiSidebarOverlay" onclick="document.querySelector('.ai-sidebar')?.classList.remove('open');this.classList.remove('show');">
+                            </div>
+                            <div class="ai-sidebar">
+                                <button class="new-chat-btn" id="newChat" data-i18n="newChat">＋ Nouvelle conversation</button>
+                                <div style="margin-bottom:14px;">
+                                    <h3 data-i18n="quickAPC">⚡ Raccourcis APC</h3>
+                                    <div class="apc-quick-btns" id="quickBtns">
+                                    </div>
+                                </div>
+                                <h3 data-i18n="historyLabel">📂 Historique</h3>
+                                <button class="clear-all-btn" onclick="clearAllHistory()" data-i18n="clearAllHistory">🗑 Tout effacer</button>
+                                <div id="historyList">
+                                </div>
+                            </div>
+                            <div class="ai-main">
+                                <div class="ai-toolbar">
+                                    <button class="btn-icon" onclick="var s=document.querySelector('.ai-sidebar');var o=document.getElementById('aiSidebarOverlay');s.classList.toggle('open');if(s.classList.contains('open')){o.classList.add('show');}else{o.classList.remove('show');}" style="font-size:18px;padding:4px 8px;display:none;" id="aiSidebarToggle">☰</button>
+                                    <span class="admin-only ai-provider-section">
+                                    <label data-i18n="providerLabel">Fournisseur IA :</label>
+                                    <select id="providerSelect" class="ai-select" onchange="onProviderChange()">
+                                        <option value="auto">🔄 Auto (Gemini → Groq → OpenRouter)</option>
+                                        <option value="groq">⚡ Groq</option>
+                                        <option value="openrouter">🔀 OpenRouter</option>
+                                        <option value="openai">🤖 OpenAI (GPT)</option>
+                                        <option value="anthropic">⚡ Anthropic Claude</option>
+                                        <option value="gemini">✦ Google Gemini</option>
+                                        <option value="ollama">🏠 Ollama (local)</option>
+                                    </select>
+                                    <select id="modelSelect" class="ai-select" style="min-width:160px;">
+                                    </select>
+                                    <span id="providerBadge" class="provider-badge">AUTO</span>
+                                    <span id="pedagogyBadge" class="pedagogy-badge">📘 APC</span>
+                                    </span>
+                                    <label class="web-search-toggle">
+                                    <input type="checkbox" id="webSearchToggle"> 🌐 Recherche web</label>
+                                    <button onclick="saveCurrentConversation()" class="btn btn-secondary" style="padding:6px 12px;font-size:11px;">💾 Sauvegarder</button>
+                                    <button id="gammaGenSlidesBtn" onclick="generateGammaFromAssistant()" class="btn btn-secondary" style="padding:6px 12px;font-size:11px;">🎨 <span id="presoBtnLabel">Générer présentation</span>
+                                    </button>
+                                    <button onclick="generateQuizFromAssistant()" class="btn btn-secondary" style="padding:6px 12px;font-size:11px;">🎯 Générer Quiz</button>
+                                    <button onclick="window.location.href='challenges.html'" class="btn btn-secondary" style="padding:6px 12px;font-size:11px;background:linear-gradient(135deg,#E65100,#FF8F00);color:#fff;border:none;">🎮 Challenge</button>
+                                </div>
+                                <div id="aiMessages" class="ai-messages">
+                                    <div class="empty-chat" id="emptyChat">
+                                        <div class="icon">🤖</div>
+                                            <p data-i18n="emptyChatMsg">Posez une question ou utilisez un raccourci APC pour commencer.</p>
+                                        </div>
+                                    </div>
+                                    <div class="ai-input-area">
+                                        <div id="docChips" class="doc-chips" style="display:none"></div>
+                                        <div class="ai-input-wrap">
+                                            <button id="docAttachBtn" class="btn-attach" title="📎 Joindre un fichier">📎</button>
+                                            <input type="file" id="docFileInput" multiple accept=".pdf,.docx,.xlsx,.csv,.txt,.json,.jpg,.jpeg,.png,.webp,.mp3,.wav,.m4a" hidden>
+                                            <textarea id="aiInput" rows="1" data-i18n-placeholder="aiInputPlaceholder" placeholder="Écrivez votre message..." onkeydown="handleInputKey(event)" oninput="autoResize(this)">
+                                            </textarea>
+                                            <button id="micBtn" class="btn-mic" onclick="toggleMic()" title="🎤 Dicter">🎤</button>
+                                            <button id="stopBtn" class="btn-stop" onclick="stopGeneration()">⏹ Stop</button>
+                                            <button id="sendBtn" class="btn-send" onclick="sendMessage()">➤</button>
+                                        </div>
+                                        <div style="display:flex;gap:6px;align-items:center;margin-top:4px;">
+                                            <button id="ttsToggle" class="btn-tts" onclick="toggleTTS()" title="Lecture vocale des réponses">🔇</button>
+                                            <span id="voiceStatus" style="font-size:11px;color:var(--text-muted);">
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <footer>
+                                <span data-i18n="footerText">APC Algérie GÉNÉRATION 3 — Formateur 2.0</span>
+                            </footer>
+                        </div>
+                        <div class="modal-overlay" id="settingsModal">
+                            <div class="modal">
+                                <button class="modal-close" id="modalCloseBtn" onclick="document.getElementById('settingsModal')?.classList.remove('open');">&times;</button>
+                                <h2>⚙️ <span data-i18n="settingsTitle">Paramètres IA</span>
+                                </h2>
+                                <p class="desc" data-i18n="settingsDesc">Configurez vos clés API et choisissez le modèle par défaut.</p>
+                                <div class="field-group">
+                                    <label data-i18n="openrouterKeyLabel">🔑 Clé API OpenRouter</label>
+                                    <div class="hint" data-i18n="openrouterKeyHint">Pour utiliser DeepSeek, Llama 3.3 via OpenRouter.</div>
+                                        <input type="text" id="openrouterApiKeyInput" placeholder="sk-or-v1-...">
+                                        <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
+                                            <button class="btn btn-secondary" id="verifyORKeyBtn">🔍 <span data-i18n="verifyBtn">Vérifier</span>
+                                            </button>
+                                            <span id="verifyORResult" class="verify-result">
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="field-group">
+                                        <label data-i18n="groqKeyLabel">⚡ Clé API Groq</label>
+                                        <div class="hint" data-i18n="groqKeyHint">Pour utiliser les modèles Groq (GPT OSS, Mixtral, DeepSeek).</div>
+                                            <input type="text" id="groqApiKeyInput" placeholder="gsk_...">
+                                            <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
+                                                <button class="btn btn-secondary" id="verifyGroqKeyBtn">🔍 <span data-i18n="verifyBtn">Vérifier</span>
+                                                </button>
+                                                <span id="verifyGroqResult" class="verify-result">
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="field-group">
+                                            <label data-i18n="geminiKeyLabel">✦ Clé API Google Gemini</label>
+                                            <div class="hint" data-i18n="geminiKeyHint">Pour utiliser Gemini 1.5 Flash/Pro (gratuit).</div>
+                                                <input type="text" id="geminiApiKeyInput" placeholder="AIza...">
+                                                <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
+                                                    <button class="btn btn-secondary" id="verifyGeminiKeyBtn">🔍 <span data-i18n="verifyBtn">Vérifier</span>
+                                                    </button>
+                                                    <span id="verifyGeminiResult" class="verify-result">
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="model-selector admin-only">
+                                                <div class="model-group-title" data-i18n="modelSelection">Modèle à utiliser</div>
+                                                    <label>
+                                                    <input type="radio" name="modelChoice" value="auto" checked>
+                                                    <span data-i18n="modelAuto">☑ Auto (Gemini → Groq → OpenRouter)</span>
+                                                    </label>
+                                                    <label>
+                                                    <input type="radio" name="modelChoice" value="gemini-flash">
+                                                    <span data-i18n="modelGeminiFlash">☐ Gemini 2.0 Flash</span>
+                                                    </label>
+                                                    <label>
+                                                    <input type="radio" name="modelChoice" value="gemini-pro">
+                                                    <span data-i18n="modelGeminiPro">☐ Gemini 2.5 Pro</span>
+                                                    </label>
+                                                    <label>
+                                                    <input type="radio" name="modelChoice" value="deepseek-v3">
+                                                    <span data-i18n="modelV3">☐ DeepSeek V3 (OpenRouter)</span>
+                                                    </label>
+                                                    <label>
+                                                    <input type="radio" name="modelChoice" value="deepseek-r1">
+                                                    <span data-i18n="modelR1">☐ DeepSeek R1 (OpenRouter)</span>
+                                                    </label>
+                                                    <label>
+                                                    <input type="radio" name="modelChoice" value="llama3.3">
+                                                    <span data-i18n="modelLlama">☐ Llama 3.3 70B (OpenRouter)</span>
+                                                    </label>
+                                                    <label>
+<input type="radio" name="modelChoice" value="groq-70b"> <span data-i18n="modelGroq70b">☐ Llama 3.3 70B (Groq)</span>
+                                                    </label>
+                                                    
+                                                    <label>
+                                                    <input type="radio" name="modelChoice" value="or-nemotron-nano-free">
+                                                    <span data-i18n="modelNemotronNanoFree">☐ Nemotron 3 Nano 30B (OpenRouter free)</span>
+                                                    </label>
+                                                    <label>
+                                                    <input type="radio" name="modelChoice" value="or-gemma4-free">
+                                                    <span data-i18n="modelGemma4Free">☐ Gemma 4 31B (OpenRouter free)</span>
+                                                    </label>
+                                                    <label>
+                                                    <input type="radio" name="modelChoice" value="or-gptoss20b-free">
+                                                    <span data-i18n="modelGptOss20bFree">☐ GPT OSS 20B (OpenRouter free)</span>
+                                                    </label>
+                                                    <label>
+                                                    <input type="radio" name="modelChoice" value="or-ling3-free">
+                                                    <span data-i18n="modelLing3Free">☐ Ling 3.0 Flash (OpenRouter free)</span>
+                                                    </label>
+                                                    <label>
+                                                    <input type="radio" name="modelChoice" value="or-nemotron-super-free">
+                                                    <span data-i18n="modelNemotronSuperFree">☐ Nemotron 3 Super 120B (OpenRouter free)</span>
+                                                    </label>
+                                                </div>
+                                                <div class="free-mode-row">
+                                                    <label class="free-mode-label"><input type="checkbox" id="freeModeToggle"> 🔓 Mode libre (tous sujets)</label>
+                                                </div>
+                                                <div class="free-mode-row">
+                                                    <label class="free-mode-label"><input type="checkbox" id="axonToggle"> 🧠 AXON Intelligence (mémoire évolutive)</label>
+                                                </div>
+                                                <div class="btn-row">
+                                                    <button class="btn btn-primary" id="modalSaveBtn">💾 <span data-i18n="saveBtn">Enregistrer</span>
+                                                    </button>
+                                                    <button class="btn btn-danger" id="modalClearBtn">🗑 <span data-i18n="clearBtn">Effacer tout</span>
+                                                    </button>
+                                                    <button class="btn btn-secondary" id="modalCancelBtn" onclick="document.getElementById('settingsModal')?.classList.remove('open');">
+                                                    <span data-i18n="cancelBtn">Annuler</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-overlay preso-modal" id="gammaModal">
+                                            <div class="modal">
+                                                <button class="modal-close" id="gammaModalClose">&times;</button>
+                                                <h2>🎨 Présentation interactive</h2>
+                                                <div style="display:flex; gap:6px; flex-wrap:wrap; margin:8px 0 4px;" id="gammaThemeBar">
+                                                    <span style="font-size:11px; font-weight:600; color:var(--text-muted); align-self:center;">🎨 Thème :</span>
+                                                </div>
+                                                <div id="gammaContent">
+                                                    <div class="slide-container" id="gammaSlides">
+                                                    </div>
+                                                    <div class="preso-nav">
+                                                        <button class="btn btn-secondary" id="gammaPrev">◀ Précédent</button>
+                                                        <span class="preso-counter" id="gammaCounter">1 / 0</span>
+                                                        <button class="btn btn-secondary" id="gammaNext">Suivant ▶</button>
+                                                    </div>
+                                                    <div class="preso-export">
+                                                        <button class="btn btn-secondary" onclick="exportGammaPDF()">📄 Exporter PDF</button>
+                                                        <button class="btn btn-secondary" onclick="exportGammaHTML()">📄 Exporter HTML (slides)</button>
+                                                        <button class="btn btn-secondary" onclick="exportGammaPPTX()">📊 Exporter PPTX</button>
+                                                        <button class="btn btn-secondary" onclick="regenerateAllImages()" style="font-size:12px;">🔄 Régénérer images</button>
+                                                        <button class="btn btn-secondary" onclick="saveGammaPresentation()">💾 <span data-i18n="savePresentationBtn">Sauvegarder la présentation</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="gamma-image-search" id="gammaImageSearch">
+                                                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                                                            <span style="font-weight:600;font-size:13px;">🌐 Rechercher une image sur le web</span>
+                                                            <button class="btn-icon-sm" onclick="document.getElementById('gammaImageSearch').style.display='none'" style="position:static;margin-left:auto;background:var(--border);color:var(--text);">✕</button>
+                                                        </div>
+                                                        <div style="display:flex;gap:8px;">
+                                                            <input type="text" id="gammaSearchInput" placeholder="Rechercher une image..." style="margin-bottom:0;">
+                                                            <button class="btn btn-secondary" id="gammaSearchBtn" style="white-space:nowrap;">🔍 Chercher</button>
+                                                        </div>
+                                                        <div class="gamma-search-results" id="gammaSearchResults">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js">
+                                        </script>
+                                        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js">
+                                        </script>
+                                        <script src="https://unpkg.com/@supabase/supabase-js@2">
+                                        </script>
+                                        <script src="js/supabase.js?v=20260707">
+                                        </script>
+                                        <script src="js/compat.js?v=2">
+                                        </script>
+                                        <script src="js/shared.v2.js?v=1.9.9">
+                                        </script>
+                                        <script src="js/apc-glossary.js?v=1.8.7">
+                                        </script>
+                                        <script src="js/assistant.js?v=1.9.9">
+                                        </script>
+                                    </body>
+                                </html>

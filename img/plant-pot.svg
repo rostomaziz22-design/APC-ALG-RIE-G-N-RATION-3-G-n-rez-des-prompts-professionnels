@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240">
+  <defs>
+    <linearGradient id="potGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#c67b4d"/>
+      <stop offset="50%" stop-color="#a0592e"/>
+      <stop offset="100%" stop-color="#7a3f1a"/>
+    </linearGradient>
+    <linearGradient id="soilGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5a3a1a"/>
+      <stop offset="100%" stop-color="#3d2610"/>
+    </linearGradient>
+  </defs>
+  <!-- Pot body -->
+  <path d="M40 80 L50 220 Q50 230 60 230 L140 230 Q150 230 150 220 L160 80 Z" fill="url(#potGrad)" stroke="#5a3018" stroke-width="2"/>
+  <!-- Pot rim -->
+  <rect x="30" y="70" width="140" height="18" rx="4" fill="#d4895a" stroke="#5a3018" stroke-width="2"/>
+  <!-- Soil -->
+  <ellipse cx="100" cy="80" rx="58" ry="12" fill="url(#soilGrad)"/>
+  <!-- Soil dots -->
+  <circle cx="80" cy="82" r="2" fill="#4a2e12" opacity="0.5"/>
+  <circle cx="110" cy="78" r="1.5" fill="#6a4a22" opacity="0.4"/>
+  <circle cx="95" cy="84" r="1.8" fill="#3d2610" opacity="0.5"/>
+  <!-- Pot base shadow -->
+  <ellipse cx="100" cy="232" rx="52" ry="4" fill="rgba(0,0,0,0.2)"/>
+</svg>

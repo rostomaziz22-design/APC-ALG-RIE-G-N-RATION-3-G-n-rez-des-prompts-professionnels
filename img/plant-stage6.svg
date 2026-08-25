@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300">
+  <defs>
+    <radialGradient id="flowerGrad6" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff2b0"/>
+      <stop offset="40%" stop-color="#ffdd44"/>
+      <stop offset="100%" stop-color="#ff9900"/>
+    </radialGradient>
+  </defs>
+  <!-- Stem -->
+  <path d="M100 180 L100 10" stroke="#3d6a1a" stroke-width="5" stroke-linecap="round"/>
+  <!-- Leaves -->
+  <ellipse cx="55" cy="120" rx="25" ry="13" fill="#3d8a1a" transform="rotate(-35 55 120)"/>
+  <ellipse cx="145" cy="120" rx="25" ry="13" fill="#3d8a1a" transform="rotate(35 145 120)"/>
+  <ellipse cx="62" cy="75" rx="20" ry="11" fill="#4a9e22" transform="rotate(-25 62 75)"/>
+  <ellipse cx="138" cy="75" rx="20" ry="11" fill="#4a9e22" transform="rotate(25 138 75)"/>
+  <!-- Large petals -->
+  <ellipse cx="100" cy="4" rx="14" ry="22" fill="#ff88bb" transform="rotate(0 100 15)"/>
+  <ellipse cx="100" cy="4" rx="14" ry="22" fill="#ff66aa" transform="rotate(45 100 15)"/>
+  <ellipse cx="100" cy="4" rx="14" ry="22" fill="#ff88bb" transform="rotate(90 100 15)"/>
+  <ellipse cx="100" cy="4" rx="14" ry="22" fill="#ff66aa" transform="rotate(135 100 15)"/>
+  <ellipse cx="100" cy="4" rx="14" ry="22" fill="#ff88bb" transform="rotate(180 100 15)"/>
+  <ellipse cx="100" cy="4" rx="14" ry="22" fill="#ff66aa" transform="rotate(225 100 15)"/>
+  <ellipse cx="100" cy="4" rx="14" ry="22" fill="#ff88bb" transform="rotate(270 100 15)"/>
+  <ellipse cx="100" cy="4" rx="14" ry="22" fill="#ff66aa" transform="rotate(315 100 15)"/>
+  <!-- Center -->
+  <circle cx="100" cy="15" r="10" fill="url(#flowerGrad6)"/>
+  <circle cx="100" cy="15" r="5" fill="#ffcc44" opacity="0.6"/>
+</svg>

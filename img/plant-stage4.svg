@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240">
+  <!-- Adult plant -->
+  <path d="M100 140 L100 20" stroke="#3d6a1a" stroke-width="4" stroke-linecap="round"/>
+  <path d="M98 140 L98 20" stroke="#5a9e2a" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+  <!-- Lower leaves -->
+  <ellipse cx="65" cy="80" rx="22" ry="12" fill="#3d8a1a" transform="rotate(-35 65 80)"/>
+  <ellipse cx="135" cy="80" rx="22" ry="12" fill="#3d8a1a" transform="rotate(35 135 80)"/>
+  <!-- Mid leaves -->
+  <ellipse cx="72" cy="50" rx="18" ry="10" fill="#4a9e22" transform="rotate(-25 72 50)"/>
+  <ellipse cx="128" cy="50" rx="18" ry="10" fill="#4a9e22" transform="rotate(25 128 50)"/>
+  <!-- Top leaves + bud -->
+  <ellipse cx="80" cy="25" rx="14" ry="8" fill="#5aae3a" transform="rotate(-15 80 25)"/>
+  <ellipse cx="120" cy="25" rx="14" ry="8" fill="#5aae3a" transform="rotate(15 120 25)"/>
+  <!-- Bud -->
+  <ellipse cx="100" cy="14" rx="8" ry="10" fill="#6bae4a" stroke="#5a9e3a" stroke-width="1"/>
+  <path d="M94 14 Q100 8 106 14" fill="none" stroke="#8ace5a" stroke-width="1.5"/>
+  <!-- Veins -->
+  <line x1="65" y1="80" x2="46" y2="72" stroke="#2d5a12" stroke-width="0.8" opacity="0.4"/>
+  <line x1="135" y1="80" x2="154" y2="72" stroke="#2d5a12" stroke-width="0.8" opacity="0.4"/>
+</svg>

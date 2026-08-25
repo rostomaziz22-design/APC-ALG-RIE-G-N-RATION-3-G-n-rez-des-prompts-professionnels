@@ -1,0 +1,1891 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title data-i18n="pageTitle">Challenge - Fais pousser ta plante</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --soil:#1a2a3a;--soil-wet:#0f2a3a;--soil-0:#0a1a08;--soil-1:#0f2610;--soil-2:#1a3a18;
+  --panel:#0f1a0ecc;--line:#2a5a32;--green:#4dff88;--green-dim:#1a6b2a;
+  --leaf:#4dff88;--leaf-dim:#1a6b2a;--leaf-light:#8affc4;--flower-gold:#ffd644;
+  --amber:#ffd644;--red:#ff3b52;--violet:#a06bff;--flower:#ff88cc;
+  --text:#dce6dc;--text-dim:#7fa37f;
+  --font-d:'Orbitron','Segoe UI',sans-serif;--font-b:'Rajdhani','Segoe UI',sans-serif;
+}
+@font-face{font-family:'Orbitron';src:local('Orbitron');}
+@font-face{font-family:'Rajdhani';src:local('Rajdhani');}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;background:var(--soil-0);overflow:hidden;color:var(--text);font-family:var(--font-b);touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+#app{position:relative;width:100%;height:100vh;min-height:560px;overflow:hidden;}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block;}
+#fxCanvas{pointer-events:none;}
+#shakeLayer{position:absolute;inset:0;}
+.screen{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .5s ease;z-index:5;}
+.screen.active{opacity:1;pointer-events:auto;}
+h1,h2,h3{font-family:var(--font-d);letter-spacing:2px;font-weight:700;}
+.eyebrow{font-family:var(--font-d);font-size:11px;letter-spacing:4px;color:var(--green);text-transform:uppercase;opacity:.85;}
+#menuEyebrow{font-size:14px;color:#fff;font-weight:700;opacity:1;}
+#loadScreen{background:radial-gradient(ellipse at center, var(--soil-2) 0%, var(--soil-0) 70%);}
+.load-ring-wrap{position:relative;width:180px;height:180px;display:flex;align-items:center;justify-content:center;}
+.load-ring{position:absolute;inset:0;}
+#loadPct{font-family:var(--font-d);font-size:34px;color:var(--green);text-shadow:0 0 20px var(--green);}
+.load-label{margin-top:22px;font-family:var(--font-d);font-size:12px;letter-spacing:5px;color:var(--text-dim);text-transform:uppercase;}
+.load-sub{margin-top:6px;font-size:13px;color:var(--green-dim);min-height:18px;}
+#menuScreen{gap:18px;text-align:center;}
+.logo-title{font-size:clamp(34px,6vw,60px);color:#fff;font-weight:900;text-shadow:0 0 40px rgba(77,255,136,.3);}
+.logo-sub{font-size:14px;letter-spacing:6px;color:var(--text-dim);text-transform:uppercase;margin-top:-6px;}
+.menu-panel{margin-top:26px;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:22px 30px;backdrop-filter:blur(6px);min-width:300px;box-shadow:0 0 40px rgba(77,255,136,.06),inset 0 0 60px rgba(77,255,136,.03);}
+@media(max-width:400px){.menu-panel{min-width:0;padding:16px 14px;margin-left:8px;margin-right:8px;}}
+.btn{font-family:var(--font-d);font-size:14px;letter-spacing:2px;text-transform:uppercase;color:var(--text);background:linear-gradient(180deg,#1a3520,#0b1a10);border:1px solid var(--green-dim);padding:14px 26px;border-radius:3px;cursor:pointer;position:relative;overflow:hidden;transition:.25s;width:100%;margin-bottom:10px;min-height:44px;}
+.btn:last-child{margin-bottom:0;}
+.btn:hover{border-color:var(--green);box-shadow:0 0 22px rgba(77,255,136,.35);transform:translateY(-1px);}
+.btn:active{transform:translateY(0);}
+.btn.primary{background:linear-gradient(180deg,#1a5a2a,#0e3018);border-color:var(--green);color:#fff;box-shadow:0 0 20px rgba(77,255,136,.25);}
+.btn::before{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transform:skewX(-20deg);transition:.5s;}
+.btn:hover::before{left:120%;}
+.menu-row{display:flex;gap:10px;}.menu-row .btn{flex:1;}
+#hud{position:absolute;inset:0;pointer-events:none;z-index:10;display:none;}
+#hud.active{display:block;}
+.hud-top{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:16px 20px;pointer-events:none;}
+.hud-block{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:9px 16px;backdrop-filter:blur(6px);}
+.hud-label{font-family:var(--font-d);font-size:9px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;}
+@media(max-width:400px){.hud-label{font-size:7px;}}
+.hud-value{font-family:var(--font-d);font-size:20px;color:var(--green);}
+@media(max-width:400px){.hud-value{font-size:14px;}}
+.water-bar-wrap{width:200px;}
+@media(max-width:400px){.water-bar-wrap{width:120px;}}
+.bar-track{width:100%;height:8px;background:#0a1608;border:1px solid var(--line);border-radius:2px;overflow:hidden;margin-top:4px;}
+.bar-fill{height:100%;width:100%;background:linear-gradient(90deg,var(--green-dim),var(--green));transition:width .4s ease;box-shadow:0 0 10px var(--green);}
+.bar-fill.danger{background:linear-gradient(90deg,#7a2212,var(--red));box-shadow:0 0 10px var(--red);}
+.xp-bar-wrap{width:220px;}.bar-fill.xp{background:linear-gradient(90deg,#6b3fae,var(--violet));box-shadow:0 0 10px var(--violet);}
+.timer-ring-wrap{position:absolute;top:16px;left:50%;transform:translateX(-50%);width:74px;height:74px;}
+.timer-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:24px;color:var(--amber);}
+#qPanel{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);width:min(720px,92vw);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:20px 22px;backdrop-filter:blur(8px);pointer-events:auto;box-shadow:0 0 40px rgba(0,0,0,.5),inset 0 0 40px rgba(77,255,136,.03);}
+@media(max-width:400px){#qPanel{padding:12px 10px;bottom:10px;}}
+#qMeta{display:flex;justify-content:space-between;font-size:11px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px;font-family:var(--font-d);}
+#qText{font-size:19px;font-weight:600;line-height:1.4;margin-bottom:16px;color:#fff;}
+@media(max-width:400px){#qText{font-size:15px;}}
+#choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.choice-btn{text-align:left;font-size:15px;font-family:var(--font-b);font-weight:600;background:#0e1a0c;border:1px solid var(--line);color:var(--text);padding:13px 16px;border-radius:4px;cursor:pointer;transition:.18s;display:flex;align-items:center;gap:10px;min-height:44px;}
+@media(max-width:400px){.choice-btn{font-size:13px;padding:10px 10px;}}
+[dir="rtl"] .choice-btn{text-align:right;}
+.choice-btn .letter{font-family:var(--font-d);color:var(--green);min-width:20px;}
+.choice-btn:hover{border-color:var(--green);background:#132a14;transform:translateY(-1px);}
+.choice-btn.correct{background:linear-gradient(90deg,#0e3a1a,#0c2410);border-color:var(--green);color:#dcffe9;box-shadow:0 0 18px rgba(77,255,136,.35);}
+.choice-btn.wrong{background:linear-gradient(90deg,#3a0e17,#240c10);border-color:var(--red);color:#ffdce2;box-shadow:0 0 18px rgba(255,59,82,.35);}
+.choice-btn.disabled{pointer-events:none;opacity:.55;}
+@media(max-width:560px){#choices{grid-template-columns:1fr;}}
+.streak-pop{position:absolute;top:100px;left:50%;transform:translateX(-50%);font-family:var(--font-d);font-size:16px;color:var(--amber);text-shadow:0 0 12px var(--amber);opacity:0;pointer-events:none;}
+.cine-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;background:radial-gradient(ellipse at center,rgba(10,20,8,.55),rgba(2,6,2,.93));opacity:0;pointer-events:none;transition:opacity .6s;z-index:30;text-align:center;}
+.cine-overlay.active{opacity:1;pointer-events:auto;}
+.cine-bar{position:absolute;left:0;right:0;height:10%;background:#000;}
+.cine-bar.top{top:0;}.cine-bar.bottom{bottom:0;}
+.cine-title{font-size:clamp(28px,6vw,60px);letter-spacing:4px;}
+.cine-title.win{color:var(--green);text-shadow:0 0 40px var(--green);}
+.cine-title.lose{color:var(--red);text-shadow:0 0 40px var(--red);}
+.cine-sub{margin-top:14px;font-size:16px;color:var(--text-dim);letter-spacing:2px;}
+.cine-stats{display:flex;gap:26px;margin-top:26px;}
+.cine-stat{text-align:center;}
+.cine-stat .n{font-family:var(--font-d);font-size:26px;color:var(--green);}
+.cine-stat .l{font-size:11px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;}
+.cine-actions{margin-top:30px;display:flex;gap:12px;}
+.cine-actions .btn{width:auto;}
+#adminScreen{align-items:stretch;justify-content:flex-start;padding:26px;overflow:auto;}
+.admin-wrap{max-width:920px;margin:0 auto;width:100%;}
+.admin-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+.admin-card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px 18px;margin-bottom:14px;}
+.admin-card h3{font-size:14px;color:var(--green);margin-bottom:10px;letter-spacing:1px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.field{display:flex;flex-direction:column;gap:4px;}
+.field label{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;}
+.field input,.field textarea,.field select{background:#0a1208;border:1px solid var(--line);color:var(--text);padding:9px 10px;border-radius:3px;font-family:var(--font-b);font-size:14px;}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--green);}
+.q-list-item{display:flex;justify-content:space-between;align-items:center;background:#0a1208;border:1px solid var(--line);border-radius:4px;padding:10px 12px;margin-bottom:8px;font-size:13px;}
+.q-list-item .qtxt{flex:1;margin-right:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.mini-btn{background:none;border:1px solid var(--line);color:var(--text-dim);border-radius:3px;padding:5px 9px;cursor:pointer;font-size:11px;margin-left:6px;}
+.mini-btn:hover{border-color:var(--green);color:var(--green);}
+.mini-btn.del:hover{border-color:var(--red);color:var(--red);}
+::-webkit-scrollbar{width:8px;}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
+.hidden{display:none!important;}
+.flash-green{position:absolute;inset:0;background:#4dff88;opacity:0;pointer-events:none;z-index:40;}
+.close-btn{position:absolute;top:16px;right:16px;background:var(--panel);border:1px solid var(--red);color:var(--red);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:50;font-size:18px;font-family:var(--font-d);transition:.2s;pointer-events:auto;}
+.close-btn:hover{background:var(--red);color:#fff;box-shadow:0 0 20px var(--red);}
+[dir="rtl"] .close-btn{right:auto;left:16px;}
+#learnerPanel{display:none;}.learner-mode #learnerPanel{display:block;border-color:var(--green);}.learner-mode .menu-panel:not(#learnerPanel){display:none!important;}.learner-mode #btnQuitToPlatform{display:none!important;}
+
+/* ===== PLANT ANIMATIONS (porté depuis Défense Orbitale) ===== */
+#plantWrap{position:relative;display:inline-block;width:240px;pointer-events:none;}
+#plantWrap #plantSvg{width:100%;height:auto;display:block;overflow:visible;}
+#plantWrap .pod-ring{width:250px;height:250px;border-radius:50%;border:1px solid var(--green-dim);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;opacity:.2;box-shadow:inset 0 0 40px rgba(77,255,136,.05),0 0 40px rgba(77,255,136,.03);animation:pulseRing 4s ease-in-out infinite;}
+@keyframes pulseRing{0%,100%{opacity:.15;transform:translate(-50%,-50%) scale(1);}50%{opacity:.35;transform:translate(-50%,-50%) scale(1.04);}}
+.grow-pop{animation:growBounce .9s cubic-bezier(.22,1,.36,1);}
+@keyframes growBounce{
+  0%{transform:scale(.78);opacity:.3;}
+  35%{transform:scale(1.07);opacity:1;}
+  60%{transform:scale(.96);}
+  100%{transform:scale(1);}
+}
+.leaf-pop{transform-box:fill-box;transform-origin:center;animation:leafSprout .65s cubic-bezier(.22,1,.36,1) backwards;}
+.petal-pop{transform-box:fill-box;transform-origin:center;animation:petalBloom .7s cubic-bezier(.22,1,.36,1) backwards;}
+@keyframes leafSprout{
+  0%{transform:scale(0) rotate(-25deg);opacity:0;}
+  55%{transform:scale(1.18) rotate(4deg);opacity:1;}
+  100%{transform:scale(1) rotate(0);}
+}
+@keyframes petalBloom{
+  0%{transform:scale(0) rotate(180deg);opacity:0;}
+  55%{transform:scale(1.15) rotate(8deg);opacity:1;}
+  100%{transform:scale(1) rotate(0);}
+}
+.growth-glow{animation:growthGlow 1s ease-out;}
+@keyframes growthGlow{
+  0%{filter:brightness(1) drop-shadow(0 0 0 rgba(77,255,136,0));}
+  25%{filter:brightness(1.35) drop-shadow(0 0 28px rgba(77,255,136,.55));}
+  100%{filter:brightness(1) drop-shadow(0 0 0 rgba(77,255,136,0));}
+}
+.pod-ring.growing{animation:ringGrowth 1.1s ease-out;}
+@keyframes ringGrowth{
+  0%{opacity:.2;transform:translate(-50%,-50%) scale(1);}
+  25%{opacity:.8;transform:translate(-50%,-50%) scale(1.14);box-shadow:inset 0 0 70px rgba(77,255,136,.3),0 0 70px rgba(77,255,136,.15);}
+  60%{opacity:.4;transform:translate(-50%,-50%) scale(1.03);}
+  100%{opacity:.2;transform:translate(-50%,-50%) scale(1);box-shadow:inset 0 0 40px rgba(77,255,136,.05);}
+}
+.seed-crack{animation:seedCrack .7s ease-out forwards;}
+@keyframes seedCrack{
+  0%{transform:scale(1);opacity:1;}
+  40%{transform:scale(1.2);opacity:.8;filter:brightness(1.4);}
+  100%{transform:scale(0);opacity:0;}
+}
+.soil-wet{transition:fill 1.4s ease;}
+#plantWrap .drops-row{display:flex;gap:6px;justify-content:center;margin-top:4px;}
+#plantWrap .drop-icon{width:18px;height:22px;transition:opacity .3s ease,transform .3s ease;}
+#plantWrap .drop-icon.empty{opacity:.18;transform:scale(.85);}
+#plantWrap .stage-badge{font-family:var(--font-d);font-size:11px;letter-spacing:3px;color:var(--green);text-shadow:0 0 10px var(--green);text-transform:uppercase;margin-top:2px;min-height:18px;}
+#canWrap{position:absolute;top:-8px;right:-4px;width:64px;opacity:0;transform:translate(-30px,-20px) rotate(-25deg);pointer-events:none;z-index:2;}
+[dir="rtl"] #canWrap{right:auto;left:-4px;}
+#canWrap.pour{animation:pourCan 1.15s ease forwards;}
+#canWrap.pour.mega{animation:pourCanMega 1.6s ease forwards;}
+@keyframes pourCan{
+  0%{opacity:0;transform:translate(-30px,-30px) rotate(-25deg);}
+  18%{opacity:1;transform:translate(6px,-6px) rotate(-38deg);}
+  70%{opacity:1;transform:translate(6px,-6px) rotate(-38deg);}
+  100%{opacity:0;transform:translate(-10px,-24px) rotate(-25deg);}
+}
+@keyframes pourCanMega{
+  0%{opacity:0;transform:translate(-40px,-40px) rotate(-15deg) scale(1);}
+  15%{opacity:1;transform:translate(8px,-8px) rotate(-42deg) scale(1.15);}
+  75%{opacity:1;transform:translate(8px,-8px) rotate(-42deg) scale(1.15);}
+  100%{opacity:0;transform:translate(-10px,-26px) rotate(-15deg) scale(1);}
+}
+.drop{position:absolute;width:6px;height:9px;background:var(--green);border-radius:50% 50% 50% 0;opacity:0;}
+#canWrap.pour .drop,#canWrap.pour.mega .drop{animation:dropFall 0.65s ease-in forwards;}
+@keyframes dropFall{
+  0%{opacity:0;transform:translateY(0) scale(0.7);}
+  15%{opacity:1;}
+  100%{opacity:0;transform:translateY(42px) scale(1);}
+}
+.vintage-filter{filter:saturate(0.4) sepia(0.4) brightness(0.6);transition:filter .6s ease;}
+.feedback-line{min-height:24px;margin-top:10px;font-weight:600;font-size:13px;text-align:center;letter-spacing:1px;pointer-events:auto;}
+.feedback-line.good{color:var(--green);}
+.feedback-line.bad{color:var(--red);}
+.stats-row{display:flex;gap:14px;justify-content:center;margin-top:4px;}
+.stat-chip{font-family:var(--font-d);font-size:10px;letter-spacing:1px;color:var(--text-dim);text-transform:uppercase;}
+.stat-chip b{color:var(--amber);font-size:14px;}
+.growth-bar-wrap{width:200px;}.bar-fill.growth{background:linear-gradient(90deg,var(--green-dim),var(--green));box-shadow:0 0 10px var(--green);}
+.top-controls{position:absolute;top:16px;right:16px;display:flex;gap:8px;z-index:20;}
+[dir="rtl"] .top-controls{right:auto;left:16px;}
+.icon-btn{width:40px;height:40px;border-radius:50%;background:var(--panel);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;color:var(--text);font-size:18px;}
+.icon-btn:hover{border-color:var(--green);box-shadow:0 0 14px rgba(77,255,136,.35);}
+
+/* ===== JARDIN DES COMPÉTENCES ===== */
+.garden-overlay{position:fixed;inset:0;z-index:9000;background:rgba(2,6,2,.92);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;overflow:auto;padding:20px;}
+.garden-overlay.open{display:flex;}
+.garden-panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:28px 24px;max-width:780px;width:100%;max-height:90vh;overflow-y:auto;position:relative;animation:gardenIn .4s ease;}
+@keyframes gardenIn{0%{opacity:0;transform:translateY(30px) scale(.95);}100%{opacity:1;transform:translateY(0) scale(1);}}
+.garden-close{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;background:transparent;border:1px solid var(--line);color:var(--text-dim);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:.2s;}
+.garden-close:hover{border-color:var(--red);color:var(--red);}
+[dir="rtl"] .garden-close{right:auto;left:12px;}
+.garden-title{font-family:var(--font-d);font-size:18px;color:var(--green);letter-spacing:3px;text-transform:uppercase;margin-bottom:18px;text-align:center;}
+.garden-empty{text-align:center;padding:40px 20px;color:var(--text-dim);}
+.garden-empty .big{font-size:48px;display:block;margin-bottom:12px;}
+.garden-group{margin-bottom:20px;}
+.garden-group-title{font-family:var(--font-d);font-size:13px;letter-spacing:2px;color:var(--flower-gold);text-transform:uppercase;margin-bottom:10px;padding-bottom:4px;border-bottom:1px solid var(--line);}
+.garden-row{display:flex;flex-wrap:wrap;gap:12px;}
+.garden-flower{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px 6px;background:rgba(10,18,8,.6);border:1px solid var(--line);border-radius:6px;min-width:80px;transition:.2s;}
+.garden-flower:hover{border-color:var(--green);background:rgba(10,30,12,.6);}
+.garden-flower svg{width:48px;height:48px;display:block;}
+.garden-flower .fn{font-size:11px;color:var(--text);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:72px;}
+.garden-flower .fc{font-size:9px;color:var(--text-dim);text-align:center;text-transform:uppercase;letter-spacing:1px;}
+.garden-loader{text-align:center;padding:40px;color:var(--green-dim);font-family:var(--font-d);letter-spacing:2px;}
+
+/* ===== FLOWER NAME FORM ===== */
+.flower-form-wrap{margin-top:16px;padding:14px 18px;background:var(--panel);border:1px solid var(--line);border-radius:6px;display:none;}
+.flower-form-wrap.show{display:block;}
+.flower-form-wrap .ff-title{font-family:var(--font-d);font-size:11px;color:var(--flower-gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+.flower-form-wrap .ff-row{display:flex;gap:8px;margin-bottom:8px;}
+.flower-form-wrap .ff-row input{flex:1;background:#0a1208;border:1px solid var(--line);color:var(--text);padding:8px 10px;border-radius:3px;font-family:var(--font-b);font-size:14px;}
+.flower-form-wrap .ff-row input:focus{outline:none;border-color:var(--green);}
+.flower-form-wrap .ff-btn{font-family:var(--font-d);font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#fff;background:linear-gradient(180deg,#1a5a2a,#0e3018);border:1px solid var(--green);padding:10px 18px;border-radius:3px;cursor:pointer;transition:.25s;width:100%;}
+.flower-form-wrap .ff-btn:hover{box-shadow:0 0 18px rgba(77,255,136,.4);}
+.flower-form-wrap .ff-btn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none;}
+.ff-result{font-size:13px;margin-top:8px;min-height:20px;text-align:center;}
+.ff-result.ok{color:var(--green);}
+.ff-result.err{color:var(--red);}
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="bgCanvas"></canvas>
+  <canvas id="fxCanvas"></canvas>
+  <div class="flash-green" id="flashGreen"></div>
+
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <radialGradient id="gSoil" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#2a4a22"/><stop offset="100%" stop-color="#0a1a08"/>
+      </radialGradient>
+      <linearGradient id="gStem" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#3d7a22"/><stop offset="100%" stop-color="#5aae3a"/>
+      </linearGradient>
+      <symbol id="icoBadgeStar" viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="30" fill="#0e1a0c" stroke="#ffd644" stroke-width="2"/>
+        <path d="M32 12 L37 26 L52 26 L40 35 L44 50 L32 41 L20 50 L24 35 L12 26 L27 26 Z" fill="#ffd644"/>
+      </symbol>
+      <symbol id="icoBadgeLeaf" viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="30" fill="#0e1a0c" stroke="#4dff88" stroke-width="2"/>
+        <path d="M32 14 Q44 22 46 38 Q40 44 32 52 Q24 44 18 38 Q20 22 32 14Z" fill="#1a5a2a" stroke="#4dff88" stroke-width="2"/>
+        <path d="M32 26 L36 34 L44 32" stroke="#4dff88" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="icoBadgeDrop" viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="30" fill="#0e1a0c" stroke="#4db8ff" stroke-width="2"/>
+        <path d="M32 14 Q32 14 28 28 Q24 38 26 44 Q28 50 32 50 Q36 50 38 44 Q40 38 36 28 Q32 14 32 14Z" fill="#1a6aac" stroke="#4db8ff" stroke-width="2"/>
+      </symbol>
+      <symbol id="icoBadgeFlower" viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="30" fill="#0e1a0c" stroke="#ff88cc" stroke-width="2"/>
+        <ellipse cx="32" cy="24" rx="5" ry="10" fill="#ff88cc"/>
+        <ellipse cx="32" cy="24" rx="5" ry="10" fill="#ff66aa" transform="rotate(72 32 24)"/>
+        <ellipse cx="32" cy="24" rx="5" ry="10" fill="#ff88cc" transform="rotate(144 32 24)"/>
+        <ellipse cx="32" cy="24" rx="5" ry="10" fill="#ff66aa" transform="rotate(216 32 24)"/>
+        <ellipse cx="32" cy="24" rx="5" ry="10" fill="#ff88cc" transform="rotate(288 32 24)"/>
+        <circle cx="32" cy="24" r="4" fill="#ffdd44"/>
+      </symbol>
+      <linearGradient id="leafGradPlant" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="var(--leaf-light)"/><stop offset="100%" stop-color="var(--green)"/></linearGradient>
+      <linearGradient id="stemGradPlant" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--green)"/><stop offset="100%" stop-color="var(--green-dim)"/></linearGradient>
+      <linearGradient id="potGradPlant" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2a5a32"/><stop offset="100%" stop-color="#1a3a18"/></linearGradient>
+      <symbol id="icoSound" viewBox="0 0 24 24"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16 8a5 5 0 010 8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></symbol>
+      <symbol id="icoMute" viewBox="0 0 24 24"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><line x1="15" y1="9" x2="21" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="21" y1="9" x2="15" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+      <symbol id="icoLang" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" fill="none"/><line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="1.4"/><path d="M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" stroke="currentColor" stroke-width="1.4" fill="none"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- LOADING -->
+  <div class="screen active" id="loadScreen">
+    <div class="load-ring-wrap">
+      <svg class="load-ring" viewBox="0 0 180 180">
+        <circle cx="90" cy="90" r="80" fill="none" stroke="#132a14" stroke-width="4"/>
+        <circle id="loadCircle" cx="90" cy="90" r="80" fill="none" stroke="url(#gStem)" stroke-width="4" stroke-linecap="round" stroke-dasharray="502" stroke-dashoffset="502" transform="rotate(-90 90 90)"/>
+      </svg>
+      <div id="loadPct">0%</div>
+    </div>
+    <div class="load-label" id="loadLabel">Germination</div>
+    <div class="load-sub" id="loadSub">Préparation du terreau…</div>
+  </div>
+
+  <!-- MENU -->
+  <div class="screen" id="menuScreen">
+    <div class="eyebrow" id="menuEyebrow">APC Algérie GÉNÉRATION 3</div>
+    <h1 class="logo-title" id="gameTitle">🌱 FAIS POUSSER TA PLANTE</h1>
+    <div class="logo-sub" id="gameSub">Arrose tes connaissances. Vois ta plante fleurir.</div>
+    <div class="menu-panel" id="learnerPanel">
+      <div style="font-size:11px;letter-spacing:1px;color:var(--green);text-transform:uppercase;margin-bottom:10px;font-family:var(--font-d);" id="lblLearnerMode">🌱 Mode Apprenant</div>
+      <div class="field">
+        <label id="lblLearnerPinLabel" style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">Code PIN du jeu</label>
+        <input type="text" id="learnerPin" placeholder="XXXXXX" maxlength="6" style="background:#0a1208;border:1px solid var(--green-dim);color:var(--text);padding:10px;border-radius:3px;font-family:var(--font-b);font-size:20px;width:100%;text-align:center;letter-spacing:8px;font-weight:800;text-transform:uppercase;">
+      </div>
+      <button class="btn primary" id="btnLearnerPlay" style="margin-top:8px;">🌱 Jouer</button>
+    </div>
+    <div class="menu-panel">
+      <div style="font-size:11px;letter-spacing:1px;color:var(--text-dim);text-transform:uppercase;margin-bottom:10px;font-family:var(--font-d);" id="lblConfigTitle">🌱 Fais pousser ta plante — Configuration</div>
+      <div class="field-row">
+        <div class="field">
+          <label id="lblDifficulty">Niveau de difficulté</label>
+          <select id="cfgDifficulty" style="background:#0a1208;border:1px solid var(--line);color:var(--text);padding:8px 10px;border-radius:3px;font-family:var(--font-b);font-size:13px;width:100%;cursor:pointer;">
+            <option value="1" id="optDiffEasy">Facile</option>
+            <option value="2" selected id="optDiffMedium">Moyen</option>
+            <option value="3" id="optDiffHard">Difficile</option>
+          </select>
+        </div>
+        <div class="field">
+          <label id="lblQuestionCount">Nombre de questions</label>
+          <input type="number" id="cfgQuestionCount" value="8" min="3" max="50" style="background:#0a1208;border:1px solid var(--line);color:var(--text);padding:8px 10px;border-radius:3px;font-family:var(--font-b);font-size:14px;width:100%;">
+        </div>
+      </div>
+      <div style="margin-bottom:8px;">
+        <label id="lblCompetence" style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;display:block;">Compétence visée</label>
+        <input type="text" id="cfgCompetence" placeholder="..." style="width:100%;background:#0a1208;border:1px solid var(--line);color:var(--text);padding:8px 10px;border-radius:3px;font-family:var(--font-b);font-size:13px;margin-bottom:6px;">
+        <div id="competenceList" style="max-height:180px;overflow-y:auto;border:1px solid var(--line);border-radius:4px;padding:4px;background:#0a1208;"></div>
+      </div>
+      <button class="btn primary" id="btnTestGame">🌱 Planter !</button>
+      <button class="btn" id="btnSaveGame" style="background:linear-gradient(135deg,#0EA5E9,#06B6D4);">💾 Sauvegarder</button>
+      <div id="gameSaveResult" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);text-align:center;">
+        <div id="challengePinDisplay" style="font-size:1.8rem;font-weight:800;letter-spacing:6px;color:var(--amber);font-family:monospace;"></div>
+        <img id="challengeQRImg" src="" alt="QR" style="width:120px;height:120px;border-radius:8px;margin:6px 0;">
+        <div class="menu-row" style="justify-content:center;">
+          <button class="btn" id="btnCopyChallengeLink" style="font-size:11px;padding:8px 10px;width:auto;">📋 Copier</button>
+          <button class="btn" id="btnDownloadQR" style="font-size:11px;padding:8px 10px;width:auto;">⬇ QR</button>
+          <button class="btn" id="btnDistribChallenge" style="font-size:11px;padding:8px 10px;width:auto;background:linear-gradient(135deg,#0EA5E9,#06B6D4);">📤 Distribuer</button>
+        </div>
+      </div>
+    </div>
+    <div id="saveListWrap" style="display:none;margin-top:14px;">
+      <div style="font-size:11px;letter-spacing:1px;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px;font-family:var(--font-d);">📂 Parties sauvegardées</div>
+      <div id="saveList" style="max-height:200px;overflow-y:auto;"></div>
+    </div>
+    <div style="margin-top:14px;display:flex;gap:8px;justify-content:center;">
+      <button class="btn" id="btnQuitToPlatform" style="font-size:12px;padding:10px 16px;flex:1;">← Retour</button>
+      <button class="btn" id="btnAdminPanel" style="font-size:12px;padding:10px 16px;flex:1;background:linear-gradient(135deg,#7c3aed,#a06bff);">⚙️ Admin</button>
+      <button class="btn" id="btnGarden" style="font-size:12px;padding:10px 16px;flex:1;background:linear-gradient(135deg,#ff88cc,#a06bff);">🌺 Jardin des compétences</button>
+    </div>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud">
+    <button class="close-btn" id="btnQuit">✕</button>
+    <div class="hud-top">
+      <div class="hud-block"><div class="hud-label" id="lblScore">Score</div><div class="hud-value" id="hudScore">0</div></div>
+      <div class="hud-block growth-bar-wrap"><div class="hud-label" id="lblGrowth">Croissance</div><div class="bar-track"><div class="bar-fill growth" id="growthBar" style="width:0%"></div></div></div>
+      <div class="hud-block water-bar-wrap"><div class="hud-label" id="lblWater">💧 Eau <span id="hudDrops"></span></div><div class="bar-track"><div class="bar-fill" id="waterBar" style="width:100%"></div></div></div>
+    </div>
+    <div class="timer-ring-wrap">
+      <svg viewBox="0 0 74 74" width="74" height="74">
+        <circle cx="37" cy="37" r="32" fill="none" stroke="#132a14" stroke-width="5"/>
+        <circle id="timerCircle" cx="37" cy="37" r="32" fill="none" stroke="var(--amber)" stroke-width="5" stroke-linecap="round" stroke-dasharray="201" stroke-dashoffset="0" transform="rotate(-90 37 37)"/>
+      </svg>
+      <div class="timer-num" id="timerNum">10</div>
+    </div>
+    <div class="streak-pop" id="streakPop"></div>
+    <div id="plantWrap" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);display:flex;flex-direction:column;align-items:center;pointer-events:none;z-index:3;">
+      <div class="pod-ring"></div>
+      <div class="stage-badge" id="stageBadge">GRAINE</div>
+      <svg id="plantSvg" viewBox="0 0 220 240" style="width:220px;height:240px;overflow:visible;">
+        <g id="plantGroup">
+          <ellipse id="soilEllipse" class="soil-wet" cx="110" cy="196" rx="58" ry="13" fill="var(--soil)"/>
+          <path d="M52,196 L46,225 Q110,240 174,225 L168,196 Q110,208 52,196 Z" fill="url(#potGradPlant)"/>
+          <path d="M60,199 Q110,210 160,199 L158,207 Q110,217 62,207 Z" fill="#2a5a32" opacity=".3"/>
+          <ellipse cx="110" cy="196" rx="60" ry="10" fill="#2a5a32"/>
+          <path d="M55,214 Q110,222 165,214" fill="none" stroke="#2a5a32" stroke-width="2" opacity=".4"/>
+          <path d="M50,222 Q110,231 170,222" fill="none" stroke="#2a5a32" stroke-width="2" opacity=".3"/>
+          <g id="plantContent"></g>
+        </g>
+      </svg>
+      <div id="canWrap">
+        <svg viewBox="0 0 74 60">
+          <rect x="8" y="18" width="34" height="26" rx="6" fill="#4a6a4a"/>
+          <rect x="10" y="10" width="18" height="10" rx="4" fill="#5a8a5a"/>
+          <path d="M40,26 L70,14 L66,22 L44,32 Z" fill="#4a6a4a"/>
+          <circle cx="68" cy="15" r="2.6" fill="#4a6a4a"/>
+        </svg>
+        <div class="drop" style="left:60px;top:16px;animation-delay:.05s;"></div>
+        <div class="drop" style="left:64px;top:20px;animation-delay:.18s;"></div>
+        <div class="drop" style="left:57px;top:22px;animation-delay:.3s;"></div>
+        <div class="drop" style="left:62px;top:14px;animation-delay:.42s;"></div>
+      </div>
+      <div class="drops-row" id="dropsRow"></div>
+      <div class="stats-row">
+        <div class="stat-chip">🔥 <b id="hudStreak">0</b> série</div>
+      </div>
+    </div>
+    <div id="qPanel">
+      <div id="qMeta"><span id="qCounter">Q1/10</span><span id="qDiff">•••</span></div>
+      <div id="qText"></div>
+      <div id="choices"></div>
+      <div class="feedback-line" id="plantFeedback"></div>
+    </div>
+  </div>
+
+  <div class="top-controls">
+    <button class="icon-btn" id="btnLang" title="FR / عربي"><svg width="20" height="20"><use href="#icoLang"></use></svg></button>
+    <button class="icon-btn" id="btnSound" title="Son"><svg width="20" height="20"><use href="#icoSound" id="soundIco"></use></svg></button>
+  </div>
+
+  <!-- JARDIN DES COMPÉTENCES -->
+  <div class="garden-overlay" id="gardenOverlay">
+    <div class="garden-panel">
+      <button class="garden-close" id="btnGardenClose">✕</button>
+      <div class="garden-title">🌺 Jardin des compétences</div>
+      <div id="gardenContent">
+        <div class="garden-loader">🌱 Chargement du jardin…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WIN -->
+  <div class="cine-overlay" id="winScreen">
+    <div class="cine-bar top"></div><div class="cine-bar bottom"></div>
+    <div class="eyebrow" id="winEyebrow">Jardin fleuri</div>
+    <h1 class="cine-title win" id="winTitle">🌸 FÉLICITATIONS !</h1>
+    <div class="cine-sub" id="winSub">Grâce à vos bonnes réponses, votre plante est devenue une magnifique fleur.</div>
+    <div class="cine-stats">
+      <div class="cine-stat"><div class="n" id="winScore">0</div><div class="l" id="lblStatScore">Score</div></div>
+      <div class="cine-stat"><div class="n" id="winStreak">0</div><div class="l" id="lblStatStreak">Meilleure série</div></div>
+    </div>
+    <div class="cine-actions">
+      <button class="btn primary" id="btnWinReplay">Nouvelle plante</button>
+      <button class="btn" id="btnWinMenu">Menu</button>
+    </div>
+    <div class="flower-form-wrap" id="flowerFormWrap">
+      <div class="ff-title">🌺 Enregistrer ma fleur dans le jardin des compétences</div>
+      <div class="ff-row">
+        <input type="text" id="flowerPrenom" placeholder="Prénom" maxlength="50">
+        <input type="text" id="flowerNom" placeholder="Nom" maxlength="50">
+      </div>
+      <button class="ff-btn" id="btnSaveFlower">🌺 Planter ma fleur !</button>
+      <div class="ff-result" id="flowerResult"></div>
+    </div>
+  </div>
+
+  <!-- LOSE -->
+  <div class="cine-overlay" id="loseScreen">
+    <div class="cine-bar top"></div><div class="cine-bar bottom"></div>
+    <div class="eyebrow" style="color:var(--red)" id="loseEyebrow">Plante fanée</div>
+    <h1 class="cine-title lose" id="loseTitle">🥀 PLANTE SÈCHE</h1>
+    <div class="cine-sub" id="loseSub">Votre plante a besoin de plus de soins. Revoyez les notions et réessayez.</div>
+    <div class="cine-stats">
+      <div class="cine-stat"><div class="n" id="loseScore">0</div><div class="l" id="lblLoseScore">Score</div></div>
+      <div class="cine-stat"><div class="n" id="loseStreak">0</div><div class="l" id="lblLoseStreak">Série</div></div>
+    </div>
+    <div class="cine-actions">
+      <button class="btn primary" id="btnLoseRetry">Réessayer</button>
+      <button class="btn" id="btnLoseMenu">Menu</button>
+    </div>
+  </div>
+
+  <!-- INTRO -->
+  <div class="cine-overlay" id="introScreen">
+    <div class="cine-bar top"></div><div class="cine-bar bottom"></div>
+    <div style="max-width:620px;padding:20px;text-align:center;position:relative;z-index:1;">
+      <div style="font-size:48px;margin-bottom:12px;">🌱</div>
+      <div class="eyebrow" style="margin-bottom:8px;" id="introEyebrow">Serre pédagogique · Module APC</div>
+      <div style="background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:20px 24px;margin-bottom:18px;backdrop-filter:blur(6px);">
+        <div id="introText" style="font-size:15px;line-height:1.7;color:var(--text);"></div>
+      </div>
+      <div style="font-size:13px;color:var(--green-dim);margin-bottom:16px;" id="introRole"></div>
+      <button class="btn primary" id="btnIntroStart" style="width:auto;padding:14px 40px;">💧 Commencer</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+"use strict";
+
+/* ===== I18N ===== */
+const I18N = {
+  fr:{
+    pageTitle:"Challenge - Fais pousser ta plante",loading:"Germination",
+    menuEyebrow:"APC Algérie GÉNÉRATION 3",gameTitle:"🌱 FAIS POUSSER TA PLANTE",gameSub:"Arrose tes connaissances. Vois ta plante s'épanouir.",
+    lblScore:"Score",lblWater:"💧 Eau",lblGrowth:"Croissance",lblStatScore:"Score",lblStatStreak:"Meilleure série",
+    winEyebrow:"Jardin fleuri",winTitle:"🌸 FÉLICITATIONS !",
+    loseEyebrow:"Plante fanée",loseTitle:"🥀 PLANTE SÈCHE",
+    btnReplay:"Nouvelle plante",btnMenu:"Menu",btnRetry:"Réessayer",btnQuit:"Quitter",btnCopy:"📋 Copier",btnDistrib:"📤 Distribuer par email",
+    lblConfigTitle:"🌱 Fais pousser ta plante — Configuration",lblCompetence:"Compétence visée",lblDifficulty:"Niveau de difficulté",lblQuestionCount:"Nombre de questions",
+    optDiffEasy:"Facile",optDiffMedium:"Moyen",optDiffHard:"Difficile",
+    lblLearnerMode:"🌱 Mode Apprenant",lblLearnerPinLabel:"Code PIN du jeu",learnerPinPlaceholder:"XXXXXX",btnLearnerPlay:"🌱 Jouer",learnerPinError:"PIN invalide. Vérifie le code donné par ton formateur.",noPinData:"Aucune partie trouvée pour ce PIN.",
+    btnTestGame:"🌱 Planter !",btnPublishGame:"💾 Sauvegarder",btnQuitToPlatform:"← Retour",
+    introText:"Bienvenue dans la serre pédagogique ! Tu vas faire pousser une plante en répondant correctement aux questions. Chaque bonne réponse arrose ta plante et la fait grandir : elle passera par les stades de graine, germination, jeune pousse, petite plante, plante adulte, floraison et enfin magnifique fleur. Chaque mauvaise réponse lui fait perdre une goutte d'eau. À zéro gouttes, ta plante se dessèche. La compétence visée est affichée en cours de route. À toi de jouer, jardinier en herbe !",
+    introRole:"🌱 Apprenti jardinier · APC",
+    introStart:"💧 Commencer",
+    winSubText:"Grâce à vos bonnes réponses, votre plante est devenue une magnifique fleur. Continuez à apprendre pour faire fleurir tout votre jardin !",
+    loseSubText:"Votre plante a besoin de plus de soins. Revoyez les notions et réessayez pour lui redonner vie.",
+    streakLabel:(n)=>`Série x${n} :: 🌊 Arrosage parfait !`,noQuestions:"Aucune question disponible pour ce challenge.",defaultQuestions:"Questions par défaut (APC)",
+    growthLabels:["🌰 Graine","🌱 Germination","🌿 Jeune pousse","🍀 Petite plante","🌳 Plante adulte","🌸 Floraison","🌺 Fleur magnifique"],
+    rewardLabel:(p)=>p>=100?"🌺 Orchidée d'or":p>=90?"🌻 Tournesol":p>=80?"🌹 Rose":"🌸 Fleur blanche",
+    waterFull:"💧💧💧💧💧"
+  },
+  ar:{
+    pageTitle:"التحدي - انمي نبتتك",loading:"الإنبات",
+    menuEyebrow:"APC Algérie GÉNÉRATION 3",gameTitle:"🌱 انمي نبتتك",gameSub:"اسقِ معرفتك. شاهد نبتتك تتفتح.",
+    lblScore:"النقاط",lblWater:"💧 الماء",lblGrowth:"النمو",lblStatScore:"النقاط",lblStatStreak:"أفضل سلسلة",
+    winEyebrow:"حديقة مزهرة",winTitle:"🌸 مبروك!",
+    loseEyebrow:"النبتة ذبلت",loseTitle:"🥀 نبتة جافة",
+    btnReplay:"نبتة جديدة",btnMenu:"القائمة",btnRetry:"إعادة المحاولة",btnQuit:"خروج",btnCopy:"📋 نسخ",btnDistrib:"📤 توزيع عبر البريد",
+    lblConfigTitle:"🌱 انمي نبتتك — الإعداد",lblCompetence:"الكفاءة المستهدفة",lblDifficulty:"مستوى الصعوبة",lblQuestionCount:"عدد الأسئلة",
+    optDiffEasy:"سهل",optDiffMedium:"متوسط",optDiffHard:"صعب",
+    lblLearnerMode:"🌱 وضع المتعلم",lblLearnerPinLabel:"رمز PIN للعبة",learnerPinPlaceholder:"XXXXXX",btnLearnerPlay:"🌱 العب",learnerPinError:"PIN غير صالح. تحقق من الرمز من مدربك.",noPinData:"لم يتم العثور على لعبة لهذا الرمز.",
+    btnTestGame:"🌱 ازرع!",btnPublishGame:"💾 حفظ",btnQuitToPlatform:"← رجوع",
+    introText:"مرحباً بك في الصف البيداغوجي! ستنمي نبتة بالإجابة الصحيحة على الأسئلة. كل إجابة صحيحة تسقي نبتتك وتجعلها تنمو: ستمر بمراحل البذرة، الإنبات، الشتلة الصغيرة، النبتة الصغيرة، النبتة البالغة، الإزهار وأخيراً الزهرة الجميلة. كل إجابة خاطئة تفقدها قطرة ماء. عند صفر قطرات، تذبل النبتة. الكفاءة المستهدفة معروضة أثناء اللعب. دورك الآن أيها البستاني المبتدئ!",
+    introRole:"🌱 بستاني مبتدئ · المقاربة بالكفاءات",
+    introStart:"💧 ابدأ",
+    winSubText:"بفضل إجاباتك الصحيحة، أصبحت نبتتك زهرة جميلة. واصل التعلم لتزهر حديقتك بأكملها!",
+    loseSubText:"نبتتك تحتاج إلى المزيد من العناية. راجع المفاهيم وحاول مرة أخرى.",
+    streakLabel:(n)=>`سلسلة x${n} :: 🌊 سقي مثالي!`,noQuestions:"لا توجد أسئلة متاحة.",defaultQuestions:"الأسئلة الافتراضية (APC)",
+    growthLabels:["🌰 بذرة","🌱 إنبات","🌿 شتلة","🍀 نبتة صغيرة","🌳 نبتة بالغة","🌸 إزهار","🌺 زهرة جميلة"],
+    rewardLabel:(p)=>p>=100?"🌺 أوركيد ذهبي":p>=90?"🌻 زهرة اللقاح":p>=80?"🌹 وردة":"🌸 زهرة بيضاء",
+    waterFull:"💧💧💧💧💧"
+  },
+  en:{
+    pageTitle:"Challenge - Grow your plant",loading:"Germination",
+    menuEyebrow:"APC Algeria GENERATION 3",gameTitle:"🌱 GROW YOUR PLANT",gameSub:"Water your knowledge. Watch your plant thrive.",
+    lblScore:"Score",lblWater:"💧 Water",lblGrowth:"Growth",lblStatScore:"Score",lblStatStreak:"Best streak",
+    winEyebrow:"Blooming garden",winTitle:"🌸 CONGRATULATIONS!",
+    loseEyebrow:"Withered plant",loseTitle:"🥀 DRY PLANT",
+    btnReplay:"New plant",btnMenu:"Menu",btnRetry:"Retry",btnQuit:"Quit",btnCopy:"📋 Copy",btnDistrib:"📤 Distribute by email",
+    lblConfigTitle:"🌱 Grow your plant — Configuration",lblCompetence:"Target Competence",lblDifficulty:"Difficulty Level",lblQuestionCount:"Number of Questions",
+    optDiffEasy:"Easy",optDiffMedium:"Medium",optDiffHard:"Hard",
+    lblLearnerMode:"🌱 Learner Mode",lblLearnerPinLabel:"Game PIN Code",learnerPinPlaceholder:"XXXXXX",btnLearnerPlay:"🌱 Play",learnerPinError:"Invalid PIN. Check code from your trainer.",noPinData:"No game found for this PIN.",
+    btnTestGame:"🌱 Plant it!",btnPublishGame:"💾 Save",btnQuitToPlatform:"← Back",
+    introText:"Welcome to the pedagogical greenhouse! You will grow a plant by answering questions correctly. Each correct answer waters your plant and makes it grow: it will go through seed, germination, sprout, small plant, adult plant, flowering and finally a beautiful flower. Each wrong answer makes it lose a water drop. At zero drops, your plant dries out. The target competence is shown along the way. Your turn, budding gardener!",
+    introRole:"🌱 Apprentice gardener · APC",
+    introStart:"💧 Start",
+    winSubText:"Thanks to your correct answers, your plant has become a beautiful flower. Keep learning to make your whole garden bloom!",
+    loseSubText:"Your plant needs more care. Review the concepts and try again to give it life.",
+    streakLabel:(n)=>`Streak x${n} :: 🌊 Perfect watering!`,noQuestions:"No questions available for this challenge.",defaultQuestions:"Default questions (APC)",
+    growthLabels:["🌰 Seed","🌱 Germination","🌿 Sprout","🍀 Small plant","🌳 Adult plant","🌸 Flowering","🌺 Beautiful flower"],
+    rewardLabel:(p)=>p>=100?"🌺 Golden Orchid":p>=90?"🌻 Sunflower":p>=80?"🌹 Rose":"🌸 White flower",
+    waterFull:"💧💧💧💧💧"
+  }
+};
+let LANG = "fr";
+function t(key,...args){ const v = I18N[LANG][key]; return typeof v==="function"?v(...args):v||key; }
+function applyI18N(){
+  document.documentElement.lang=LANG;
+  document.documentElement.dir=LANG==="ar"?"rtl":"ltr";
+  ["loadLabel","menuEyebrow","gameTitle","gameSub","lblScore","lblWater","lblGrowth",
+   "winEyebrow","winTitle","loseEyebrow","loseTitle","lblStatScore","lblStatStreak",
+   "lblLoseScore","lblLoseStreak"].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.textContent=t(id);
+  });
+  document.getElementById("btnIntroStart").textContent=t("introStart");
+  document.getElementById("introText").textContent=t("introText");
+  document.getElementById("introRole").textContent=t("introRole");
+  document.getElementById("btnWinReplay").textContent=t("btnReplay");
+  document.getElementById("btnWinMenu").textContent=t("btnMenu");
+  document.getElementById("btnLoseRetry").textContent=t("btnRetry");
+  document.getElementById("btnLoseMenu").textContent=t("btnMenu");
+  document.getElementById("btnQuit").textContent="✕";
+  document.getElementById("lblLearnerMode").textContent=t("lblLearnerMode");
+  document.getElementById("lblLearnerPinLabel").textContent=t("lblLearnerPinLabel");
+  document.getElementById("learnerPin").placeholder=t("learnerPinPlaceholder");
+  document.getElementById("btnLearnerPlay").textContent=t("btnLearnerPlay");
+  document.getElementById("lblConfigTitle").textContent=t("lblConfigTitle");
+  document.getElementById("lblCompetence").textContent=t("lblCompetence");
+  document.getElementById("lblDifficulty").textContent=t("lblDifficulty");
+  document.getElementById("lblQuestionCount").textContent=t("lblQuestionCount");
+  document.getElementById("optDiffEasy").textContent=t("optDiffEasy");
+  document.getElementById("optDiffMedium").textContent=t("optDiffMedium");
+  document.getElementById("optDiffHard").textContent=t("optDiffHard");
+  document.getElementById("btnTestGame").textContent=t("btnTestGame");
+  document.getElementById("btnSaveGame").textContent=t("btnPublishGame");
+  document.getElementById("btnQuitToPlatform").textContent=t("btnQuitToPlatform");
+  document.getElementById("btnCopyChallengeLink").textContent=t("btnCopy");
+  document.getElementById("btnDistribChallenge").textContent=t("btnDistrib");
+}
+
+/* ===== DEFAULT QUESTIONS ===== */
+var DEFAULT_QUESTIONS = [
+  {text:"Que signifie APC dans la formation professionnelle ?",text_ar:"ماذا تعني المقاربة بالكفاءات (APC) في التكوين المهني؟",text_en:"What does APC mean in vocational training?",
+   options:["Approche Par Compétences","Analyse Pédagogique Continue","Atelier Pratique Collectif","Apprentissage Par Correction"],
+   options_ar:["المقاربة بالكفاءات","التحليل البيداغوجي المستمر","الورشة التطبيقية الجماعية","التعلم بالتصحيح"],
+   options_en:["Competency-Based Approach","Continuous Pedagogical Analysis","Group Practical Workshop","Learning by Correction"],
+   correctIndex:0,diff:1},
+  {text:"Combien de phases compte une séquence APC ?",text_ar:"كم عدد المراحل التي تتضمنها حصة APC؟",text_en:"How many phases does an APC session have?",
+   options:["3","5","7","2"],options_ar:["3","5","7","2"],options_en:["3","5","7","2"],correctIndex:1,diff:2},
+  {text:"Une compétence combine :",text_ar:"تجمع الكفاءة بين:",text_en:"A competency combines:",
+   options:["Savoir, savoir-faire, savoir-être","Notes, examens, diplômes","Salaire, horaires, contrat","Théorie uniquement"],
+   options_ar:["المعرفة، المعرفة العملية، المعرفة السلوكية","العلامات، الامتحانات، الشهادات","الأجر، التوقيت، العقد","النظرية فقط"],
+   options_en:["Knowledge, skills, attitudes","Grades, exams, diplomas","Salary, hours, contract","Theory only"],correctIndex:0,diff:2},
+  {text:"L'évaluation formative sert à :",text_ar:"يستخدم التقييم التكويني من أجل:",text_en:"Formative assessment is used to:",
+   options:["Sanctionner l'élève","Réguler l'apprentissage","Classer les stagiaires","Remplacer l'examen"],
+   options_ar:["معاقبة المتعلم","تعديل التعلم أثناء المسار","ترتيب المتربصين","استبدال الامتحان"],
+   options_en:["Punish the student","Regulate learning","Rank trainees","Replace the exam"],correctIndex:1,diff:2},
+  {text:"Le formateur APC est avant tout :",text_ar:"المكوّن في APC هو قبل كل شيء:",text_en:"The APC trainer is above all:",
+   options:["Un transmetteur passif","Un facilitateur et guide","Un simple surveillant","Un correcteur de copies"],
+   options_ar:["ناقل سلبي للمعارف","ميسّر وموجّه للتعلم","مراقب فقط","مصحح أوراق فقط"],
+   options_en:["A passive transmitter","A facilitator and guide","A mere supervisor","A paper corrector"],correctIndex:1,diff:2},
+  {text:"La situation-problème doit être :",text_ar:"الوضعية-المشكلة يجب أن تكون:",text_en:"The problem-situation should be:",
+   options:["Abstraite et théorique","Signifiante et proche du réel","Identique pour tous","Sans lien avec le référentiel"],
+   options_ar:["مجردة ونظرية","ذات معنى وقريبة من الواقع","متطابقة للجميع","بدون علاقة بالمرجعية"],
+   options_en:["Abstract and theoretical","Meaningful and close to reality","Identical for everyone","Unrelated to the framework"],correctIndex:1,diff:3}
+];
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function loadQuestions(challengeId){
+  if(challengeId){
+    var stored = localStorage.getItem(challengeId);
+    if(stored){
+      try{
+        var d = JSON.parse(stored);
+        var qs = [];
+        (d.rounds||[]).forEach(function(r){
+          (r.questions||[]).forEach(function(q){
+            if(q.text && q.options && q.options.length>=2){
+              qs.push({
+                text: q.text, text_ar: q.text_ar || q.text, text_en: q.text_en || q.text,
+                options: q.options, options_ar: q.options_ar || q.options, options_en: q.options_en || q.options,
+                correctIndex: q.correctIndex || 0, diff: q.diff || 1
+              });
+            }
+          });
+        });
+        if(qs.length>=3) return qs;
+      }catch(e){}
+    }
+  }
+  return DEFAULT_QUESTIONS;
+}
+
+var GAME_PUBLISH_KEY = "challenge_plant_grow";
+var GAME_SAVES_KEY = "challenge_plant_grow_saves";
+var _selectedCompetence = "";
+
+function _extractCompetences(text){
+  if(!text)return[];
+  var seen={},result=[];
+  var patterns=[
+    /-\s*(?:compétence visée|competence visee|compétence|competence)\s*:\s*([^\n]+)/gi,
+    /(?:compétence visée|competence visee|compétence|competence)\s*:\s*([^\n]+)/gi,
+    /-\s*(?:target competency|competency)\s*:\s*([^\n]+)/gi,
+    /(?:target competency|competency)\s*:\s*([^\n]+)/gi,
+    /-\s*(?:الكفاءة المستهدفة|الكفاءة)\s*:\s*([^\n]+)/gi,
+    /(?:الكفاءة المستهدفة|الكفاءة)\s*:\s*([^\n]+)/gi
+  ];
+  for(var pi=0;pi<patterns.length;pi++){
+    var re=new RegExp(patterns[pi].source,'gi'),m;
+    while((m=re.exec(text))!==null){
+      if(m[1]&&m[1].trim().length>3){
+        var val=m[1].trim().replace(/^["'\-—\s\*_]+|["'\-—\s\*_]+$/g,'').replace(/\*+/g,'').replace(/_+/g,'');
+        if(val.length>3&&val!=='—'&&!seen[val]){seen[val]=true;result.push(val);}
+      }
+    }
+  }
+  var fallbackPatterns=[
+    /(?:sur la compétence|sur le thème|sur le sujet|thème\s*:|sujet\s*:|au sujet de|concernant)\s+["“]?([^"”\n]{4,60})["”]?/gi,
+    /(?:compétence|competence|skill)\s+["“]?([^"”\n]{4,60})["”]?/gi,
+    /(?:about|regarding|concerning|topic\s*:)\s+["“]?([^"”\n]{4,60})["”]?/gi,
+    /(?:حول|موضوع|بخصوص|الكفاءة)\s+["“]?([^"”\n]{4,60})["”]?/gi,
+    /génère?\s+(?:un\s+)?(?:challenge|quiz|scénario|scenario|cours|séquence)\s+(?:sur|de|pour|about)\s+["“]?([^"”\n]{4,60})["”]?/gi,
+    /cr[éeé]e?\s+(?:un\s+)?(?:challenge|quiz|scénario|scenario|cours)\s+(?:sur|de|pour|about)\s+["“]?([^"”\n]{4,60})["”]?/gi
+  ];
+  for(var fi=0;fi<fallbackPatterns.length;fi++){
+    var fre=new RegExp(fallbackPatterns[fi].source,'gi'),fm;
+    while((fm=fre.exec(text))!==null){
+      if(fm[1]&&fm[1].trim().length>3){
+        var fv=fm[1].trim().replace(/^["'\-—\s\*_]+|["'\-—\s\*_]+$/g,'').replace(/\*+/g,'').replace(/_+/g,'');
+        if(fv.length>3&&fv!=='—'&&!seen[fv]){seen[fv]=true;result.push(fv);}
+      }
+    }
+  }
+  if(result.length===0){try{var g=JSON.parse(localStorage.getItem('gammaData')||'{}');if(g&&g.title&&g.title.length>3)result.push(g.title);}catch(e){}}
+  return result;
+}
+
+function loadCompetenceList(){
+  var listEl=document.getElementById("competenceList");
+  if(!listEl)return;
+  try{
+    var allConvs=JSON.parse(localStorage.getItem('ai_conversations')||'[]');
+    if(!allConvs.length){listEl.innerHTML='<div style="padding:8px;text-align:center;color:var(--green-dim);font-size:11px;">Aucune conversation trouvée.</div>';return;}
+    var html='';
+    allConvs.slice(0,10).forEach(function(c,idx){
+      var combined='';
+      (c.messages||[]).forEach(function(m){
+        var txt=m.content||'';
+        if(txt&&m.role==='user')combined+='\n'+txt+'\n';
+      });
+      var competences=_extractCompetences(combined);
+      if(!competences.length)return;
+      var title=c.title||'Conversation';
+      html+='<div style="padding:6px 8px;border-bottom:1px solid var(--line);cursor:pointer;" class="conv-competence" data-conv="'+idx+'">'
+        +'<div style="font-size:11px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(title)+'</div>'
+        +'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:2px;">';
+      competences.forEach(function(cp){
+        html+='<span class="comp-badge" style="background:var(--accent-glow,#1a2a1a);color:var(--accent,#4dff88);padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;display:inline-block;">🎯 '+esc(cp)+'</span>';
+      });
+      html+='</div></div>';
+    });
+    if(!html)html='<div style="padding:8px;text-align:center;color:var(--green-dim);font-size:11px;">Aucune compétence trouvée.</div>';
+    listEl.innerHTML=html;
+    listEl.querySelectorAll('.comp-badge').forEach(function(el){
+      el.addEventListener('click',function(e){
+        e.stopPropagation();
+        var comp=this.textContent.replace('🎯 ','').trim();
+        document.getElementById("cfgCompetence").value=comp;
+        _selectedCompetence=comp;
+      });
+    });
+  }catch(e){}
+}
+
+function getGameConfig(){
+  var comp=document.getElementById("cfgCompetence");
+  var diff=document.getElementById("cfgDifficulty");
+  var qty=document.getElementById("cfgQuestionCount");
+  return{
+    competence:(comp?comp.value:"").trim()||"APC",
+    difficulty:parseInt(diff?diff.value:2)||2,
+    questionCount:parseInt(qty?qty.value:8)||8
+  };
+}
+
+function generateQuestionsForCompetence(competence, count, difficulty){
+  return new Promise(function(resolve){
+    var matched=[];
+    for(var i=0;i<localStorage.length;i++){
+      var key=localStorage.key(i);
+      if(key.indexOf("challenge_")!==0||key===GAME_PUBLISH_KEY)continue;
+      try{
+        var d=JSON.parse(localStorage.getItem(key));
+        if(d.theme&&competence.toLowerCase().includes(d.theme.toLowerCase().slice(0,20))){
+          (d.rounds||[]).forEach(function(r){
+            (r.questions||[]).forEach(function(q){matched.push(q);});
+          });
+        }
+      }catch(e){}
+    }
+    if(matched.length>=count){
+      matched=matched.filter(function(q){return (q.diff||1)<=difficulty;});
+      if(matched.length<count)matched=matched.concat(matched).slice(0,count);
+      else matched=matched.slice(0,count);
+      resolve(matched);
+      return;
+    }
+    var gqKey=null;
+    try{gqKey=localStorage.getItem('gq_key')||localStorage.getItem('groq_key')||localStorage.getItem('groq_api_key')||'';}catch(e){}
+    if(!gqKey||gqKey.length<10){resolve(null);return;}
+    var prompt="Génère exactement "+count+" questions à choix multiples (QCM) sur le thème: \""+competence+"\". "
+      +"Chaque question doit avoir 4 options dont une seule correcte. "
+      +"Retourne UNIQUEMENT un tableau JSON valide sans texte avant/après, au format: "
+      +'[{"text":"Question?","options":["A","B","C","D"],"correctIndex":0,"diff":'+difficulty+',"text_ar":"ترجمة","text_en":"Translation","options_ar":["أ","ب","ت","ث"],"options_en":["A","B","C","D"]}]';
+    fetch("https://api.groq.com/openai/v1/chat/completions",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+gqKey},
+      body:JSON.stringify({model:"llama-3.3-70b-versatile",messages:[{role:"system",content:"Tu génères des QCM au format JSON uniquement."},{role:"user",content:prompt}],max_tokens:4096,temperature:0.7})
+    }).then(function(r){return r.json();}).then(function(j){
+      try{
+        var txt=j.choices[0].message.content||"[]";
+        var start=txt.indexOf("["),end=txt.lastIndexOf("]");
+        if(start>=0&&end>start)txt=txt.substring(start,end+1);
+        var qs=JSON.parse(txt);
+        if(qs&&qs.length>0){resolve(qs);return;}
+      }catch(e){}
+      resolve(null);
+    }).catch(function(){resolve(null);});
+  });
+}
+
+function generatePin(){
+  var chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",pin="";
+  for(var i=0;i<6;i++)pin+=chars[Math.floor(Math.random()*chars.length)];
+  return pin;
+}
+function loadSaves(){
+  try{return JSON.parse(localStorage.getItem(GAME_SAVES_KEY)||'[]');}catch(e){return [];}
+}
+function saveSaves(arr){
+  localStorage.setItem(GAME_SAVES_KEY,JSON.stringify(arr));
+  var uid=localStorage.getItem('sb_user_id');
+  if(uid&&_sb){try{_sb.from('game_saves').delete().eq('user_id',uid).eq('game_type','plant').then(function(){_sb.from('game_saves').insert({user_id:uid,game_type:'plant',save_data:arr}).then();});}catch(e){}}
+}
+function syncSavesFromServer(){
+  var uid=localStorage.getItem('sb_user_id');
+  if(!uid||!_sb)return;
+  _sb.from('game_saves').select('save_data').eq('user_id',uid).eq('game_type','plant').limit(1).then(function(resp){
+    if(!resp.error&&resp.data&&resp.data.length>0&&resp.data[0].save_data){
+      var serverSaves=resp.data[0].save_data;
+      if(Array.isArray(serverSaves)&&serverSaves.length>0){
+        localStorage.setItem(GAME_SAVES_KEY,JSON.stringify(serverSaves));
+        renderSaveList();
+      }
+    }
+  }).catch(function(){});
+}
+function saveGame(){
+  var cfg=getGameConfig();
+  showToast("🤖 Génération des questions sur \""+cfg.competence+"\"...");
+  generateQuestionsForCompetence(cfg.competence,cfg.questionCount,cfg.difficulty).then(function(aiQs){
+    var questions;
+    if(aiQs&&aiQs.length>=3)questions=aiQs;
+    else{
+      questions=loadQuestions("");
+      questions=questions.filter(function(q){return (q.diff||1)<=cfg.difficulty;});
+      if(questions.length<cfg.questionCount)questions=questions.concat(questions).slice(0,cfg.questionCount);
+      else questions=questions.slice(0,cfg.questionCount);
+    }
+    var pin=generatePin();
+    var saves=loadSaves();
+    while(saves.some(function(s){return s.pin===pin;}))pin=generatePin();
+    var trainerId = localStorage.getItem('sb_user_id')||'';
+    var d={
+      id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),
+      title:"Fais pousser ta plante",
+      theme:cfg.competence,
+      specialty:"APC",
+      difficulty:cfg.difficulty,
+      questionCount:cfg.questionCount,
+      pin:pin,
+      trainer_id:trainerId,
+      rounds:[{name:"Round 1",questions:questions}],
+      savedAt:new Date().toISOString()
+    };
+    saves.push(d);
+    saveSaves(saves);
+    localStorage.setItem(GAME_PUBLISH_KEY,JSON.stringify(d));
+    showSaveResult(d);
+    renderSaveList();
+  });
+}
+function showSaveResult(d){
+  var sec=document.getElementById("gameSaveResult");
+  var pinEl=document.getElementById("challengePinDisplay");
+  var qrImg=document.getElementById("challengeQRImg");
+  if(!sec||!pinEl||!qrImg)return;
+  sec.style.display="block";
+  var pin=d.pin||"";
+  pinEl.textContent=pin;
+  var count=(d.rounds&&d.rounds[0]&&d.rounds[0].questions)?d.rounds[0].questions.length:8;
+  var link=window.location.origin+window.location.pathname+'?challenge_pin='+pin+'&comp='+encodeURIComponent(d.theme||'')+'&diff='+(d.difficulty||2)+'&count='+count+'&t_id='+encodeURIComponent(d.trainer_id||'');
+  qrImg.src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(link);
+}
+function _h(s){return String(s||'').replace(/[<>&"']/g,function(c){return{'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":"&#39;"}[c]||c;});}
+function renderSaveList(){
+  var wrap=document.getElementById("saveListWrap");
+  var list=document.getElementById("saveList");
+  if(!wrap||!list)return;
+  var saves=loadSaves();
+  var currentUserId=localStorage.getItem('sb_user_id')||'';
+  if(currentUserId)saves=saves.filter(function(s){return s&&s.trainer_id===currentUserId;});
+  if(saves.length===0){wrap.style.display="none";return;}
+  wrap.style.display="block";
+  var html='';
+  saves.forEach(function(s,i){
+    var diffLabel=["Facile","Moyen","Difficile"][(s.difficulty||2)-1]||"Moyen";
+    var date=s.savedAt?new Date(s.savedAt).toLocaleDateString():"";
+    html+='<div class="save-item" data-idx="'+i+'" style="display:flex;align-items:center;justify-content:space-between;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:8px 10px;margin-bottom:6px;">'
+      +'<div style="flex:1;min-width:0;">'
+      +'<div style="font-size:13px;font-weight:600;color:var(--green);">'+_h(s.theme||'—')+'</div>'
+      +'<div style="font-size:10px;color:var(--text-dim);margin-top:2px;">PIN: <b style="color:var(--amber);font-family:monospace;">'+_h(s.pin)+'</b> · '+_h(diffLabel)+' · '+s.questionCount+'Q · '+date+'</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:4px;flex-shrink:0;">'
+      +'<button class="btn save-play-btn" data-idx="'+i+'" style="font-size:10px;padding:5px 8px;min-height:0;width:auto;">🌱 Jouer</button>'
+      +'<button class="btn save-del-btn" data-idx="'+i+'" style="font-size:10px;padding:5px 8px;min-height:0;width:auto;background:transparent;border-color:var(--red);color:var(--red);">🗑</button>'
+      +'</div></div>';
+  });
+  list.innerHTML=html;
+  list.querySelectorAll(".save-play-btn").forEach(function(b){b.addEventListener("click",function(){loadSave(parseInt(b.dataset.idx));});});
+  list.querySelectorAll(".save-del-btn").forEach(function(b){b.addEventListener("click",function(){deleteSave(parseInt(b.dataset.idx));});});
+}
+function loadSave(idx){
+  var saves=loadSaves();
+  var s=saves[idx];if(!s)return;
+  var d=s;
+  localStorage.setItem(GAME_PUBLISH_KEY,JSON.stringify(d));
+  document.getElementById("cfgCompetence").value=d.theme||'';
+  document.getElementById("cfgDifficulty").value=d.difficulty||2;
+  var cnt=(d.rounds&&d.rounds[0]&&d.rounds[0].questions)?d.rounds[0].questions.length:d.questionCount||8;
+  document.getElementById("cfgQuestionCount").value=cnt;
+  SETTINGS.qPerGame=cnt;
+  showSaveResult(d);
+  showToast('📂 "'+(d.theme||'Sans titre')+'" chargée.');
+}
+function deleteSave(idx){
+  if(!confirm("Supprimer cette sauvegarde ?"))return;
+  var saves=loadSaves();
+  saves.splice(idx,1);
+  saveSaves(saves);
+  renderSaveList();
+  showToast("🗑 Sauvegarde supprimée.");
+}
+
+/* ===== AUDIO ===== */
+const Audio = (()=>{
+  let ctx=null, master=null, musicG=null, sfxG=null, muted=false, musicTimer=null, mood="calm";
+  function init(){ if(ctx) return;
+    ctx=new(window.AudioContext||window.webkitAudioContext)();
+    master=ctx.createGain(); master.gain.value=0.9; master.connect(ctx.destination);
+    musicG=ctx.createGain(); musicG.gain.value=0.3; musicG.connect(master);
+    sfxG=ctx.createGain(); sfxG.gain.value=0.8; sfxG.connect(master);
+  }
+  function now(){return ctx.currentTime;}
+  function tone(f,t,d,vol=1,g=null){
+    var o=ctx.createOscillator(),gg=ctx.createGain();
+    o.type=t; o.frequency.setValueAtTime(f,now());
+    o.connect(gg); gg.connect(g||sfxG);
+    gg.gain.setValueAtTime(0,now());
+    gg.gain.linearRampToValueAtTime(vol,now()+0.01);
+    gg.gain.linearRampToValueAtTime(vol*0.6,now()+d*0.3);
+    gg.gain.linearRampToValueAtTime(0,now()+d);
+    o.start(); o.stop(now()+d+0.05);
+    return o;
+  }
+  function noise(dur,vol=1,freq=2000,type="highpass"){
+    var sz=ctx.sampleRate*dur,buf=ctx.createBuffer(1,sz,ctx.sampleRate),dta=buf.getChannelData(0);
+    for(var i=0;i<sz;i++) dta[i]=(Math.random()*2-1)*(1-i/sz);
+    var src=ctx.createBufferSource(); src.buffer=buf;
+    var filt=ctx.createBiquadFilter(); filt.type=type; filt.frequency.value=freq;
+    var g=ctx.createGain(); src.connect(filt); filt.connect(g); g.connect(sfxG);
+    g.gain.setValueAtTime(0,now()); g.gain.linearRampToValueAtTime(vol,now()+0.005);
+    g.gain.linearRampToValueAtTime(0,now()+dur);
+    src.start(); src.stop(now()+dur+0.05);
+  }
+  function sfx(name){
+    if(!ctx)init();
+    if(muted)return;
+    if(ctx.state==="suspended")ctx.resume();
+    switch(name){
+      case"click":tone(880,"square",0.06,0.3);break;
+      case"water":tone(1200,"sine",0.2,0.3);setTimeout(function(){tone(900,"sine",0.15,0.2);},80);noise(0.1,0.08,6000);break;
+      case"pour":setTimeout(function(){tone(600,"sine",0.3,0.2);},0);setTimeout(function(){tone(500,"sine",0.25,0.15);},100);setTimeout(function(){tone(700,"sine",0.2,0.15);},200);break;
+      case"grow":tone(440,"triangle",0.3,0.25);setTimeout(function(){tone(660,"triangle",0.25,0.25);},120);break;
+      case"correct":tone(523,"sine",0.14,0.35);setTimeout(function(){tone(784,"sine",0.18,0.35);},90);setTimeout(function(){tone(1046,"sine",0.22,0.35);},180);break;
+      case"wrong":tone(220,"sawtooth",0.3,0.4,sfxG);break;
+      case"countdown":tone(660,"square",0.09,0.2);break;
+      case"victory":[523,659,784,1046,1318].forEach(function(f,i){setTimeout(function(){tone(f,"triangle",0.5,0.25);},i*120);});break;
+      case"defeat":[400,340,280,200].forEach(function(f,i){setTimeout(function(){tone(f,"sawtooth",0.4,0.25);},i*160);});break;
+      case"butterfly":tone(1800,"sine",0.08,0.1);setTimeout(function(){tone(2000,"sine",0.08,0.1);},60);break;
+      case"flower":tone(880,"sine",0.4,0.3);setTimeout(function(){tone(1100,"sine",0.35,0.25);},150);setTimeout(function(){tone(1320,"sine",0.3,0.2);},300);break;
+    }
+  }
+  function scheduleMusic(){
+    if(muted||!ctx) return;
+    var scales={calm:[261.6,293.7,329.6,349.2,392],heroic:[329.6,392,440,523,587],tense:[220,233.1,261.6,277.2,311]};
+    var scale=scales[mood]||scales.calm;
+    var f=scale[Math.floor(Math.random()*scale.length)];
+    var dur=mood==="tense"?1.5:2.8;
+    var o=ctx.createOscillator(),g=ctx.createGain();
+    o.type="sine";
+    o.frequency.value=f/2; o.connect(g); g.connect(musicG);
+    g.gain.setValueAtTime(0,now());
+    g.gain.linearRampToValueAtTime(0.12,now()+dur*0.3);
+    g.gain.linearRampToValueAtTime(0,now()+dur);
+    o.start(now()); o.stop(now()+dur+0.1);
+    var harm=ctx.createOscillator();
+    harm.type="sine"; harm.frequency.value=f/4; harm.connect(g);
+    harm.start(now()); harm.stop(now()+dur+0.1);
+    musicTimer=setTimeout(scheduleMusic,dur*1000*0.7);
+  }
+  function startMusic(){if(!musicTimer)scheduleMusic();}
+  function stopMusic(){if(musicTimer){clearTimeout(musicTimer);musicTimer=null;}}
+  function setMood(m){mood=m;}
+  var _duckVol=0.3;
+  function duckMusic(v){if(musicG){_duckVol=musicG.gain.value;musicG.gain.linearRampToValueAtTime(v,now()+0.15);}}
+  function restoreMusic(){if(musicG)musicG.gain.linearRampToValueAtTime(_duckVol,now()+0.3);}
+  function toggleMute(){muted=!muted;if(master)master.gain.value=muted?0:0.9;return muted;}
+  return{init,sfx,startMusic,stopMusic,setMood,duckMusic,restoreMusic,toggleMute,isMuted:function(){return muted;}};
+})();
+
+/* ===== TTS ===== */
+function speakIntro(){
+  if(!window.speechSynthesis)return;
+  stopSpeech();
+  Audio.duckMusic(0.05);
+  var text=t("introText");
+  var u=new SpeechSynthesisUtterance(text);
+  u.lang={fr:"fr-FR",ar:"ar-SA",en:"en-US"}[LANG]||"fr-FR";
+  u.rate=0.85;u.pitch=1;u.volume=1;
+  try{
+    var voices=window.speechSynthesis.getVoices();
+    if(voices&&voices.length){
+      var pf={fr:"fr",ar:"ar",en:"en"}[LANG]||"fr";
+      for(var i=0;i<voices.length;i++){
+        if(voices[i].lang.indexOf(pf)!==0)continue;
+        var n=voices[i].name.toLowerCase();
+        if(n.indexOf("zira")>=0||n.indexOf("sara")>=0||n.indexOf("amelie")>=0||n.indexOf("hortense")>=0||n.indexOf("samantha")>=0||n.indexOf("karen")>=0||n.indexOf("female")>=0||n.indexOf("google")>=0){
+          u.voice=voices[i];break;
+        }
+      }
+      if(!u.voice){
+        for(var i=0;i<voices.length;i++){
+          if(voices[i].lang.indexOf(pf)===0){u.voice=voices[i];break;}
+        }
+      }
+    }
+  }catch(e){}
+  u.onend=function(){Audio.restoreMusic();};
+  u.onerror=function(){Audio.restoreMusic();};
+  window.speechSynthesis.speak(u);
+}
+function stopSpeech(){
+  if(window.speechSynthesis)try{window.speechSynthesis.cancel();}catch(e){}
+  try{Audio.restoreMusic();}catch(e){}
+}
+
+/* ===== CANVAS ===== */
+var bgC=document.getElementById("bgCanvas"),fxC=document.getElementById("fxCanvas");
+var bctx=bgC.getContext("2d"),fctx=fxC.getContext("2d");
+var W=0,H=0,DPR=Math.min(2,window.devicePixelRatio||1);
+function resize(){
+  W=window.innerWidth;H=window.innerHeight;
+  [bgC,fxC].forEach(function(c){c.width=W*DPR;c.height=H*DPR;c.style.width=W+"px";c.style.height=H+"px";});
+  bctx.setTransform(DPR,0,0,DPR,0,0);fctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener("resize",resize);resize();
+
+/* ===== BACKGROUND ===== */
+const SKY_TINTS=["#cfe8ff","#ffffff","#fff2d6","#d8f0ff","#ffe0e0"];
+var clouds=[];
+function initClouds(){
+  clouds=[];
+  for(var i=0;i<25;i++) clouds.push({x:Math.random()*W,y:Math.random()*H*0.35,size:4+Math.random()*18,speed:0.1+Math.random()*0.2,alpha:0.08+Math.random()*0.15});
+}
+initClouds();window.addEventListener("resize",initClouds);
+
+var butterflies=[];
+function spawnButterfly(){
+  var x=-20, y=H*0.1+Math.random()*H*0.7;
+  butterflies.push({x:x,y:y,vx:0.6+Math.random()*1.2,vy:(Math.random()-0.5)*0.3,life:1,wingPhase:0,size:8+Math.random()*6});
+}
+function updateButterflies(dt){
+  if(Math.random()<0.005)spawnButterfly();
+  butterflies.forEach(function(b){b.x+=b.vx;b.y+=b.vy;b.wingPhase+=dt*6;b.life=Math.min(1,1-(b.x-W)/W);});
+  butterflies=butterflies.filter(function(b){return b.x<W+20&&b.life>0;});
+}
+function drawButterflies(){
+  butterflies.forEach(function(b){
+    var a=Math.max(0,b.life),w=0.4+Math.abs(Math.sin(b.wingPhase))*0.6;
+    fctx.save();fctx.translate(b.x,b.y);fctx.globalAlpha=a*0.7;
+    fctx.fillStyle="#ff88cc";
+    fctx.beginPath();fctx.ellipse(-5,0,5*w,4,0,0,Math.PI*2);fctx.fill();
+    fctx.beginPath();fctx.ellipse(5,0,5*w,4,0,0,Math.PI*2);fctx.fill();
+    fctx.fillStyle="#3a1a0a";
+    fctx.beginPath();fctx.ellipse(0,0,1.5,5,0,0,Math.PI*2);fctx.fill();
+    fctx.globalAlpha=1;fctx.restore();
+  });
+}
+
+var bees=[];
+function spawnBee(){
+  var x=Math.random()*W,y=H*0.4+Math.random()*H*0.5;
+  bees.push({x:x,y:y,vx:(Math.random()-0.5)*1.5,vy:-0.2-Math.random()*0.5,life:2,wingPhase:0});
+}
+function updateBees(dt){
+  if(Math.random()<0.003)spawnBee();
+  bees.forEach(function(b){b.x+=b.vx;b.y+=b.vy;b.wingPhase+=dt*12;b.life-=dt*0.05;});
+  bees=bees.filter(function(b){return b.y>0&&b.y<H&&b.life>0;});
+}
+function drawBees(){
+  bees.forEach(function(b){
+    var a=Math.max(0,Math.min(1,b.life)),ww=0.3+Math.abs(Math.sin(b.wingPhase))*0.7;
+    fctx.save();fctx.translate(b.x,b.y);fctx.globalAlpha=a*0.6;
+    fctx.fillStyle="rgba(200,230,255,0.4)";
+    fctx.beginPath();fctx.ellipse(-4,0,4*ww,3,0,0,Math.PI*2);fctx.fill();
+    fctx.beginPath();fctx.ellipse(4,0,4*ww,3,0,0,Math.PI*2);fctx.fill();
+    fctx.fillStyle="#ffcc00";
+    fctx.beginPath();fctx.ellipse(0,0,3,5,0,0,Math.PI*2);fctx.fill();
+    fctx.fillStyle="#1a1a0a";
+    fctx.beginPath();fctx.rect(-1,-2,2,1.5);fctx.fill();
+    fctx.beginPath();fctx.rect(-1,1.5,2,1.5);fctx.fill();
+    fctx.globalAlpha=1;fctx.restore();
+  });
+}
+
+var particles=[];
+function spawnParticles(x,y,count,opts){
+  opts=opts||{};var cs=opts.colorSet||["#88ff66","#66dd44","#aaff88"];
+  var spd=opts.speed||3,life=opts.life||0.8,sz=opts.size||3,grav=opts.gravity||0;
+  var shape=opts.shape||"circle",spread=opts.spread||Math.PI*2;
+  for(var i=0;i<count;i++){
+    var ang=Math.random()*spread-spread/2,sp=spd*(0.3+Math.random()*0.9);
+    particles.push({x:x,y:y,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp,life:life,maxLife:life,size:sz*(0.5+Math.random()),color:cs[Math.floor(Math.random()*cs.length)],gravity:grav,shape:shape,rot:Math.random()*Math.PI*2,rotSpeed:(Math.random()-0.5)*0.3});
+  }
+}
+var shockwaves=[];
+function spawnShockwave(x,y,color,maxR,dur){
+  maxR=maxR||90;dur=dur||0.5;
+  shockwaves.push({x:x,y:y,color:color,r:4,maxR:maxR,life:dur,maxLife:dur});
+}
+function updateShockwaves(dt){
+  shockwaves.forEach(function(s){s.life-=dt;s.r=s.maxR*(1-s.life/s.maxLife);});
+  shockwaves=shockwaves.filter(function(s){return s.life>0;});
+}
+function drawShockwaves(){
+  shockwaves.forEach(function(s){
+    var a=Math.max(0,s.life/s.maxLife);
+    fctx.beginPath();fctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    fctx.strokeStyle=s.color;fctx.globalAlpha=a*0.8;fctx.lineWidth=3;
+    fctx.shadowBlur=18;fctx.shadowColor=s.color;fctx.stroke();
+  });
+  fctx.globalAlpha=1;fctx.shadowBlur=0;
+}
+function updateParticles(dt){
+  particles.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.vy+=p.gravity;p.vx*=0.98;p.vy*=0.98;p.rot+=p.rotSpeed;p.life-=dt;});
+  particles=particles.filter(function(p){return p.life>0;});
+}
+function drawParticles(){
+  particles.forEach(function(p){
+    var a=Math.max(0,p.life/p.maxLife);
+    fctx.globalAlpha=a;fctx.fillStyle=p.color;
+    fctx.shadowBlur=12;fctx.shadowColor=p.color;
+    if(p.shape==="leaf"){
+      fctx.save();fctx.translate(p.x,p.y);fctx.rotate(p.rot);
+      fctx.beginPath();fctx.ellipse(0,0,p.size*a,p.size*a*0.5,0,0,Math.PI*2);fctx.fill();fctx.restore();
+    }else if(p.shape==="spark"){
+      fctx.strokeStyle=p.color;fctx.lineWidth=Math.max(1,p.size*a*0.5);
+      fctx.beginPath();fctx.moveTo(p.x,p.y);fctx.lineTo(p.x-p.vx*1.8,p.y-p.vy*1.8);fctx.stroke();
+    }else{fctx.beginPath();fctx.arc(p.x,p.y,p.size*a,0,Math.PI*2);fctx.fill();}
+  });
+  fctx.globalAlpha=1;fctx.shadowBlur=0;
+}
+
+
+
+var shake={x:0,y:0,t:0,mag:0};
+function triggerShake(mag,dur){shake.mag=mag;shake.t=dur;}
+function updateShake(dt){
+  if(shake.t>0){shake.t-=dt;shake.x=(Math.random()*2-1)*shake.mag;shake.y=(Math.random()*2-1)*shake.mag;shake.mag*=0.9;}
+  else{shake.x=0;shake.y=0;}
+}
+
+var Scene={
+  growthLevel:0,waterMax:5,waterPct:100,mood:"neutral",
+  flowerType:0,showRainbow:false,
+  bloomPct:0,prevStage:0,stageTrans:1
+};
+
+/* ===== PLANT SVG RENDERING (porté depuis Défense Orbitale) ===== */
+const PLANT_STAGE_NAMES=["stageSeed","stageSprout","stageShoot","stagePlant","stageAdult","stageBud","stageFlower"];
+const PLANT_STEM_HEIGHT=[0,20,46,76,112,138,148];
+const PLANT_LEAF_PAIRS=[0,1,1,2,3,3,3];
+const PLANT_HAS_SEED=[true,false,false,false,false,false,false];
+const PLANT_HAS_BUD=[false,false,false,false,false,true,false];
+const PLANT_HAS_FLOWER=[false,false,false,false,false,false,true];
+const PLANT_BASE_X=110,PLANT_BASE_Y=195;
+
+function qP(t,p0,p1,p2){const mt=1-t;return{x:mt*mt*p0.x+2*mt*t*p1.x+t*t*p2.x,y:mt*mt*p0.y+2*mt*t*p1.y+t*t*p2.y};}
+function qTA(t,p0,p1,p2){const dx=2*(1-t)*(p1.x-p0.x)+2*t*(p2.x-p1.x);const dy=2*(1-t)*(p1.y-p0.y)+2*t*(p2.y-p1.y);return Math.atan2(dy,dx)*180/Math.PI;}
+
+function buildPlant(s,anim){
+  var st="";var sh=PLANT_STEM_HEIGHT[s];
+  if(PLANT_HAS_SEED[s])return '<ellipse class="'+(anim?'leaf-pop':'')+'" style="animation-delay:.05s" cx="'+PLANT_BASE_X+'" cy="'+(PLANT_BASE_Y-4)+'" rx="9" ry="6.5" fill="var(--green-dim)"/>';
+  var p0={x:PLANT_BASE_X,y:PLANT_BASE_Y},p1={x:PLANT_BASE_X+14,y:PLANT_BASE_Y-sh*0.55},p2={x:PLANT_BASE_X,y:PLANT_BASE_Y-sh};
+  st+='<path id="stemPath" d="M'+p0.x+','+p0.y+' Q'+p1.x+','+p1.y+' '+p2.x+','+p2.y+'" fill="none" stroke="url(#stemGradPlant)" stroke-width="'+(6+s)+'" stroke-linecap="round"/>';
+  var np=PLANT_LEAF_PAIRS[s];var d=0.22;
+  for(var i=0;i<np;i++){var t=(i+1)/(np+1.4)+(i%2===0?0.02:-0.01);var pt=qP(t,p0,p1,p2);var ang=qTA(t,p0,p1,p2);var ls=13+s*2.2;[1,-1].forEach(function(side){var rot=ang+(side>0?-62:118);st+='<g transform="translate('+pt.x.toFixed(1)+','+pt.y.toFixed(1)+') rotate('+rot.toFixed(1)+')"><ellipse class="'+(anim?'leaf-pop':'')+'" style="animation-delay:'+d.toFixed(2)+'s" cx="'+(ls*0.65).toFixed(1)+'" cy="0" rx="'+ls+'" ry="'+(ls*0.42)+'" fill="url(#leafGradPlant)"/></g>';d+=0.05;});}
+  if(PLANT_HAS_BUD[s]){st+='<g class="'+(anim?'leaf-pop':'')+'" style="animation-delay:.5s"><ellipse cx="'+p2.x+'" cy="'+(p2.y-6)+'" rx="10" ry="15" fill="var(--leaf-light)" stroke="var(--green-dim)" stroke-width="1.5"/><ellipse cx="'+p2.x+'" cy="'+(p2.y-9)+'" rx="6" ry="10" fill="#f3c1d6"/></g>';}
+  if(PLANT_HAS_FLOWER[s]){var pt=7,R=17;for(var i=0;i<pt;i++){var a=(360/pt)*i;st+='<g transform="translate('+p2.x+','+(p2.y-4)+') rotate('+a+') translate('+R+',0)"><ellipse class="'+(anim?'petal-pop':'')+'" style="animation-delay:'+(0.5+i*0.06).toFixed(2)+'s" cx="0" cy="0" rx="18" ry="9.5" fill="#f2a6cf"/></g>';}st+='<circle class="'+(anim?'petal-pop':'')+'" style="animation-delay:.9s" cx="'+p2.x+'" cy="'+(p2.y-4)+'" r="10" fill="var(--flower-gold)"/><circle cx="'+p2.x+'" cy="'+(p2.y-4)+'" r="10" fill="none" stroke="#c98a1f" stroke-width="1.5"/>';}
+  return st;
+}
+
+var _plantPrevStage = -1;
+
+function curStage(){
+  if(!State.run) return 0;
+  return Math.min(6, Math.floor((State.run.correctCount/State.run.total)*7));
+}
+
+function setPlant(s, anim){
+  var g = document.getElementById("plantContent");
+  if(!g) return;
+  var stageChanged = (_plantPrevStage >= 0 && _plantPrevStage !== s);
+  _plantPrevStage = s;
+
+  // Gradual transition: first pulse old plant, then swap
+  if(anim && stageChanged && _plantPrevStage >= 0){
+    var oldGroup = document.getElementById("plantGroup");
+    if(oldGroup){
+      oldGroup.classList.add("growth-glow");
+      var oldRing = document.querySelector(".pod-ring");
+      if(oldRing){oldRing.classList.remove("growing");void oldRing.offsetWidth;oldRing.classList.add("growing");}
+      // Spawn pre-growth particles
+      setTimeout(function(){
+        var cx = W*0.5, cy = H*0.35;
+        spawnParticles(cx, cy, 22, {colorSet:["#4dff88","#7cffaa","#b0ffd0"],speed:5,life:0.9,size:3.5,gravity:-0.6});
+        spawnParticles(cx, cy, 10, {colorSet:["#88ffdd","#e0ffe8"],speed:3.5,life:1.1,size:2.5,shape:"leaf"});
+        spawnShockwave(cx, cy, "#4dff88", 70, 0.5);
+      }, 180);
+    }
+  }
+
+  g.innerHTML = buildPlant(s, anim);
+
+  if(anim){
+    var w = document.getElementById("plantGroup");
+    if(w){
+      w.classList.remove("grow-pop", "growth-glow");
+      void w.offsetWidth;
+      w.classList.add("grow-pop", "growth-glow");
+    }
+    // Animate stem grow
+    var stEl = document.getElementById("stemPath");
+    if(stEl){
+      var l = stEl.getTotalLength();
+      stEl.style.strokeDasharray = l;
+      stEl.style.strokeDashoffset = l;
+      stEl.getBoundingClientRect();
+      stEl.style.transition = "stroke-dashoffset 1.2s ease-out";
+      requestAnimationFrame(function(){
+        stEl.style.strokeDashoffset = "0";
+      });
+    }
+    // Stage change particle burst
+    if(stageChanged){
+      setTimeout(function(){
+        var cx = W*0.5, cy = H*0.35;
+        spawnParticles(cx, cy, 35, {colorSet:["#4dff88","#7cffaa","#aaffcc","#fff"],speed:6,life:1,size:4,gravity:-0.5});
+        spawnParticles(cx, cy, 14, {colorSet:["#88ffdd","#e0ffe8"],speed:4,life:1.3,size:3,shape:"leaf"});
+        spawnShockwave(cx, cy, "#4dff88", 100, 0.6);
+      }, 500);
+    }
+  }
+
+  var badge = document.getElementById("stageBadge");
+  if(badge){
+    var raw = t("growthLabels")[s] || "";
+    badge.textContent = raw.replace(/^[^\s]+\s*/, '').toUpperCase() || "GRAINE";
+    if(stageChanged && anim){
+      badge.style.transform = "scale(0)";
+      void badge.offsetWidth;
+      badge.style.transition = "transform .5s cubic-bezier(.34,1.56,.64,1)";
+      badge.style.transform = "scale(1)";
+      setTimeout(function(){badge.style.transition = "";badge.style.transform = "";}, 600);
+    }
+  }
+}
+
+function renderPlantDrops(){
+  var row=document.getElementById("dropsRow");if(!row)return;
+  var maxDrops=Scene.waterMax||5;
+  var drops=Math.round((State.run?State.run.waterPct:100)/100*maxDrops);
+  row.innerHTML="";
+  for(var i=0;i<maxDrops;i++){var filled=i<drops;row.innerHTML+='<svg class="drop-icon '+(filled?"":"empty")+'" viewBox="0 0 20 24"><path d="M10,1 C10,1 19,13 19,17.5 C19,21.6 15,24 10,24 C5,24 1,21.6 1,17.5 C1,13 10,1 10,1 Z" fill="'+(filled?"#4dff88":"#2a4a2a")+'"/></svg>';}
+}
+
+function pourCan(mega){
+  var c=document.getElementById("canWrap");if(!c)return;
+  c.classList.remove("pour","mega");void c.offsetWidth;c.classList.add("pour");if(mega)c.classList.add("mega");
+}
+
+function wetSoil(){
+  var s=document.getElementById("soilEllipse");if(!s)return;
+  s.setAttribute("fill","var(--soil-wet)");clearTimeout(wetSoil._t);
+  wetSoil._t=setTimeout(function(){s.setAttribute("fill","var(--soil)");},1500);
+}
+
+function dryLeaves(){
+  var g=document.getElementById("plantGroup");if(!g)return;
+  g.classList.add("vintage-filter");clearTimeout(dryLeaves._t);
+  dryLeaves._t=setTimeout(function(){g.classList.remove("vintage-filter");},900);
+}
+
+function growPlantParticles(potX,potY){
+  spawnParticles(potX,potY-60,18,{colorSet:["#4dff88","#7cffaa","#aaffcc"],speed:4,life:0.8,size:3,gravity:-0.5});
+  spawnParticles(potX,potY-60,8,{colorSet:["#88ffdd","#fff"],speed:3,life:1,size:2,shape:"leaf"});
+  spawnShockwave(potX,potY-60,"#4dff88",50,0.4);
+}
+
+function wiltPlantParticles(potX,potY){
+  spawnParticles(potX,potY-60,20,{colorSet:["#a08040","#c8a860","#d4b870"],speed:3,life:0.8,size:3,gravity:0.2});
+}
+
+function drawScene(t){
+  bctx.clearRect(0,0,W,H);
+  var sky=bctx.createLinearGradient(0,0,0,H);
+  if(Scene.mood==="bad"){sky.addColorStop(0,"#c8a878");sky.addColorStop(0.5,"#8a7040");sky.addColorStop(1,"#4a3830");}
+  else if(Scene.mood==="good"){sky.addColorStop(0,"#87ceeb");sky.addColorStop(0.5,"#b8e0f8");sky.addColorStop(1,"#d8f0ff");}
+  else{sky.addColorStop(0,"#a0c8e8");sky.addColorStop(0.5,"#c8e4f8");sky.addColorStop(1,"#e8f4ff");}
+  bctx.fillStyle=sky;bctx.fillRect(0,0,W,H);
+
+  // Clouds
+  clouds.forEach(function(c){
+    c.x-=c.speed;if(c.x<-30)c.x=W+30;
+    bctx.fillStyle="rgba(255,255,255,"+c.alpha+")";
+    bctx.beginPath();bctx.arc(c.x,c.y,c.size*0.5,0,Math.PI*2);bctx.fill();
+    bctx.beginPath();bctx.arc(c.x+c.size*0.4,c.y-c.size*0.2,c.size*0.4,0,Math.PI*2);bctx.fill();
+    bctx.beginPath();bctx.arc(c.x+c.size*0.8,c.y+c.size*0.1,c.size*0.35,0,Math.PI*2);bctx.fill();
+  });
+
+  // Rainbow
+  if(Scene.showRainbow){
+    var rcx=W*0.15,rcy=H*0.85,rR=Math.min(W,H)*0.5;
+    var rcolors=["rgba(255,0,0,0.08)","rgba(255,165,0,0.08)","rgba(255,255,0,0.08)","rgba(0,200,0,0.08)","rgba(0,150,255,0.08)","rgba(75,0,130,0.08)","rgba(200,0,200,0.08)"];
+    for(var ri=0;ri<rcolors.length;ri++){
+      bctx.beginPath();bctx.arc(rcx,rcy,rR-ri*6,Math.PI,Math.PI*2);
+      bctx.strokeStyle=rcolors[ri];bctx.lineWidth=6;bctx.stroke();
+    }
+  }
+
+  // Ground
+  var groundY=H*0.78;
+  var gd=bctx.createLinearGradient(0,groundY,0,H);
+  gd.addColorStop(0,"#5a8a3a");gd.addColorStop(0.3,"#4a7a2a");gd.addColorStop(1,"#3a5a22");
+  bctx.fillStyle=gd;bctx.beginPath();
+  bctx.moveTo(0,groundY);
+  for(var gx=0;gx<=W;gx+=8){bctx.lineTo(gx,groundY+Math.sin(gx*0.02+t*0.0005)*4);}
+  bctx.lineTo(W,H);bctx.lineTo(0,H);bctx.closePath();bctx.fill();
+  // Grass blades
+  bctx.strokeStyle="#3d7a22";bctx.lineWidth=1.2;
+  for(var gi=0;gi<60;gi++){
+    var gxx=Math.random()*W,gyy=groundY+Math.sin(gxx*0.03+t*0.0003)*4;
+    bctx.globalAlpha=0.3+Math.random()*0.4;
+    bctx.beginPath();bctx.moveTo(gxx,gyy);bctx.lineTo(gxx+Math.sin(gxx)*2,gyy-6-Math.random()*8);bctx.stroke();
+  }
+  bctx.globalAlpha=1;
+
+
+}
+
+var lastT=0;
+function loop(t){
+  var dt=Math.min(0.05,(t-lastT)/1000);lastT=t;
+  updateShake(dt);updateParticles(dt);updateShockwaves(dt);
+  updateButterflies(dt);updateBees(dt);
+  drawScene(t);
+  fctx.clearRect(0,0,W,H);fctx.save();fctx.translate(shake.x,shake.y);
+  drawShockwaves();drawParticles();drawButterflies();drawBees();fctx.restore();
+  requestAnimationFrame(loop);
+}
+
+/* ===== OVERLAY ===== */
+function _closeOverlay(id) {
+  var el = document.getElementById(id);
+  if (el) { el.style.opacity = '0'; setTimeout(function() { el.remove(); }, 400); }
+}
+function _createOverlay(id, innerHtml) {
+  var existing = document.getElementById(id);
+  if (existing) existing.remove();
+  var o = document.createElement('div');
+  o.id = id;
+  o.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .4s;backdrop-filter:blur(4px);';
+  o.innerHTML = innerHtml;
+  document.body.appendChild(o);
+  setTimeout(function() { o.style.opacity = '1'; }, 10);
+  return o;
+}
+
+/* ===== SCREENS ===== */
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("active");});
+  var el=document.getElementById(id);if(el)el.classList.add("active");
+}
+function showOverlay(id,show){document.getElementById(id).classList.toggle("active",show);}
+
+/* ===== TOAST ===== */
+function showToast(msg){
+  var el=document.getElementById("toastEl");
+  if(!el){
+    el=document.createElement("div");
+    el.id="toastEl";
+    el.style.cssText="position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#0f1a0e;color:#dce6dc;border:1px solid var(--line);padding:10px 22px;border-radius:6px;font-size:14px;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.5);opacity:0;transition:opacity .3s;pointer-events:none;font-family:var(--font-b);";
+    document.body.appendChild(el);
+  }
+  el.textContent=msg;
+  el.style.opacity="1";
+  clearTimeout(el._t);
+  el._t=setTimeout(function(){el.style.opacity="0";},2500);
+}
+
+/* ===== LOADING ===== */
+var loadMsgsFr=["Préparation du terreau…","Plantation de la graine…","Arrosage initial…","Croissance accélérée…"];
+var loadMsgsAr=["تحضير التربة…","زرع البذرة…","السقي الأولي…","نمو متسارع…"];
+function runLoading(){
+  var circle=document.getElementById("loadCircle"),pctEl=document.getElementById("loadPct"),subEl=document.getElementById("loadSub");
+  var pct=0,msgs=LANG==="ar"?loadMsgsAr:loadMsgsFr,msgI=0;
+  subEl.textContent=msgs[0];
+  var iv=setInterval(function(){
+    pct+=4+Math.random()*8;
+    if(pct>=100){pct=100;clearInterval(iv);setTimeout(function(){showScreen("menuScreen");},300);}
+    circle.setAttribute("stroke-dashoffset",502-(502*pct/100));
+    pctEl.textContent=Math.floor(pct)+"%";
+    var nmi=Math.floor((pct/100)*msgs.length);
+    if(nmi!==msgI&&nmi<msgs.length){msgI=nmi;subEl.textContent=msgs[msgI];}
+  },120);
+}
+
+/* ===== GAME ===== */
+var QUESTIONS=[],SETTINGS={qPerGame:8,baseTime:12};
+var State={screen:"load",playerXP:0,playerLevel:1,badges:{},run:null};
+var XP_PER_LEVEL=120;
+var BADGE_DEFS=[
+  {id:"star",icon:"icoBadgeStar",cond:function(r){return r.bestStreak>=5;}},
+  {id:"leaf",icon:"icoBadgeLeaf",cond:function(r){return r.waterPct>=80;}},
+  {id:"drop",icon:"icoBadgeDrop",cond:function(r){return r.correctCount===r.total;}},
+  {id:"flower",icon:"icoBadgeFlower",cond:function(r){return State.playerLevel>=3;}}
+];
+
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+function startGameWithConfig(cfg){
+  if(!cfg)cfg=getGameConfig();
+  var questions=loadQuestions("");
+  questions=questions.filter(function(q){return (q.diff||1)<=cfg.difficulty;});
+  if(questions.length<cfg.questionCount) questions=questions.concat(questions).slice(0,cfg.questionCount);
+  else questions=questions.slice(0,cfg.questionCount);
+  if(!questions||questions.length<3){
+    showToast("❌ Pas assez de questions.");
+    return;
+  }
+  SETTINGS.qPerGame=cfg.questionCount;
+  startRunWithQuestions(questions,cfg);
+}
+
+function generateAndRunGame(cfg){
+  showToast("🤖 Génération des questions sur \""+cfg.competence+"\"...");
+  generateQuestionsForCompetence(cfg.competence,cfg.questionCount,cfg.difficulty).then(function(qs){
+    if(qs&&qs.length>=3){
+      SETTINGS.qPerGame=cfg.questionCount;
+      startRunWithQuestions(qs,cfg);
+    }else{
+      startGameWithConfig(cfg);
+    }
+  });
+}
+
+function startRunWithQuestions(qs,cfg){
+  QUESTIONS=qs;
+  if(!QUESTIONS||QUESTIONS.length<3){
+    showScreen("menuScreen");showToast(t("noQuestions"));return;
+  }
+  var count=Math.min(SETTINGS.qPerGame,QUESTIONS.length);
+  var shuffled=shuffle([].concat(QUESTIONS)).slice(0,count);
+  State.run={questions:shuffled,idx:0,score:0,waterPct:100,streak:0,bestStreak:0,xpGained:0,correctCount:0,total:shuffled.length,timePerQ:SETTINGS.baseTime,timerId:null,timeLeft:SETTINGS.baseTime,answering:false};
+  Scene.mood="neutral";Scene.growthLevel=0;Scene.waterPct=100;Scene.showRainbow=false;Scene.bloomPct=0;Scene.stageTrans=1;
+  _plantPrevStage = -1; setPlant(0,false);renderPlantDrops();
+  document.getElementById("hud").classList.add("active");
+  Audio.setMood("calm");Audio.startMusic();
+  document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("active");});
+  updateHUDStatic();nextQuestion();
+}
+
+function updateHUDStatic(){
+  document.getElementById("hudScore").textContent=State.run.score;
+  var wPct=State.run.waterPct;
+  var wb=document.getElementById("waterBar");
+  if(wb){wb.style.width=wPct+"%";wb.classList.toggle("danger",wPct<35);}
+  var gb=document.getElementById("growthBar");
+  if(gb){gb.style.width=Math.round((State.run.correctCount/State.run.total)*100)+"%";}
+  document.getElementById("hudStreak").textContent=State.run.streak;
+}
+
+function nextQuestion(){
+  var run=State.run;
+  if(run.idx>=run.questions.length)return endRun(true);
+  var q=run.questions[run.idx];run.answering=false;
+  var isRTL=LANG==="ar";
+  document.getElementById("qText").textContent=isRTL?(q.text_ar||q.text):(LANG==="en"?(q.text_en||q.text):q.text);
+  document.getElementById("qCounter").textContent="Q"+(run.idx+1)+"/"+run.questions.length;
+  document.getElementById("qDiff").textContent="•".repeat(q.diff||1);
+  var opts=isRTL?(q.options_ar||q.options):(LANG==="en"?(q.options_en||q.options):q.options);
+  var wrap=document.getElementById("choices");wrap.innerHTML="";
+  var letters=["A","B","C","D"];
+  opts.forEach(function(c,i){
+    var b=document.createElement("button");b.className="choice-btn";
+    b.innerHTML='<span class="letter">'+letters[i]+'</span><span>'+c+'</span>';
+    b.addEventListener("click",function(){answerQuestion(i,q);});
+    wrap.appendChild(b);
+  });
+  run.timeLeft=Math.max(6,run.timePerQ-Math.min(4,run.streak));
+  startTimer(run.timeLeft);
+}
+
+var timerAnim=null;
+function startTimer(seconds){
+  clearInterval(timerAnim);
+  var circle=document.getElementById("timerCircle"),numEl=document.getElementById("timerNum");
+  var t=seconds,total=seconds;
+  circle.setAttribute("stroke-dashoffset",0);numEl.textContent=Math.ceil(t);
+  timerAnim=setInterval(function(){
+    t-=0.1;
+    if(t<=3&&t>0&&Math.floor(t*10)%5===0)Audio.sfx("countdown");
+    circle.setAttribute("stroke-dashoffset",201*(1-t/total));
+    numEl.textContent=Math.max(0,Math.ceil(t));
+    if(t<=0){clearInterval(timerAnim);if(!State.run.answering)answerQuestion(-1,State.run.questions[State.run.idx]);}
+  },100);
+}
+
+function answerQuestion(choiceIdx,q){
+  var run=State.run;
+  if(run.answering)return;
+  run.answering=true;clearInterval(timerAnim);
+  var correct=choiceIdx===q.correctIndex;
+  var btns=document.querySelectorAll(".choice-btn");
+  btns.forEach(function(b,i){
+    b.classList.add("disabled");
+    if(i===q.correctIndex)b.classList.add("correct");
+    else if(i===choiceIdx)b.classList.add("wrong");
+  });
+  var cx=W*0.5,cy=H*0.45;
+  var fb=document.getElementById("plantFeedback");
+  if(correct){
+    run.correctCount++;run.streak++;run.bestStreak=Math.max(run.bestStreak,run.streak);
+    var gain=80+(q.diff||1)*30+run.streak*8;
+    run.score+=gain;run.xpGained+=18+(q.diff||1)*6;
+    run.waterPct=Math.min(100,run.waterPct+15);
+    var prevLevel=Scene.growthLevel;
+    Scene.growthLevel=Math.min(6,Math.floor(run.correctCount/run.total*7));
+    Scene.mood="good";Scene.waterPct=run.waterPct;
+    var mega=run.streak>0&&run.streak%5===0;
+    setPlant(curStage(),true);pourCan(mega);wetSoil();renderPlantDrops();
+    if(run.streak>=5){Scene.showRainbow=true;setTimeout(function(){Scene.showRainbow=false;},3000);}
+    Audio.sfx("correct");setTimeout(function(){Audio.sfx("water");},100);setTimeout(function(){Audio.sfx("grow");},200);
+    Audio.setMood("heroic");
+    growPlantParticles(cx,cy);
+    showStreakPop(t("streakLabel",run.streak));
+    triggerShake(1,0.1);
+    if(fb){fb.textContent=run.streak>=5?"Arrosage parfait ! Série de 5 → +20 XP bonus":"✓ Bonne réponse !";fb.className="feedback-line good";}
+  }else{
+    run.streak=0;run.waterPct=Math.max(0,run.waterPct-20);
+    Scene.mood="bad";Scene.waterPct=run.waterPct;
+    dryLeaves();renderPlantDrops();
+    Audio.sfx("wrong");Audio.setMood("tense");
+    triggerShake(6,0.3);
+    wiltPlantParticles(cx,cy);
+    flashScreen();
+    if(fb){fb.textContent="✗ Mauvaise réponse";fb.className="feedback-line bad";}
+  }
+  updateHUDStatic();document.getElementById("hudScore").textContent=run.score;
+  setTimeout(function(){
+    if(run.waterPct<=0)return endRun(false);
+    run.idx++;
+    if(run.idx>=run.questions.length)return endRun(true);
+    Scene.mood=run.waterPct>60?"neutral":Scene.mood;
+    nextQuestion();
+  },1500);
+}
+
+function showStreakPop(text){
+  var el=document.getElementById("streakPop");el.textContent=text;
+  el.style.opacity=1;
+  el.animate([{opacity:0,transform:"translate(-50%,10px)"},{opacity:1,transform:"translate(-50%,-10px)"},{opacity:0,transform:"translate(-50%,-24px)"}],{duration:1200,easing:"ease-out"});
+}
+function flashScreen(){
+  var fw=document.getElementById("flashGreen");
+  fw.style.background="#ffcc66";
+  fw.animate([{opacity:0.35},{opacity:0}],{duration:400,easing:"ease-out"});
+}
+
+function endRun(won){
+  clearInterval(timerAnim);Audio.stopMusic();
+  var run=State.run;
+  document.getElementById("hud").classList.remove("active");
+  State.playerXP+=run.xpGained;
+  while(State.playerXP>=State.playerLevel*XP_PER_LEVEL)State.playerLevel++;
+  var evalCtx={bestStreak:run.bestStreak,waterPct:run.waterPct,correctCount:run.correctCount,total:run.total};
+  var newlyUnlocked=[];
+  BADGE_DEFS.forEach(function(b){
+    if(!State.badges[b.id]&&b.cond(evalCtx)){State.badges[b.id]=true;newlyUnlocked.push(b);}
+  });
+  if(won){
+    Audio.sfx("victory");setTimeout(function(){Audio.sfx("flower");},600);Scene.mood="good";Scene.growthLevel=6;
+    setPlant(run.correctCount/run.total>=0.7?6:curStage(),true);
+    document.getElementById("winScore").textContent=run.score;
+    document.getElementById("winStreak").textContent=run.bestStreak;
+    document.getElementById("winSub").textContent=t("winSubText");
+    showOverlay("winScreen",true);
+  }else{
+    Audio.sfx("defeat");Scene.mood="bad";triggerShake(10,0.5);
+    setPlant(0,false);var pg=document.getElementById("plantGroup");if(pg)pg.classList.add("vintage-filter");
+    document.getElementById("loseScore").textContent=run.score;
+    document.getElementById("loseStreak").textContent=run.bestStreak;
+    document.getElementById("loseSub").textContent=t("loseSubText");
+    showOverlay("loseScreen",true);
+  }
+}
+
+/* ===== UI WIRING ===== */
+var lastChallengeId="";
+function ensureAudio(){Audio.init();}
+document.getElementById("btnIntroStart").addEventListener("click",function(){
+  stopSpeech();showOverlay("introScreen",false);Audio.sfx("click");
+  var cfg=getGameConfig();
+  if(cfg.competence&&cfg.competence!=="APC")generateAndRunGame(cfg);
+  else startGameWithConfig(cfg);
+});
+document.getElementById("btnWinReplay").addEventListener("click",function(){showOverlay("winScreen",false);Audio.sfx("click");startGameWithConfig();});
+document.getElementById("btnWinMenu").addEventListener("click",function(){stopSpeech();showOverlay("winScreen",false);showOverlay("introScreen",false);Audio.sfx("click");Audio.stopMusic();Scene.mood="neutral";showScreen("menuScreen");});
+document.getElementById("btnLoseRetry").addEventListener("click",function(){showOverlay("loseScreen",false);Audio.sfx("click");startGameWithConfig();});
+document.getElementById("btnLoseMenu").addEventListener("click",function(){stopSpeech();showOverlay("loseScreen",false);showOverlay("introScreen",false);Audio.sfx("click");Audio.stopMusic();Scene.mood="neutral";showScreen("menuScreen");});
+document.getElementById("btnQuit").addEventListener("click",function(){
+  stopSpeech();
+  if(State.run){clearInterval(timerAnim);Audio.stopMusic();document.getElementById("hud").classList.remove("active");}
+  showOverlay("winScreen",false);showOverlay("loseScreen",false);showOverlay("introScreen",false);
+  Scene.mood="neutral";showScreen("menuScreen");
+});
+document.getElementById("btnTestGame").addEventListener("click",function(){
+  Audio.sfx("click");
+  var cfg=getGameConfig();
+  var te=document.getElementById("introText");
+  if(te)te.textContent='🎯 '+cfg.competence+'\n\n'+t("introText");
+  showOverlay("introScreen",true);setTimeout(speakIntro,400);
+  lastChallengeId="";
+});
+document.getElementById("btnSaveGame").addEventListener("click",function(){
+  Audio.sfx("click");
+  saveGame();
+});
+document.getElementById("btnLearnerPlay").addEventListener("click",function(){
+  Audio.sfx("click");
+  var pin=document.getElementById("learnerPin").value.trim().toUpperCase();
+  if(!pin||pin.length<4){showToast("❌ "+t("learnerPinError"));return;}
+  var sp=new URLSearchParams(window.location.search);
+  var urlPin=sp.get('challenge_pin');
+  var aComp=sp.get('comp'),aDiff=sp.get('diff'),aCount=sp.get('count');
+  if(urlPin&&pin===urlPin.toUpperCase()&&aComp&&aDiff&&aCount){
+    var aCfg={competence:aComp,difficulty:parseInt(aDiff)||2,questionCount:parseInt(aCount)||8};
+    document.getElementById("cfgCompetence").value=aCfg.competence;
+    document.getElementById("cfgDifficulty").value=aCfg.difficulty;
+    document.getElementById("cfgQuestionCount").value=aCfg.questionCount;
+    SETTINGS.qPerGame=aCfg.questionCount;
+    var te=document.getElementById("introText");
+    if(te)te.textContent='🎯 '+aCfg.competence+'\n\n'+t("introText");
+    showOverlay("introScreen",true);setTimeout(speakIntro,400);lastChallengeId="";
+    return;
+  }
+  try{
+    var raw=localStorage.getItem(GAME_PUBLISH_KEY);
+    if(raw){
+      var d=JSON.parse(raw);
+      if(d.pin&&pin===d.pin.toUpperCase()){
+        document.getElementById("cfgCompetence").value=d.theme||'';
+        document.getElementById("cfgDifficulty").value=d.difficulty||2;
+        var cnt=(d.rounds&&d.rounds[0]&&d.rounds[0].questions)?d.rounds[0].questions.length:SETTINGS.qPerGame;
+        document.getElementById("cfgQuestionCount").value=cnt;
+        SETTINGS.qPerGame=cnt;
+        var cfg={competence:d.theme||'',difficulty:d.difficulty||2,questionCount:cnt};
+        var te=document.getElementById("introText");
+        if(te)te.textContent='🎯 '+cfg.competence+'\n\n'+t("introText");
+        showOverlay("introScreen",true);setTimeout(speakIntro,400);lastChallengeId="";
+        return;
+      }
+    }
+  }catch(e){}
+  showToast("❌ "+t("learnerPinError"));
+});
+function _gameLink(d){var p=d.pin||'';var c=(d.rounds&&d.rounds[0]&&d.rounds[0].questions)?d.rounds[0].questions.length:SETTINGS.qPerGame;return window.location.origin+window.location.pathname+'?challenge_pin='+encodeURIComponent(p)+'&comp='+encodeURIComponent(d.theme||'')+'&diff='+(d.difficulty||2)+'&count='+c+'&t_id='+encodeURIComponent(d.trainer_id||'');}
+document.getElementById("btnCopyChallengeLink").addEventListener("click",function(){
+  try{
+    var raw=localStorage.getItem(GAME_PUBLISH_KEY);
+    if(!raw)return;
+    var d=JSON.parse(raw);
+    var link=_gameLink(d);
+    navigator.clipboard.writeText(link).then(function(){showToast('📋 '+t("btnCopy")+' !');}).catch(function(){});
+  }catch(e){}
+});
+document.getElementById("btnDownloadQR").addEventListener("click",function(){
+  try{
+    var raw=localStorage.getItem(GAME_PUBLISH_KEY);
+    if(!raw)return;
+    var d=JSON.parse(raw);
+    var link=_gameLink(d);
+    var url='https://api.qrserver.com/v1/create-qr-code/?size=400x400&data='+encodeURIComponent(link);
+    var a=document.createElement('a');a.href=url;a.download='qr_plant_grow_'+d.pin+'.png';a.click();
+  }catch(e){}
+});
+document.getElementById("btnQuitToPlatform").addEventListener("click",function(){
+  stopSpeech();Audio.sfx("click");Audio.stopMusic();
+  setTimeout(function(){window.location.href='games.html';},100);
+});
+var btnAdmin=document.getElementById("btnAdminPanel");
+btnAdmin.addEventListener("click",function(){
+  stopSpeech();Audio.sfx("click");Audio.stopMusic();
+  setTimeout(function(){window.location.href='admin.html';},100);
+});
+if(new URLSearchParams(window.location.search).get('challenge_pin')||localStorage.getItem('isAdmin')!=='true'){
+  btnAdmin.style.display='none';
+}
+document.getElementById("btnDistribChallenge").addEventListener("click",function(){
+  Audio.sfx("click");
+  try{
+    if(typeof openChallengeDistribModal==="function"){
+      openChallengeDistribModal(GAME_PUBLISH_KEY);
+    }else{
+      var _dr=localStorage.getItem(GAME_PUBLISH_KEY);if(_dr){var _dd=JSON.parse(_dr);window.open(_gameLink(_dd),'_blank');}
+    }
+  }catch(e){}
+});
+
+// Top controls
+document.getElementById("btnLang").addEventListener("click",function(){
+  Audio.sfx("click");
+  LANG=LANG==="fr"?"ar":LANG==="ar"?"en":"fr";
+  applyI18N();
+});
+document.getElementById("btnSound").addEventListener("click",function(){
+  Audio.init();
+  var muted=Audio.toggleMute();
+  document.getElementById("soundIco").setAttribute("href",muted?"#icoMute":"#icoSound");
+});
+
+// Lang detection
+try{
+  localStorage.removeItem('challengeGameLang');
+  var storedLang = localStorage.getItem('lang');
+  if(storedLang && I18N[storedLang]){LANG=storedLang;}
+}catch(e){}
+applyI18N();
+try{
+  var pinParam = new URLSearchParams(window.location.search).get('challenge_pin');
+  if(pinParam){
+    var raw = localStorage.getItem(GAME_PUBLISH_KEY);
+    if(raw){
+      var d = JSON.parse(raw);
+      if(d.pin === pinParam){
+        var cfg = {competence:d.theme||"",difficulty:d.difficulty||2,questionCount:(d.rounds&&d.rounds[0]&&d.rounds[0].questions)?d.rounds[0].questions.length:8};
+        document.getElementById("cfgCompetence").value=cfg.competence;
+        document.getElementById("cfgDifficulty").value=cfg.difficulty;
+        document.getElementById("cfgQuestionCount").value=cfg.questionCount;
+        SETTINGS.qPerGame=cfg.questionCount;
+      }
+    }
+  }
+}catch(e){}
+try{
+  var raw=localStorage.getItem(GAME_PUBLISH_KEY);
+  if(raw){var d=JSON.parse(raw);if(d.pin)showSaveResult(d);}
+}catch(e){}
+renderSaveList();
+syncSavesFromServer();
+loadCompetenceList();
+requestAnimationFrame(loop);
+runLoading();
+(function(){
+  var sp=new URLSearchParams(window.location.search);
+  var aPin=sp.get('challenge_pin'),aComp=sp.get('comp'),aDiff=sp.get('diff'),aCount=sp.get('count'),aTId=sp.get('t_id');
+  if(aPin&&aComp&&aDiff&&aCount){
+    document.getElementById("cfgCompetence").value=aComp;
+    document.getElementById("cfgDifficulty").value=aDiff;
+    document.getElementById("cfgQuestionCount").value=aCount;
+    SETTINGS.qPerGame=parseInt(aCount)||8;
+    document.documentElement.classList.add("learner-mode");
+    var pi=document.getElementById("learnerPin");
+    if(pi){pi.style.borderColor="var(--green)";pi.style.boxShadow="0 0 12px rgba(77,255,136,.4)";}
+    if(aTId){try{localStorage.setItem('plant_trainer_id',aTId);}catch(e){}}
+  }
+})();
+/* ===== SUPABASE – JARDIN DES COMPÉTENCES ===== */
+const _SB_URL='https://zheglrzqzwopcfsdbztc.supabase.co';
+const _SB_KEY='sb_publishable_fbnRXgRq0ipF-Y97PEZYCw_pheHamr7';
+var _sb=null;
+function _initSB(){
+  if(typeof supabase!=='undefined'&&!_sb){
+    _sb=supabase.createClient(_SB_URL,_SB_KEY);
+  }
+}
+_initSB();
+var _savingFlower=false;
+function _getFlowerColor(score,total){
+  var pct=total>0?(score/total)*100:0;
+  if(pct>=100)return '#ffd644';
+  if(pct>=90)return '#ff88cc';
+  if(pct>=80)return '#a06bff';
+  if(pct>=70)return '#4db8ff';
+  return '#ffffff';
+}
+function _flowerSVG(color){
+  return '<svg viewBox="0 0 48 48" width="48" height="48"><ellipse cx="24" cy="16" rx="5" ry="10" fill="'+color+'"/><ellipse cx="24" cy="16" rx="5" ry="10" fill="'+color+'" transform="rotate(72 24 16)"/><ellipse cx="24" cy="16" rx="5" ry="10" fill="'+color+'" transform="rotate(144 24 16)"/><ellipse cx="24" cy="16" rx="5" ry="10" fill="'+color+'" transform="rotate(216 24 16)"/><ellipse cx="24" cy="16" rx="5" ry="10" fill="'+color+'" transform="rotate(288 24 16)"/><circle cx="24" cy="16" r="4" fill="#ffdd44"/></svg>';
+}
+function saveCompetenceFlower(){
+  if(_savingFlower)return;
+  var prenom=document.getElementById('flowerPrenom').value.trim();
+  var nom=document.getElementById('flowerNom').value.trim();
+  var resEl=document.getElementById('flowerResult');
+  if(!prenom||!nom){resEl.textContent='❌ Veuillez entrer votre prénom et nom.';resEl.className='ff-result err';return;}
+  if(!_sb){resEl.textContent='❌ Base de données non disponible.';resEl.className='ff-result err';return;}
+  _savingFlower=true;
+  var btn=document.getElementById('btnSaveFlower');
+  btn.disabled=true;btn.textContent='⏳ Enregistrement…';
+  var run=State.run;
+  var cfg=getGameConfig();
+  var color=_getFlowerColor(run.correctCount,run.total);
+  var flowerTrainerId=localStorage.getItem('sb_user_id')||'';  _sb.from('competence_flowers').insert({
+    prenom:prenom,nom:nom,
+    competence:cfg.competence||'APC',
+    specialite:'',
+    trainer_id:flowerTrainerId||null,
+    score:run.score||0,
+    couleur_fleur:color
+  }).then(function(resp){
+    _savingFlower=false;
+    btn.disabled=false;btn.textContent='🌺 Planter ma fleur !';
+    if(resp.error){
+      resEl.textContent='❌ Erreur : '+resp.error.message;
+      resEl.className='ff-result err';
+    }else{
+      resEl.innerHTML='✅ <b>'+prenom+' '+nom+'</b> — votre fleur est plantée dans le jardin ! 🌸';
+      resEl.className='ff-result ok';
+      document.getElementById('flowerPrenom').disabled=true;
+      document.getElementById('flowerNom').disabled=true;
+      btn.disabled=true;btn.textContent='✅ Enregistré';
+      // Petite animation de confirmation
+      Audio.sfx('flower');
+      spawnParticles(W*0.5,H*0.35,30,{colorSet:[color,'#ffd644','#88ffcc'],speed:5,life:1,size:4,gravity:-0.5});
+    }
+  });
+}
+function openGarden(){
+  var ov=document.getElementById('gardenOverlay');
+  if(!ov)return;
+  ov.classList.add('open');
+  var ct=document.getElementById('gardenContent');
+  ct.innerHTML='<div class="garden-loader">🌱 Chargement du jardin…</div>';
+  if(!_sb){
+    ct.innerHTML='<div class="garden-empty"><span class="big">🌿</span>Jardin non disponible.</div>';
+    return;
+  }
+  var trainerId=localStorage.getItem('sb_user_id')||'';  var q=_sb.from('competence_flowers').select('*');  if(trainerId)q=q.eq('trainer_id',trainerId);  q.order('created_at',{ascending:false}).limit(200).then(function(resp){
+    if(resp.error){
+      console.warn('openGarden error:',resp.error);
+      ct.innerHTML='<div class="garden-empty"><span class="big">🌿</span>Erreur de chargement.</div>';
+      return;
+    }
+    var flowers=resp.data||[];
+    if(!flowers.length){
+      ct.innerHTML='<div class="garden-empty"><span class="big">🌱</span>Le jardin est encore vide.<br><span style="font-size:13px;color:var(--text-dim);">Joue et gagne pour planter ta première fleur !</span></div>';
+      return;
+    }
+    // Group by competence
+    var groups={};
+    flowers.forEach(function(f){
+      var comp=f.competence||'APC';
+      if(!groups[comp])groups[comp]=[];
+      groups[comp].push(f);
+    });
+    var html='';
+    Object.keys(groups).forEach(function(comp){
+      html+='<div class="garden-group"><div class="garden-group-title">🎯 '+esc(comp)+' ('+groups[comp].length+')</div><div class="garden-row">';
+      groups[comp].forEach(function(f){
+        html+='<div class="garden-flower">'
+          +_flowerSVG(f.couleur_fleur||'#ff88cc')
+          +'<div class="fn">'+esc(f.prenom||'')+' '+esc(f.nom||'')+'</div>'
+          +'<div class="fc">'+(f.created_at?new Date(f.created_at).toLocaleDateString():'')+'</div>'
+          +'</div>';
+      });
+      html+='</div></div>';
+    });
+    ct.innerHTML=html;
+  });
+}
+function closeGarden(){
+  document.getElementById('gardenOverlay').classList.remove('open');
+}
+// Wire garden
+document.getElementById('btnGarden').addEventListener('click',function(){Audio.sfx('click');openGarden();});
+document.getElementById('btnGardenClose').addEventListener('click',closeGarden);
+document.getElementById('gardenOverlay').addEventListener('click',function(e){if(e.target===this)closeGarden();});
+document.getElementById('btnSaveFlower').addEventListener('click',saveCompetenceFlower);
+
+// Show flower form on every win + reset
+(function(){
+  var _origEndRun=endRun;
+  endRun=function(won){
+    _origEndRun(won);
+    if(won){
+      var fw=document.getElementById('flowerFormWrap');
+      if(fw){
+        fw.classList.add('show');
+        var el=document.getElementById('flowerPrenom');if(el){el.disabled=false;el.value='';}
+        var el2=document.getElementById('flowerNom');if(el2){el2.disabled=false;el2.value='';}
+        var btn=document.getElementById('btnSaveFlower');if(btn){btn.disabled=false;btn.textContent='🌺 Planter ma fleur !';}
+        var res=document.getElementById('flowerResult');if(res){res.textContent='';res.className='ff-result';}
+      }
+    }
+  };
+})();
+
+})();
+</script>
+<script src="js/shared.v2.js?v=1.9.9"></script>
+<script src="js/challenges.js?v=1.8.7"></script>
+</body>
+</html>

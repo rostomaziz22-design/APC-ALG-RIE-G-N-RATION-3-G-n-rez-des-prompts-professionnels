@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Seed - Exemples de prompts</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; background: #f5f7fb; }
+        h1 { color: #0A3A6B; }
+        pre { background: #1e293b; color: #e2e8f0; padding: 12px; border-radius: 8px; overflow: auto; max-height: 400px; font-size: 12px; }
+        button { padding: 10px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .btn-seed { background: #0077CC; color: #fff; }
+        .btn-seed:disabled { opacity: 0.5; cursor: not-allowed; }
+        .status { margin-top: 16px; padding: 12px; border-radius: 8px; }
+        .ok { background: #d4edda; color: #155724; }
+        .err { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+<div id="apcCompatBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(135deg,#E65100,#FF8F00);color:#fff;padding:10px 16px;text-align:center;font-size:13px;font-weight:500;box-shadow:0 2px 12px rgba(0,0,0,.3);align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;"><i class="fas fa-exclamation-triangle" style="font-size:16px;"></i> <span>Mode de compatibilité activé pour votre navigateur. Certaines icônes peuvent être différentes.</span> <button id="apcCompatBannerClose" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);color:#fff;padding:4px 14px;border-radius:14px;font-size:12px;cursor:pointer;">OK</button></div>
+    <h1>🚀 Seed - Exemples de prompts APC</h1>
+    <p>Cet outil insère les exemples de prompts (actuellement dans le code source) dans la base Supabase.</p>
+    <button id="seedBtn" class="btn-seed">🚀 Insérer les exemples dans Supabase</button>
+    <div id="status"></div>
+    <pre id="log"></pre>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://zheglrzqzwopcfsdbztc.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_fbnRXgRq0ipF-Y97PEZYCw_pheHamr7';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const FALLBACK_EXAMPLES = [{"icon":"💻","name_fr":"Informatique APC","name_ar":"إعلام آلي APC","role_fr":"Vous êtes un expert mondial en ingénierie pédagogique, conception de programmes d'études, approche par compétences (APC), andragogie, pédagogie active, et vous vous spécialisez dans la préparation de leçons et de scénarios éducatifs pour la formation professionnelle algérienne conformément aux programmes officiels approuvés.","role_ar":"أنت خبير عالمي في الهندسة البيداغوجية، وتصميم المناهج الدراسية، والمقاربة بالكفاءات (APC)، وأندراغوجيا، والبيداغوجيا النشطة، وتتخصص في إعداد الدروس والسيناريوهات التعليمية للتكوين المهني الجزائري وفقاً للبرامج الرسمية المعتمدة.","mission_fr":"Construire un scénario pédagogique complet pour l'installation de Windows 11 selon l'APC Algérie.","mission_ar":"بناء سيناريو بيداغوجي كامل لتثبيت Windows 11 وفق APC الجزائر.","specialite_fr":"Techniques de l'Informatique","specialite_ar":"تقنيات الإعلام الآلي","module_fr":"Systèmes d'exploitation","module_ar":"أنظمة التشغيل","competence_fr":"Installer et configurer Windows 11 sur un poste de travail.","competence_ar":"تثبيت وضبط Windows 11 على محطة عمل.","niveau_fr":"Technicien Supérieur","niveau_ar":"تقني سامٍ","annee_fr":"1ère année","annee_ar":"السنة الأولى","duree_fr":"4 heures","duree_ar":"4 ساعات","stagiaires":"20","espace_fr":"Laboratoire informatique","espace_ar":"مخبر الإعلام الآلي","ressources_fr":"20 PC, Data Show, Clé USB bootable, ISO Windows 11","ressources_ar":"20 حاسوب، داتاشو، مفتاح USB، نسخة ISO Windows 11","contexte_fr":"Préparation des postes informatiques d'une entreprise avant leur mise en service.","contexte_ar":"تجهيز حواسيب المؤسسة قبل الشروع في العمل.","difficultes_fr":"Mauvaise maîtrise du BIOS, erreurs de partitionnement, gestion des pilotes","difficultes_ar":"ضعف في التعامل مع BIOS، أخطاء في تقسيم القرص، إدارة المشغلات","astMetier_fr":"Technicien Supérieur en Informatique (Administrateur systèmes et réseaux)","astMetier_ar":"تقني سامٍ في الإعلام الآلي (مسؤول الأنظمة والشبكات)","astExtrait_fr":"Installer et configurer un poste client Windows ; diagnostiquer les pannes matérielles ; sécuriser l'accès.","astExtrait_ar":"تثبيت وضبط محطة عميل Windows؛ تشخيص الأعطال المادية؛ تأمين الوصول."},{"icon":"⚡","name_fr":"Soudure APC","name_ar":"لحام APC","role_fr":"Tu es un formateur expert en soudure industrielle et en APC.","role_ar":"أنت مكوِّن خبير في اللحام الصناعي وAPC.","mission_fr":"Construire une séance pratique sur la soudure à l'arc selon l'APC Algérie.","mission_ar":"بناء حصة تطبيقية حول اللحام بالقوس الكهربائي وفق APC الجزائر.","specialite_fr":"Soudure à l'arc électrique","specialite_ar":"اللحام بالقوس الكهربائي","module_fr":"Soudure à l'arc","module_ar":"اللحام بالقوس","competence_fr":"Réaliser une soudure bout à bout à l'arc sur acier carbone.","competence_ar":"إنجاز لحام وجهاً لوجه بالقوس الكهربائي على فولاذ كربوني.","niveau_fr":"Ouvrier Qualifié","niveau_ar":"عامل مؤهل","annee_fr":"1ère année","annee_ar":"السنة الأولى","duree_fr":"6 heures","duree_ar":"6 ساعات","stagiaires":"12","espace_fr":"Atelier de soudure","espace_ar":"ورشة اللحام","ressources_fr":"Poste à souder, électrodes E6013, masque, gants, tôles acier 5mm","ressources_ar":"منضدة لحام، أقطاب E6013، قناع، قفازات، صفائح فولاذ 5 مم","contexte_fr":"Fabrication d'une structure métallique pour un chantier naval.","contexte_ar":"تصنيع هيكل معدني لورشة بناء سفن.","difficultes_fr":"Mauvaise gestion de l'arc, défauts de pénétration, manque de stabilité","difficultes_ar":"سوء التحكم في القوس، عيوب في الاختراق، عدم الاستقرار","astMetier_fr":"Ouvrier Qualifié en soudure","astMetier_ar":"عامل مؤهل في اللحام","astExtrait_fr":"Réaliser des soudures bout à bout ; contrôler la qualité visuelle ; respecter les règles de sécurité.","astExtrait_ar":"إنجاز لحام وجهاً لوجه؛ مراقبة الجودة البصرية؛ احترام قواعد السلامة."},{"icon":"🍳","name_fr":"Cuisine APC","name_ar":"طبخ APC","role_fr":"Tu es expert en restauration pour collectivités, formateur selon APC Algérie.","role_ar":"أنت خبير في التغذية الجماعية، مكوِّن وفق APC الجزائر.","mission_fr":"Générer l'analyse du métier et le scénario pour stagiaires débutants en Technicien Cuisine.","mission_ar":"توليد تحليل المهنة والسيناريو للمتربصين المبتدئين في تقني طبخ.","specialite_fr":"Cuisine","specialite_ar":"الطبخ","module_fr":"Cuisine et HACCP","module_ar":"الطبخ وHACCP","competence_fr":"Préparer un menu complet selon les normes HACCP pour 20 couverts.","competence_ar":"تحضير قائمة طعام كاملة وفق معايير HACCP لـ 20 شخصاً.","niveau_fr":"Technicien","niveau_ar":"تقني","annee_fr":"1ère année","annee_ar":"السنة الأولى","duree_fr":"8 heures","duree_ar":"8 ساعات","stagiaires":"15","espace_fr":"Cuisine pédagogique","espace_ar":"مطبخ بيداغوجي","ressources_fr":"Matériel de cuisine professionnel, denrées, fiches techniques, thermomètre","ressources_ar":"معدات مطبخ مهنية، مواد غذائية، بطاقات تقنية، ميزان حرارة","contexte_fr":"Service restauration collective dans un centre de formation.","contexte_ar":"خدمة مطعم جماعي في مركز تكوين.","difficultes_fr":"Gestion des temps, respect des températures, traçabilité HACCP","difficultes_ar":"إدارة الوقت، احترام درجات الحرارة، تتبع HACCP","astMetier_fr":"Technicien supérieur en restauration collective","astMetier_ar":"تقني سامٍ في التغذية الجماعية","astExtrait_fr":"Appliquer les principes HACCP, préparer des plats en respectant les DLC, organiser le poste de travail.","astExtrait_ar":"تطبيق مبادئ HACCP، تحضير الأطباق مع احترام تواريخ الصلاحية، تنظيم محطة العمل."},{"icon":"📊","name_fr":"Comptabilité APC","name_ar":"محاسبة APC","role_fr":"Tu es un formateur expert en comptabilité et gestion.","role_ar":"أنت مكوِّن خبير في المحاسبة والتسيير.","mission_fr":"Construire un scénario d'apprentissage pour l'enregistrement comptable selon l'APC Algérie.","mission_ar":"بناء سيناريو تعليمي للتسجيل المحاسبي وفق APC الجزائر.","specialite_fr":"Comptabilité et Gestion","specialite_ar":"المحاسبة والتسيير","module_fr":"Comptabilité générale","module_ar":"المحاسبة العامة","competence_fr":"Enregistrer les opérations comptables courantes (achats, ventes, trésorerie).","competence_ar":"تسجيل العمليات المحاسبية الجارية (مشتريات، مبيعات، خزينة).","niveau_fr":"Technicien","niveau_ar":"تقني","annee_fr":"1ère année","annee_ar":"السنة الأولى","duree_fr":"5 heures","duree_ar":"5 ساعات","stagiaires":"18","espace_fr":"Salle informatique","espace_ar":"قاعة الإعلام الآلي","ressources_fr":"PC, logiciel SAGE, journaux, factures","ressources_ar":"حواسيب، برنامج SAGE، دفاتر يومية، فواتير","contexte_fr":"Tenue de la comptabilité d'une PME de négoce.","contexte_ar":"مسك محاسبة مؤسسة صغيرة تجارية.","difficultes_fr":"Code général de comptabilité, lettrage, rapprochement bancaire","difficultes_ar":"المخطط المحاسبي العام، الترخيم، التسوية البنكية","astMetier_fr":"Technicien comptable","astMetier_ar":"تقني محاسبة","astExtrait_fr":"Saisir les pièces comptables, lettrer les comptes, établir les balances.","astExtrait_ar":"إدخال الوثائق المحاسبية، ترخيم الحسابات، إعداد ميزان المراجعة."},{"icon":"🌍","name_fr":"Anglais Pro APC","name_ar":"إنجليزية مهنية APC","role_fr":"Tu es un formateur expert en anglais professionnel.","role_ar":"أنت مكوِّن خبير في الإنجليزية المهنية.","mission_fr":"Construire un scénario pour l'accueil client en anglais selon l'APC Algérie.","mission_ar":"بناء سيناريو لاستقبال الزبون بالإنجليزية وفق APC الجزائر.","specialite_fr":"Anglais Professionnel","specialite_ar":"الإنجليزية المهنية","module_fr":"Anglais des affaires","module_ar":"إنجليزية الأعمال","competence_fr":"Accueillir et orienter un client étranger en anglais.","competence_ar":"استقبال وتوجيه زبون أجنبي بالإنجليزية.","niveau_fr":"Technicien","niveau_ar":"تقني","annee_fr":"2ème année","annee_ar":"السنة الثانية","duree_fr":"3 heures","duree_ar":"3 ساعات","stagiaires":"12","espace_fr":"Salle de langue","espace_ar":"قاعة اللغات","ressources_fr":"Audio, vidéo, fiches de dialogues, casques","ressources_ar":"صوتيات، فيديو، بطاقات حوار، سماعات","contexte_fr":"Réceptionniste dans un hôtel international.","contexte_ar":"موظف استقبال في فندق دولي.","difficultes_fr":"Prononciation, compréhension orale, formules de politesse","difficultes_ar":"النطق، الفهم الشفهي، عبارات المجاملة","astMetier_fr":"Technicien en tourisme et hôtellerie","astMetier_ar":"تقني في السياحة والفندقة","astExtrait_fr":"Accueillir des clients anglophones, répondre aux demandes d'orientation, gérer les réservations par téléphone.","astExtrait_ar":"استقبال زبائن ناطقين بالإنجليزية، الرد على طلبات التوجيه، إدارة الحجوزات هاتفياً."}];
+
+        function log(msg) { document.getElementById('log').textContent += msg + '\n'; }
+        function status(msg, ok) { document.getElementById('status').innerHTML = `<div class="status ${ok ? 'ok' : 'err'}">${msg}</div>`; }
+
+        document.getElementById('seedBtn').onclick = async function() {
+            this.disabled = true;
+            this.textContent = '⏳ Insertion en cours...';
+            document.getElementById('log').textContent = '';
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) { status('❌ Vous devez être connecté à Supabase. Ouvrez login.html et connectez-vous d\\'abord.', false); this.disabled = false; this.textContent = '🚀 Insérer les exemples dans Supabase'; return; }
+                log('✅ Connecté: ' + session.user.email);
+                const { data: existing } = await supabase.from('prompts_examples').select('id');
+                if (existing && existing.length > 0) {
+                    log('🗑 Suppression des ' + existing.length + ' exemples existants...');
+                    await supabase.from('prompts_examples').delete().neq('id', 0);
+                }
+                let count = 0;
+                for (const ex of FALLBACK_EXAMPLES) {
+                    const { error } = await supabase.from('prompts_examples').insert({
+                        icon: ex.icon,
+                        name_fr: ex.name_fr, name_ar: ex.name_ar,
+                        role_fr: ex.role_fr, role_ar: ex.role_ar,
+                        mission_fr: ex.mission_fr, mission_ar: ex.mission_ar,
+                        specialite_fr: ex.specialite_fr, specialite_ar: ex.specialite_ar,
+                        module_fr: ex.module_fr, module_ar: ex.module_ar,
+                        competence_fr: ex.competence_fr, competence_ar: ex.competence_ar,
+                        niveau_fr: ex.niveau_fr, niveau_ar: ex.niveau_ar,
+                        annee_fr: ex.annee_fr || '', annee_ar: ex.annee_ar || '',
+                        duree_fr: ex.duree_fr || '', duree_ar: ex.duree_ar || '',
+                        stagiaires: ex.stagiaires || '',
+                        espace_fr: ex.espace_fr || '', espace_ar: ex.espace_ar || '',
+                        ressources_fr: ex.ressources_fr || '', ressources_ar: ex.ressources_ar || '',
+                        contexte_fr: ex.contexte_fr || '', contexte_ar: ex.contexte_ar || '',
+                        difficultes_fr: ex.difficultes_fr || '', difficultes_ar: ex.difficultes_ar || '',
+                        astMetier_fr: ex.astMetier_fr || '', astMetier_ar: ex.astMetier_ar || '',
+                        astExtrait_fr: ex.astExtrait_fr || '', astExtrait_ar: ex.astExtrait_ar || '',
+                        sort_order: count,
+                        active: true
+                    });
+                    if (error) { log('❌ Erreur: ' + error.message); throw error; }
+                    count++;
+                    log('✅ Insertion #' + count + ' - ' + ex.name_fr);
+                }
+                status('✅ ' + count + ' exemples insérés avec succès !', true);
+                log('✅ Terminé ! Ouvrez generator.html pour voir les nouveaux exemples depuis la DB.');
+            } catch (e) {
+                status('❌ ' + e.message, false);
+            } finally {
+                this.disabled = false;
+                this.textContent = '🚀 Insérer les exemples dans Supabase';
+            }
+        };
+    </script>
+</body>
+</html>

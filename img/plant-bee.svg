@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 40">
+  <defs>
+    <radialGradient id="wingGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(200,230,255,0.5)"/>
+      <stop offset="100%" stop-color="rgba(150,200,255,0.15)"/>
+    </radialGradient>
+  </defs>
+  <!-- Wings -->
+  <ellipse cx="18" cy="14" rx="10" ry="7" fill="url(#wingGlow)" stroke="rgba(180,220,255,0.3)" stroke-width="0.5" transform="rotate(-20 18 14)"/>
+  <ellipse cx="30" cy="14" rx="10" ry="7" fill="url(#wingGlow)" stroke="rgba(180,220,255,0.3)" stroke-width="0.5" transform="rotate(20 30 14)"/>
+  <!-- Body -->
+  <ellipse cx="24" cy="22" rx="6" ry="10" fill="#ffcc00"/>
+  <!-- Stripes -->
+  <rect x="20" y="16" width="8" height="3" rx="1.5" fill="#1a1a0a"/>
+  <rect x="21" y="22" width="6" height="3" rx="1.5" fill="#1a1a0a"/>
+  <rect x="20" y="28" width="8" height="2.5" rx="1.25" fill="#1a1a0a"/>
+  <!-- Head -->
+  <circle cx="24" cy="11" r="4" fill="#1a1a0a"/>
+  <!-- Eyes -->
+  <circle cx="23" cy="10" r="1" fill="#fff"/>
+  <circle cx="26" cy="10" r="1" fill="#fff"/>
+  <!-- Antennae -->
+  <path d="M22 8 Q18 3 16 2" fill="none" stroke="#1a1a0a" stroke-width="0.8"/>
+  <path d="M26 8 Q30 3 32 2" fill="none" stroke="#1a1a0a" stroke-width="0.8"/>
+</svg>

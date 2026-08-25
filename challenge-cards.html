@@ -1,0 +1,976 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' data: https://cdnjs.cloudflare.com; connect-src 'self' https://*.supabase.co https://openrouter.ai https://api.groq.com https://generativelanguage.googleapis.com https://api.emailjs.com https://api.ipify.org https://ipinfo.io https://ip-api.com; img-src 'self' data: https: https://api.qrserver.com; media-src 'self'; frame-ancestors 'none'; base-uri 'self';">
+<title data-i18n="pageTitle">Challenge - Défi des Cartes du Savoir</title>
+<style>
+:root{--bg:#0a0715;--panel:#14101e;--line:#2a1f3a;--text:#ece4f0;--text-dim:#8a7a9a;--green:#7ddf7d;--red:#ff6b6b;--gold:#ffd866;--blue:#6bb8ff;--purple:#b07cff;--cyan:#6edcff;--pink:#ff7eb3;--card-w:120px;--card-h:168px;--radius:12px;--font-b:'Segoe UI',system-ui,sans-serif;--font-d:'Segoe UI',system-ui,sans-serif;--glow-gold:0 0 20px rgba(255,216,102,.25);--glow-purple:0 0 20px rgba(176,124,255,.25)}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font-b);-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none}
+body.lm .trainer-only{display:none!important}
+.bg-layer{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:radial-gradient(ellipse at 20% 50%,rgba(176,124,255,.08) 0%,transparent 50%),radial-gradient(ellipse at 80% 50%,rgba(255,216,102,.06) 0%,transparent 50%),radial-gradient(ellipse at 50% 0%,rgba(110,220,255,.04) 0%,transparent 50%),var(--bg)}
+.bg-layer .bg-card{position:absolute;font-size:28px;opacity:.04;animation:bgCardFloat 20s linear infinite}
+.bg-layer .bg-card:nth-child(1){top:8%;left:5%;animation-delay:0s;font-size:32px}
+.bg-layer .bg-card:nth-child(2){top:20%;right:12%;animation-delay:-3s;font-size:24px}
+.bg-layer .bg-card:nth-child(3){top:55%;left:8%;animation-delay:-7s;font-size:36px}
+.bg-layer .bg-card:nth-child(4){top:70%;right:8%;animation-delay:-11s;font-size:28px}
+.bg-layer .bg-card:nth-child(5){top:40%;left:50%;animation-delay:-15s;font-size:22px}
+@keyframes bgCardFloat{0%{transform:translateY(0) rotate(0deg)}25%{transform:translateY(-20px) rotate(5deg)}50%{transform:translateY(0) rotate(0deg)}75%{transform:translateY(20px) rotate(-5deg)}100%{transform:translateY(0) rotate(0deg)}}
+#app{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;z-index:1;overflow:hidden}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .5s ease;z-index:1}
+.screen.active{opacity:1;pointer-events:auto;z-index:2}
+#loadScreen{background:var(--bg);z-index:10}
+#loadScreen.active{z-index:10}
+.load-ring{width:60px;height:60px;border:3px solid var(--line);border-top-color:var(--purple);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-pct{font-family:var(--font-d);font-size:28px;letter-spacing:4px;color:var(--purple);margin-top:16px}
+.load-label{font-size:13px;color:var(--text-dim);margin-top:8px;letter-spacing:2px;text-transform:uppercase}
+#menuScreen{background:transparent;gap:16px}
+.menu-title{font-family:var(--font-d);font-size:24px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:4px;text-align:center;text-shadow:var(--glow-gold)}
+.menu-sub{font-size:13px;color:var(--text-dim);text-align:center;margin-bottom:16px;max-width:360px;line-height:1.5}
+.config-wrap{background:rgba(20,16,30,.85);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:16px;padding:20px;width:90%;max-width:380px;display:flex;flex-direction:column;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.config-wrap label{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px}
+.config-wrap input,.config-wrap select{width:100%;padding:10px 12px;background:rgba(10,7,21,.6);border:1px solid var(--line);border-radius:10px;color:var(--text);font-size:14px;font-family:var(--font-b);transition:border-color .2s}
+.config-wrap input:focus,.config-wrap select:focus{border-color:var(--purple);outline:none;box-shadow:var(--glow-purple)}
+.btn{padding:10px 24px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-b);transition:all .2s;min-height:44px}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:linear-gradient(135deg,#6c3faa,#4a2578);border-color:var(--purple);color:#fff}
+.btn-primary:hover{box-shadow:0 0 24px rgba(176,124,255,.35)}
+.btn-gold{background:linear-gradient(135deg,#8a6a00,#5a4200);border-color:var(--gold);color:var(--gold)}
+.btn-gold:hover{box-shadow:0 0 24px rgba(255,216,102,.35)}
+.btn-sm{padding:6px 14px;font-size:11px;min-height:32px}
+.btn-icon{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:18px;padding:6px;transition:color .2s}
+.btn-icon:hover{color:var(--text)}
+.top-bar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;justify-content:space-between;padding:8px 14px;background:linear-gradient(180deg,rgba(10,7,21,.9),transparent)}
+.top-bar .btn-icon{font-size:16px;color:var(--text-dim)}
+#saveListWrap{width:90%;max-width:380px;max-height:160px;overflow-y:auto}
+#saveListWrap h3{font-size:12px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.save-item{display:flex;align-items:center;justify-content:space-between;background:rgba(20,16,30,.7);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:6px}
+.save-item .si-title{font-size:12px;font-weight:600;color:var(--cyan)}
+.save-item .si-meta{font-size:9px;color:var(--text-dim);margin-top:2px}
+#gameScreen{background:transparent;flex-direction:column;gap:0}
+#gameTable{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%}
+.deck-area{position:relative;width:100%;max-width:500px;height:280px;display:flex;align-items:center;justify-content:center}
+.card-slot{position:relative;width:var(--card-w);height:var(--card-h);perspective:800px}
+.card{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .3s cubic-bezier(.34,1.56,.64,1);cursor:pointer}
+.card.flipped{transform:rotateY(180deg)}
+.card-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:var(--radius);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px;border:2px solid var(--line);overflow:hidden}
+.card-front{background:linear-gradient(145deg,#2a1a3a,#1a0e2a);z-index:2;border-color:rgba(176,124,255,.3)}
+.card-front::before{content:'';position:absolute;inset:-1px;border-radius:var(--radius);background:linear-gradient(135deg,var(--purple),var(--cyan),var(--gold),var(--purple));background-size:300% 300%;opacity:0;z-index:-1;animation:shineBorder 4s ease-in-out infinite}
+@keyframes shineBorder{0%,100%{background-position:0% 50%;opacity:.3}50%{background-position:100% 50%;opacity:.6}}
+.card-front .card-pattern{font-size:40px;opacity:.4;position:absolute;filter:drop-shadow(0 0 8px rgba(176,124,255,.3));animation:cardPulse 2s ease-in-out infinite}
+@keyframes cardPulse{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(1.05);opacity:.6}}
+.card-back{background:linear-gradient(145deg,#1a1228,#0e0a1a);transform:rotateY(180deg);z-index:1;padding:10px;border-color:rgba(176,124,255,.2)}
+.card-back .q-text{font-size:11px;line-height:1.4;text-align:center;color:var(--text);margin-bottom:auto;overflow-y:auto;max-height:100px}
+.card-back .q-badge{font-size:9px;padding:2px 8px;border-radius:4px;margin-top:4px}
+.card-back .q-badge.bonus{background:rgba(255,216,102,.2);color:var(--gold)}
+.card-back .q-badge.gold{background:rgba(255,215,0,.3);color:#ffd700}
+.card-back .q-badge.surprise{background:rgba(176,124,255,.2);color:var(--purple)}
+.card-back .q-badge.chrono{background:rgba(110,220,255,.2);color:var(--cyan)}
+.card.correct{animation:cardCorrect .5s cubic-bezier(.34,1.56,.64,1) forwards}
+@keyframes cardCorrect{0%{transform:rotateY(180deg) scale(1)}30%{transform:rotateY(180deg) scale(1.12)}60%{transform:rotateY(180deg) scale(.95)}100%{transform:rotateY(180deg) scale(1) translateY(-200px) translateX(120px) rotate(10deg);opacity:0}}
+.card.wrong{animation:cardWrong .5s ease forwards}
+@keyframes cardWrong{0%{transform:rotateY(180deg) scale(1)}15%{transform:rotateY(180deg) scale(1.05) translateX(-12px)}30%{transform:rotateY(180deg) scale(1) translateX(12px)}50%{transform:rotateY(180deg) scale(.97) translateX(-8px)}70%{transform:rotateY(180deg) scale(1) translateX(4px)}100%{transform:rotateY(180deg) scale(1) translateX(0)}}
+.card.wrong .card-back{border-color:var(--red);box-shadow:0 0 16px rgba(255,107,107,.2)}
+.card.correct .card-back{border-color:var(--green);box-shadow:0 0 20px rgba(125,223,125,.3)}
+.card.entering{animation:cardEnter .35s cubic-bezier(.34,1.56,.64,1) forwards}
+@keyframes cardEnter{0%{opacity:0;transform:translateX(80px) rotate(-15deg) scale(.9)}100%{opacity:1;transform:translateX(0) rotate(0) scale(1)}}
+.pile-area{position:absolute;right:10px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;z-index:0}
+.pile-area .pile-label{font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px}
+.pile-area .pile-cards{position:relative;width:50px;height:70px}
+.pile-area .pile-cards .pile-card{position:absolute;width:44px;height:62px;border-radius:8px;border:1px solid var(--line);background:var(--panel);bottom:0;transition:all .3s}
+.pile-area .pile-cards .pile-card.success{background:linear-gradient(145deg,#1a4a2a,#0e2a18);border-color:var(--green);box-shadow:0 0 12px rgba(125,223,125,.2)}
+.answer-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px;max-width:400px}
+.answer-btn{width:calc(50% - 4px);min-width:140px;padding:12px 16px;border-radius:10px;border:2px solid var(--line);background:rgba(20,16,30,.7);backdrop-filter:blur(8px);color:var(--text);font-size:13px;cursor:pointer;font-family:var(--font-b);transition:all .2s;text-align:left;display:flex;align-items:center;gap:8px}
+.answer-btn:hover{border-color:var(--purple);transform:translateY(-1px);box-shadow:var(--glow-purple)}
+.answer-btn.correct{border-color:var(--green);background:rgba(125,223,125,.15);box-shadow:0 0 16px rgba(125,223,125,.2)}
+.answer-btn.wrong{border-color:var(--red);background:rgba(255,107,107,.15);box-shadow:0 0 16px rgba(255,107,107,.2)}
+.answer-btn .badge{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.answer-btn .badge.a{background:linear-gradient(135deg,#27ae60,#1e8449);color:#fff}
+.answer-btn .badge.b{background:linear-gradient(135deg,#2980b9,#1f6da0);color:#fff}
+.answer-btn .badge.c{background:linear-gradient(135deg,#f39c12,#d68910);color:#fff}
+.answer-btn .badge.d{background:linear-gradient(135deg,#c0392b,#a93226);color:#fff}
+.retry-row{display:flex;gap:8px;margin-top:12px}
+.hud-bar{position:fixed;bottom:0;left:0;right:0;z-index:15;display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:linear-gradient(0deg,rgba(10,7,21,.95),transparent)}
+.hud-bar .hud-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-dim)}
+.hud-bar .hud-item .hud-val{font-weight:700;color:var(--text);font-size:14px}
+.hud-bar .hud-item .hud-val.gold{color:var(--gold)}
+.deck-count{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--text-dim);white-space:nowrap}
+#resultScreen{background:transparent;gap:20px}
+.result-score{font-family:var(--font-d);font-size:64px;letter-spacing:4px;position:relative}
+.result-score .trophy{width:80px;height:80px;display:block;margin:0 auto 8px;filter:drop-shadow(0 0 20px rgba(255,216,102,.5));animation:trophyBounce 2s ease-in-out infinite}
+@keyframes trophyBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.result-score .trophy .cup{fill:var(--gold)}
+.result-score .trophy .cup-shine{fill:rgba(255,255,255,.3)}
+.result-score .trophy .cup-base{fill:#b8962e}
+.result-score .trophy .cup-star{fill:#fff}
+.result-score .trophy.bronze .cup{fill:#cd7f32}
+.result-score .trophy.bronze .cup-base{fill:#a0652a}
+.result-score .trophy.silver .cup{fill:#c0c0c0}
+.result-score .trophy.silver .cup-base{fill:#909090}
+.result-score .trophy.gold .cup{fill:var(--gold)}
+.result-score .trophy.gold .cup-base{fill:#b8962e}
+.result-stars{font-size:28px;letter-spacing:4px;margin-bottom:8px}
+.result-detail{font-size:14px;color:var(--text-dim);text-align:center;line-height:1.5}
+.result-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.result-actions .btn{min-width:140px}
+#gameSaveResult{display:none;background:rgba(20,16,30,.85);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:12px;width:90%;max-width:380px}
+#gameSaveResult .sr-row{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+#gameSaveResult .sr-pin{font-size:22px;font-weight:700;letter-spacing:4px;color:var(--gold);font-family:monospace}
+#gameSaveResult .sr-actions{display:flex;gap:6px;flex-wrap:wrap}
+#gameSaveResult .sr-actions button{font-size:10px;padding:4px 10px;min-height:28px}
+#gameSaveResult img{border-radius:8px}
+.cine-overlay{position:fixed;inset:0;z-index:9000;background:rgba(5,3,10,.94);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:20px;flex-direction:column;gap:16px}
+.cine-overlay.open{display:flex;animation:fadeIn .3s ease}
+@keyframes fadeIn{0%{opacity:0}100%{opacity:1}}
+.cine-overlay .big{font-size:64px;animation:overlayPulse 1.5s ease-in-out infinite}
+@keyframes overlayPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.cine-overlay h2{font-family:var(--font-d);font-size:20px;letter-spacing:3px;color:var(--gold);text-align:center}
+.cine-overlay p{font-size:14px;color:var(--text-dim);text-align:center;max-width:400px;line-height:1.6}
+.chrono-bar{width:100%;max-width:300px;height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin-top:8px}
+.chrono-bar .fill{height:100%;background:linear-gradient(90deg,var(--red),#ff4444);border-radius:2px;transition:width .1s linear}
+#competenceList{max-height:160px;overflow-y:auto;border:1px solid var(--line);border-radius:10px;padding:4px;background:rgba(10,7,21,.6);display:none}
+#competenceList .comp-item{padding:6px 8px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .15s;font-size:12px;color:var(--text-dim)}
+#competenceList .comp-item:last-child{border-bottom:none}
+#competenceList .comp-item:hover{background:rgba(176,124,255,.1);color:var(--text)}
+#competenceList .comp-item .comp-badge{display:inline-block;background:rgba(176,124,255,.15);color:var(--purple);padding:1px 8px;border-radius:8px;font-size:10px;font-weight:600;margin:2px;cursor:pointer;transition:all .15s}
+#competenceList .comp-item .comp-badge:hover{background:rgba(176,124,255,.3);color:var(--text)}
+@media(max-width:500px){
+:root{--card-w:100px;--card-h:140px}
+.card-back .q-text{font-size:10px}
+.answer-btn{font-size:11px;padding:10px 12px;min-width:120px}
+.result-score{font-size:48px}
+.menu-title{font-size:18px}
+}
+@media(max-width:360px){
+:root{--card-w:85px;--card-h:120px}
+.answer-btn{min-width:100px;font-size:10px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="bg-layer"><div class="bg-card">🂠</div><div class="bg-card">🃏</div><div class="bg-card">🂠</div><div class="bg-card">🃏</div><div class="bg-card">🂠</div></div>
+  <div class="screen active" id="loadScreen">
+    <div class="load-ring"></div>
+    <div class="load-pct" id="loadPct">0%</div>
+    <div class="load-label" id="loadLabel">Chargement</div>
+  </div>
+  <div class="top-bar">
+    <button class="btn-icon" id="btnBack" onclick="goTo('games.html')">✕</button>
+    <div style="display:flex;gap:4px">
+      <button class="btn-icon" id="btnLang">🌐</button>
+      <button class="btn-icon" id="btnSound">🔊</button>
+    </div>
+  </div>
+  <div class="screen" id="menuScreen">
+    <div class="menu-title" id="menuTitle">🃏 Défi des Cartes du Savoir</div>
+    <div class="menu-sub" id="menuSub">Retourne les cartes, réponds aux questions et empile tes réussites !</div>
+    <div class="config-wrap">
+      <div>
+        <label id="lblCompetence">🎯 Compétence</label>
+        <input type="text" id="cfgCompetence" placeholder="Ex: Définition de l'APC">
+        <div id="competenceList"></div>
+      </div>
+      <div>
+        <label id="lblDifficulty">⚡ Difficulté</label>
+        <select id="cfgDifficulty"><option value="1">Facile</option><option value="2" selected>Moyen</option><option value="3">Difficile</option></select>
+      </div>
+      <div>
+        <label id="lblQuestionCount">📚 Nombre de cartes</label>
+        <select id="cfgQuestionCount"><option value="5">5</option><option value="8" selected>8</option><option value="10">10</option><option value="12">12</option><option value="15">15</option><option value="20">20</option></select>
+      </div>
+      <button class="btn btn-primary" id="btnStartGame">🃏 Commencer</button>
+      <button class="btn btn-gold trainer-only" id="btnSaveGame">💾 Sauvegarder</button>
+    </div>
+    <div id="saveListWrap" style="display:none;">
+      <h3>📂 Parties sauvegardées</h3>
+      <div id="saveList"></div>
+    </div>
+    <div id="gameSaveResult"></div>
+  </div>
+  <div class="screen" id="gameScreen">
+    <div id="gameTable">
+      <div class="deck-area" id="deckArea">
+        <div class="deck-count" id="deckCount"></div>
+        <div class="card-slot" id="cardSlot">
+          <div class="card" id="theCard">
+            <div class="card-face card-front">
+              <div class="card-pattern">🂠</div>
+            </div>
+            <div class="card-face card-back" id="cardBack">
+              <div class="q-text" id="qText"></div>
+              <div class="q-badge" id="qBadge" style="display:none;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="pile-area" id="pileArea">
+          <div class="pile-label" id="pileLabel">Réussites</div>
+          <div class="pile-cards" id="pileCards"></div>
+        </div>
+      </div>
+      <div class="answer-row" id="answerRow">
+        <button class="answer-btn" data-idx="0"><span class="badge a">A</span><span class="ans-text"></span></button>
+        <button class="answer-btn" data-idx="1"><span class="badge b">B</span><span class="ans-text"></span></button>
+        <button class="answer-btn" data-idx="2"><span class="badge c">C</span><span class="ans-text"></span></button>
+        <button class="answer-btn" data-idx="3"><span class="badge d">D</span><span class="ans-text"></span></button>
+      </div>
+      <div class="retry-row" id="retryRow" style="display:none;"></div>
+    </div>
+  </div>
+  <div class="screen" id="resultScreen">
+    <div class="result-score">
+      <svg class="trophy gold" id="resultTrophy" viewBox="0 0 100 100">
+        <path class="cup" d="M30 35h40v5c0 12-6 22-16 27l-4 2h-4l-4-2c-10-5-16-15-16-27v-5z"/>
+        <path class="cup-shine" d="M38 38h4v22l-4-2c-7-4-12-11-12-20v-4l12 4z"/>
+        <rect class="cup-base" x="40" y="70" width="20" height="6" rx="2"/>
+        <rect class="cup-base" x="36" y="76" width="28" height="4" rx="2"/>
+        <path class="cup" d="M26 25c0-3 3-5 6-5h36c3 0 6 2 6 5v4c0 8-6 14-14 14H40c-8 0-14-6-14-14v-4z"/>
+        <path class="cup-shine" d="M30 27c0-2 2-3 4-3h4v12h-4c-2 0-4-1-4-3v-6z"/>
+        <polygon class="cup-star" points="50,10 53,18 62,18 55,23 58,32 50,27 42,32 45,23 38,18 47,18"/>
+      </svg>
+      <span id="resultScore">0/0</span>
+    </div>
+    <div class="result-stars" id="resultStars">⭐⭐⭐⭐☆</div>
+    <div class="result-detail" id="resultDetail"></div>
+    <div class="result-actions">
+      <button class="btn btn-primary" id="btnReplay">🔄 Rejouer</button>
+      <button class="btn btn-gold trainer-only" id="btnSaveResult">💾 Sauvegarder</button>
+    </div>
+    <div id="gameSaveResultEnd" style="display:none;width:90%;max-width:380px;">
+      <div class="sr-row">
+        <img id="resultQRImg" width="120" height="120" alt="QR">
+        <div>
+          <div style="font-size:10px;color:var(--text-dim);">PIN</div>
+          <div class="sr-pin" id="resultPin">------</div>
+          <div class="sr-actions">
+            <button class="btn btn-sm btn-gold" id="btnCopyResultLink">📋 Copier</button>
+            <button class="btn btn-sm" id="btnDistribResult">📤 Distribuer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cine-overlay" id="introScreen">
+    <div class="big">🃏</div>
+    <h2 id="introTitle">Défi des Cartes du Savoir</h2>
+    <div id="introComp" style="font-size:13px;color:var(--purple);margin-bottom:4px;font-weight:600;">🎯 Compétence</div>
+    <p id="introText">Un paquet de cartes t'attend. Chaque carte cache une question. Réponds correctement pour l'empiler dans tes réussites. Attention aux cartes spéciales !</p>
+    <button class="btn btn-primary" id="introStart">🚀 Commencer</button>
+  </div>
+  <div class="hud-bar" id="hudBar" style="display:none;">
+    <div class="hud-item"><span>🏆</span><span class="hud-val" id="hudScore">0</span></div>
+    <div class="hud-item"><span>✔</span><span class="hud-val" id="hudCorrect">0</span></div>
+    <div class="hud-item"><span>🃏</span><span class="hud-val" id="hudRemaining">0</span></div>
+    <div class="hud-item" style="flex:1;min-width:0;"><span class="hud-val" id="hudComp" style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--purple);"></span></div>
+    <div class="hud-item trainer-only"><span>⭐</span><span class="hud-val gold" id="hudBonus">0</span></div>
+  </div>
+</div>
+
+<svg width="0" height="0" style="position:absolute">
+<symbol id="icoStar" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor"/></symbol>
+<symbol id="icoShield" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" fill="currentColor"/></symbol>
+</svg>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+'use strict';
+// ===== CONSTS =====
+var GAME_PUBLISH_KEY='challenge_cards_knowledge_pub';
+var GAME_SAVES_KEY='challenge_cards_knowledge_saves';
+var _SB_URL='https://zheglrzqzwopcfsdbztc.supabase.co';
+var _SB_KEY='sb_publishable_fbnRXgRq0ipF-Y97PEZYCw_pheHamr7';
+var _sb=null;
+var SETTINGS={qPerGame:8};
+function _getGroqKey(){return localStorage.getItem('gq_key')||localStorage.getItem('groq_key')||localStorage.getItem('groq_api_key')||'';}
+var _savingFlower=false;
+
+// ===== I18N =====
+var I18N={fr:{pageTitle:'Challenge - Défi des Cartes du Savoir',loading:'Chargement',menuTitle:'🃏 Défi des Cartes du Savoir',menuSub:'Retourne les cartes, réponds aux questions et empile tes réussites !',lblCompetence:'🎯 Compétence',lblDifficulty:'⚡ Difficulté',lblQuestionCount:'📚 Nombre de cartes',btnStart:'🃏 Commencer',btnSave:'💾 Sauvegarder',btnReplay:'🔄 Rejouer',btnSaveResult:'💾 Sauvegarder',lblEasy:'Facile',lblMedium:'Moyen',lblHard:'Difficile',pileLabel:'Réussites',btnRetry:'🔄 Réessayer',btnSkip:'⏭ Passer',introTitle:'Défi des Cartes du Savoir',introText:'Un paquet de cartes t\'attend. Chaque carte cache une question. Réponds correctement pour l\'empiler dans tes réussites. Attention aux cartes spéciales !',introStart:'🚀 Commencer',introComp:'🎯 Compétence',hudScore:'Score',hudCorrect:'Correctes',hudRemaining:'Restantes',hudBonus:'Bonus',cardBonus:'⭐ Bonus',cardGold:'💎 Or',cardSurprise:'🎁 Surprise',cardChrono:'⏱ Chrono',resultTrophy:'🏆',resultStars:function(p){return p>=90?'⭐⭐⭐⭐⭐':p>=75?'⭐⭐⭐⭐☆':p>=50?'⭐⭐⭐☆☆':p>=25?'⭐⭐☆☆☆':'⭐☆☆☆☆';},resultDetail:function(c,t){var p=Math.round(c/t*100);return c+'/'+t+' bonnes réponses ('+p+'%)';},endTitle:'Défi terminé !',loadingTexts:['Mélange des cartes…','Préparation du paquet…','Affûtage des connaissances…','Chargement des questions…'],bonusLabel:'⭐ Bonus +50 pts',goldLabel:'💎 Points doublés !',surpriseLabel:'🎁 Indice : ',chronoLabel:'⏱ Dépêche-toi !',saveEmpty:'Aucune partie sauvegardée',saveTitle:'📂 Parties sauvegardées'},
+ar:{pageTitle:'تحدي - بطاقات المعرفة',loading:'جاري التحميل',menuTitle:'🃏 تحدي بطاقات المعرفة',menuSub:'اقلب البطاقات وأجب على الأسئلة وجمع نجاحاتك!',lblCompetence:'🎯 الكفاءة',lblDifficulty:'⚡ الصعوبة',lblQuestionCount:'📚 عدد البطاقات',btnStart:'🃏 ابدأ',btnSave:'💾 حفظ',btnReplay:'🔄 إعادة',btnSaveResult:'💾 حفظ',lblEasy:'سهل',lblMedium:'متوسط',lblHard:'صعب',pileLabel:'النجاحات',btnRetry:'🔄 إعادة المحاولة',btnSkip:'⏭ تخطي',introTitle:'تحدي بطاقات المعرفة',introText:'حزمة بطاقات في انتظارك. كل بطاقة تخفي سؤالاً. أجب بشكل صحيح لتكديسها في نجاحاتك. انتبه للبطاقات الخاصة!',introStart:'🚀 ابدأ',introComp:'🎯 الكفاءة',hudScore:'النقاط',hudCorrect:'الصحيحة',hudRemaining:'المتبقية',hudBonus:'المكافأة',cardBonus:'⭐ مكافأة',cardGold:'💎 ذهب',cardSurprise:'🎁 مفاجأة',cardChrono:'⏱ مؤقت',resultTrophy:'🏆',resultStars:function(p){return p>=90?'⭐⭐⭐⭐⭐':p>=75?'⭐⭐⭐⭐☆':p>=50?'⭐⭐⭐☆☆':p>=25?'⭐⭐☆☆☆':'⭐☆☆☆☆';},resultDetail:function(c,t){return c+'/'+t+' إجابات صحيحة ('+Math.round(c/t*100)+'%)';},endTitle:'انتهى التحدي!',loadingTexts:['جاري خلط البطاقات…','تجهيز الحزمة…','شحذ المعرفة…','تحميل الأسئلة…'],bonusLabel:'⭐ مكافأة +50 نقطة',goldLabel:'💎 المضاعفة!',surpriseLabel:'🎁 تلميح: ',chronoLabel:'⏱ بسرعة!',saveEmpty:'لا توجد ألعاب محفوظة',saveTitle:'📂 الألعاب المحفوظة'},
+en:{pageTitle:'Challenge - Knowledge Cards',loading:'Loading',menuTitle:'🃏 Knowledge Cards Challenge',menuSub:'Flip the cards, answer questions and stack your successes!',lblCompetence:'🎯 Competence',lblDifficulty:'⚡ Difficulty',lblQuestionCount:'📚 Number of cards',btnStart:'🃏 Start',btnSave:'💾 Save',btnReplay:'🔄 Replay',btnSaveResult:'💾 Save',lblEasy:'Easy',lblMedium:'Medium',lblHard:'Hard',pileLabel:'Successes',btnRetry:'🔄 Retry',btnSkip:'⏭ Skip',introTitle:'Knowledge Cards Challenge',introText:'A deck of cards awaits you. Each card hides a question. Answer correctly to stack it in your successes. Watch out for special cards!',introStart:'🚀 Start',introComp:'🎯 Competence',hudScore:'Score',hudCorrect:'Correct',hudRemaining:'Left',hudBonus:'Bonus',cardBonus:'⭐ Bonus',cardGold:'💎 Gold',cardSurprise:'🎁 Surprise',cardChrono:'⏱ Timer',resultTrophy:'🏆',resultStars:function(p){return p>=90?'⭐⭐⭐⭐⭐':p>=75?'⭐⭐⭐⭐☆':p>=50?'⭐⭐⭐☆☆':p>=25?'⭐⭐☆☆☆':'⭐☆☆☆☆';},resultDetail:function(c,t){return c+'/'+t+' correct ('+Math.round(c/t*100)+'%)';},endTitle:'Challenge complete!',loadingTexts:['Shuffling cards…','Preparing deck…','Sharpening knowledge…','Loading questions…'],bonusLabel:'⭐ Bonus +50 pts',goldLabel:'💎 Points doubled!',surpriseLabel:'🎁 Hint: ',chronoLabel:'⏱ Hurry up!',saveEmpty:'No saved games',saveTitle:'📂 Saved games'}};
+var LANG='fr';
+function t(k){var v=I18N[LANG]&&I18N[LANG][k];return typeof v==='function'?v():v||k;}
+function ts(k){var v=I18N[LANG]&&I18N[LANG][k];return typeof v==='function'?v:v||k;}
+function applyI18N(){
+  document.documentElement.lang=LANG;document.documentElement.dir=LANG==='ar'?'rtl':'ltr';
+  var m={pageTitle:'pageTitle',loading:'loading',menuTitle:'menuTitle',menuSub:'menuSub',lblCompetence:'lblCompetence',lblDifficulty:'lblDifficulty',lblQuestionCount:'lblQuestionCount',btnStart:'btnStart',btnSave:'btnSave',btnReplay:'btnReplay',btnSaveResult:'btnSaveResult',pileLabel:'pileLabel',btnRetry:'btnRetry',btnSkip:'btnSkip',introTitle:'introTitle',introText:'introText',introStart:'introStart',hudScore:'hudScore',hudCorrect:'hudCorrect',hudRemaining:'hudRemaining',hudBonus:'hudBonus',endTitle:'endTitle',saveTitle:'saveTitle'};
+  for(var id in m){var el=document.getElementById(id);if(el)el.textContent=t(m[id]);}
+  document.getElementById('cfgDifficulty').options[0].textContent=t('lblEasy');
+  document.getElementById('cfgDifficulty').options[1].textContent=t('lblMedium');
+  document.getElementById('cfgDifficulty').options[2].textContent=t('lblHard');
+  document.querySelectorAll('[data-i18n]').forEach(function(el){el.textContent=t(el.getAttribute('data-i18n'));});
+}
+if(window.setLang){var _origSL=window.setLang;window.setLang=function(l){_origSL(l);LANG=l;applyI18N();};}
+LANG=localStorage.getItem('lang')||'fr';applyI18N();
+
+// ===== AUDIO =====
+var Audio=(function(){var ctx=null,master=null,musicG=null,sfxG=null,muted=false,musicTimer=null,mood='calm',_duckVol=0.3;function init(){if(ctx)return;ctx=new(window.AudioContext||window.webkitAudioContext)();master=ctx.createGain();master.gain.value=0.9;master.connect(ctx.destination);musicG=ctx.createGain();musicG.gain.value=0.3;musicG.connect(master);sfxG=ctx.createGain();sfxG.gain.value=0.8;sfxG.connect(master);}function tone(f,t,d,v,g){var o=ctx.createOscillator();o.type=t||'sine';o.frequency.value=f;var gn=g||sfxG;var eg=ctx.createGain();eg.gain.setValueAtTime(v||0.3,ctx.currentTime);eg.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+(d||0.2));o.connect(eg);eg.connect(gn);o.start();o.stop(ctx.currentTime+(d||0.2));}function noise(d,v,f,ft){var b=ctx.createBuffer(1,ctx.sampleRate*d,ctx.sampleRate);var d0=b.getChannelData(0);for(var i=0;i<d0.length;i++)d0[i]=Math.random()*2-1;var bs=ctx.createBufferSource();bs.buffer=b;var fn=ctx.createBiquadFilter();fn.type=ft||'lowpass';fn.frequency.value=f||2000;var gn=ctx.createGain();gn.gain.setValueAtTime(v||0.1,ctx.currentTime);gn.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+d);bs.connect(fn);fn.connect(gn);gn.connect(sfxG);bs.start();bs.stop(ctx.currentTime+d);}
+function sfx(n){
+  if(muted)return;if(!ctx)init();
+  switch(n){
+    case'click':tone(660,'square',0.05,0.2);break;
+    case'flip':tone(440,'triangle',0.1,0.15);setTimeout(function(){tone(660,'triangle',0.08,0.1);},60);break;
+    case'correct':tone(523,'sine',0.12,0.25);setTimeout(function(){tone(784,'sine',0.12,0.25);},100);setTimeout(function(){tone(1046,'sine',0.15,0.3);},200);break;
+    case'wrong':tone(220,'sawtooth',0.25,0.35);setTimeout(function(){tone(180,'sawtooth',0.2,0.25);},150);break;
+    case'slide':tone(880,'sine',0.08,0.2);setTimeout(function(){tone(660,'sine',0.08,0.15);},80);break;
+    case'bonus':tone(784,'triangle',0.1,0.25);setTimeout(function(){tone(988,'triangle',0.1,0.25);},80);setTimeout(function(){tone(1174,'triangle',0.15,0.3);},160);break;
+    case'victory':[523,659,784,1046,1318].forEach(function(f,i){setTimeout(function(){tone(f,'sine',0.15,0.3);},i*120);});setTimeout(function(){[1568,1046,1318,1568].forEach(function(f,i){setTimeout(function(){tone(f,'triangle',0.2,0.25);},i*150+600);});},300);break;
+    case'defeat':tone(440,'sawtooth',0.3,0.35);setTimeout(function(){tone(349,'sawtooth',0.3,0.3);},200);setTimeout(function(){tone(261,'sawtooth',0.4,0.4);},400);break;
+    case'tick':tone(1000,'square',0.04,0.1);break;
+    case'timeUp':tone(600,'square',0.1,0.2);setTimeout(function(){tone(400,'square',0.15,0.25);},120);break;
+    case'gold':tone(660,'sine',0.1,0.2);setTimeout(function(){tone(880,'sine',0.1,0.2);},70);setTimeout(function(){tone(1100,'sine',0.1,0.2);},140);setTimeout(function(){tone(1320,'sine',0.15,0.3);},210);break;
+  }
+}
+function scheduleMusic(){if(muted||!ctx)return;var notes={calm:[262,294,330,349,392,440],heroic:[392,440,523,587,659,784],tense:[220,247,262,294,330,349]};var pool=notes[mood]||notes.calm;var f=pool[Math.floor(Math.random()*pool.length)];tone(f,'sine',0.8,0.06,musicG);musicTimer=setTimeout(scheduleMusic,1200+Math.random()*800);}
+function startMusic(){if(!musicTimer)scheduleMusic();}
+function stopMusic(){if(musicTimer){clearTimeout(musicTimer);musicTimer=null;}}
+function duckMusic(v){if(!musicG)return;try{musicG.gain.linearRampToValueAtTime(v,ctx.currentTime+0.15);}catch(e){}}
+function restoreMusic(){if(!musicG)return;try{musicG.gain.linearRampToValueAtTime(_duckVol,ctx.currentTime+0.3);}catch(e){}}
+function toggleMute(){muted=!muted;if(muted){stopMusic();if(master)master.gain.value=0;}else{if(master)master.gain.value=0.9;startMusic();}return muted;}
+document.getElementById('btnSound').addEventListener('click',function(){sfx('click');var m=toggleMute();document.getElementById('btnSound').textContent=m?'🔇':'🔊';});
+return{init,sfx,startMusic,stopMusic,setMood:function(m){mood=m;},duckMusic,restoreMusic,toggleMute,isMuted:function(){return muted;}};
+})();
+
+// ===== TTS =====
+function speakIntro(text){
+  if(!window.speechSynthesis)return;
+  Audio.duckMusic(0.05);
+  var u=new SpeechSynthesisUtterance(text);u.rate=0.85;u.pitch=1;
+  var vl=speechSynthesis.getVoices();
+  var plang=LANG==='ar'?'ar-SA':LANG==='en'?'en-US':'fr-FR';
+  u.lang=plang;
+  var pv=vl.find(function(v){return v.lang.startsWith(plang)&&/female|zira|sara|amelie|hortense|samantha|karen|google/i.test(v.name);});
+  if(!pv)pv=vl.find(function(v){return v.lang.startsWith(plang);});
+  if(pv)u.voice=pv;
+  u.onend=function(){Audio.restoreMusic();};
+  speechSynthesis.speak(u);
+}
+
+// ===== SUPABASE =====
+function _initSB(){if(typeof supabase!=='undefined'&&!_sb)_sb=supabase.createClient(_SB_URL,_SB_KEY);}
+_initSB();
+
+// ===== SAVE / LOAD =====
+function loadSaves(){try{return JSON.parse(localStorage.getItem(GAME_SAVES_KEY)||'[]');}catch(e){return [];}}
+function saveSaves(arr){
+  localStorage.setItem(GAME_SAVES_KEY,JSON.stringify(arr));
+  var uid=localStorage.getItem('sb_user_id');
+  if(uid&&_sb){try{_sb.from('game_saves').delete().eq('user_id',uid).eq('game_type','cards').then(function(){_sb.from('game_saves').insert({user_id:uid,game_type:'cards',save_data:arr}).then();});}catch(e){}}
+}
+function syncSavesFromServer(){
+  var uid=localStorage.getItem('sb_user_id');
+  if(!uid||!_sb)return;
+  _sb.from('game_saves').select('save_data').eq('user_id',uid).eq('game_type','cards').limit(1).then(function(resp){
+    if(!resp.error&&resp.data&&resp.data.length>0&&resp.data[0].save_data){
+      var ss=resp.data[0].save_data;
+      if(Array.isArray(ss)&&ss.length>0){localStorage.setItem(GAME_SAVES_KEY,JSON.stringify(ss));renderSaveList();}
+    }
+  }).catch(function(){});
+}
+function generatePin(){var c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',p='';for(var i=0;i<6;i++)p+=c[Math.floor(Math.random()*c.length)];return p;}
+function _gameLink(d){var p=d.pin||'';return window.location.origin+window.location.pathname+'?challenge_pin='+encodeURIComponent(p)+'&comp='+encodeURIComponent(d.theme||'')+'&diff='+(d.difficulty||2)+'&count='+SETTINGS.qPerGame+'&t_id='+encodeURIComponent(d.trainer_id||'');}
+function renderSaveList(){
+  var wrap=document.getElementById('saveListWrap');var list=document.getElementById('saveList');
+  if(!wrap||!list)return;var saves=loadSaves();
+  var uid=localStorage.getItem('sb_user_id')||'';if(uid)saves=saves.filter(function(s){return s&&s.trainer_id===uid;});
+  if(!saves.length){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  var html='';saves.forEach(function(s,i){
+    var dl=['Facile','Moyen','Difficile'][(s.difficulty||2)-1]||'Moyen';
+    var dt=s.savedAt?new Date(s.savedAt).toLocaleDateString():'';
+    html+='<div class="save-item"><div><div class="si-title">'+_h(s.theme||'—')+'</div><div class="si-meta">PIN: <b style="color:var(--gold);font-family:monospace;">'+_h(s.pin)+'</b> · '+_h(dl)+' · '+s.questionCount+'Q · '+dt+'</div></div><div style="display:flex;gap:4px;flex-shrink:0;"><button class="btn btn-sm save-play" data-idx="'+i+'" style="border-color:var(--green);color:var(--green);">🃏</button><button class="btn btn-sm save-del" data-idx="'+i+'" style="border-color:var(--red);color:var(--red);">🗑</button></div></div>';
+  });
+  list.innerHTML=html;
+  list.querySelectorAll('.save-play').forEach(function(b){b.addEventListener('click',function(){loadSave(parseInt(b.dataset.idx));});});
+  list.querySelectorAll('.save-del').forEach(function(b){b.addEventListener('click',function(){deleteSave(parseInt(b.dataset.idx));});});
+}
+function loadSave(idx){
+  var saves=loadSaves();var s=saves[idx];if(!s)return;
+  localStorage.setItem(GAME_PUBLISH_KEY,JSON.stringify(s));
+  document.getElementById('cfgCompetence').value=s.theme||'';
+  document.getElementById('cfgDifficulty').value=s.difficulty||2;
+  document.getElementById('cfgQuestionCount').value=s.questionCount||8;
+  SETTINGS.qPerGame=s.questionCount||8;
+  showSaveResult(s);
+  showToast('📂 "'+(s.theme||'Sans titre')+'" chargée.');
+}
+function deleteSave(idx){
+  if(!confirm('Supprimer cette sauvegarde ?'))return;
+  var saves=loadSaves();saves.splice(idx,1);saveSaves(saves);renderSaveList();
+  showToast('🗑 Sauvegarde supprimée.');
+}
+function showToast(msg){
+  var el=document.getElementById('_toast');
+  if(!el){el=document.createElement('div');el.id='_toast';el.style.cssText='position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:9999;transition:opacity .3s;pointer-events:none;';document.body.appendChild(el);}
+  el.textContent=msg;el.style.opacity='1';setTimeout(function(){el.style.opacity='0';},2500);
+}
+function _h(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ===== COMPETENCE EXTRACTION =====
+var _selectedCompetence='';
+function _extractCompetences(text){
+  if(!text)return[];
+  var seen={},result=[];
+  var patterns=[
+    /-\s*(?:compétence visée|competence visee|compétence|competence)\s*:\s*([^\n]+)/gi,
+    /(?:compétence visée|competence visee|compétence|competence)\s*:\s*([^\n]+)/gi,
+    /-\s*(?:target competency|competency)\s*:\s*([^\n]+)/gi,
+    /(?:target competency|competency)\s*:\s*([^\n]+)/gi,
+    /-\s*(?:الكفاءة المستهدفة|الكفاءة)\s*:\s*([^\n]+)/gi,
+    /(?:الكفاءة المستهدفة|الكفاءة)\s*:\s*([^\n]+)/gi
+  ];
+  patterns.forEach(function(p){var m;while((m=p.exec(text))!==null){var v=m[1].trim();if(v&&!seen[v]){seen[v]=true;result.push(v);}}});
+  return result;
+}
+function loadCompetenceList(){
+  var listEl=document.getElementById('competenceList');
+  if(!listEl)return;
+  try{
+    var groqKey=_getGroqKey()||'';
+    var html='';
+    var allConvs=JSON.parse(localStorage.getItem('ai_conversations')||'[]');
+    if(allConvs.length){
+      var convC=0;
+      allConvs.slice(0,8).forEach(function(c){
+        var combined='';(c.messages||[]).forEach(function(m){var txt=m.content||'';if(txt&&m.role==='user')combined+='\n'+txt+'\n';});
+        var competences=_extractCompetences(combined);
+        if(!competences.length)return;
+        convC++;
+        var title=c.title||'Conversation';
+        html+='<div class="comp-item"><div style="font-size:10px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+_h(title)+'</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:2px;">';
+        competences.forEach(function(cp){html+='<span class="comp-badge" data-comp="'+_h(cp)+'">🎯 '+_h(cp)+'</span>';});
+        html+='</div></div>';
+      });
+      if(convC>0&&groqKey){html+='<div class="comp-item" style="text-align:center;border-bottom:none;padding:8px;"><span style="font-size:10px;color:var(--text-dim);">💡 Saisissez une compétence personnalisée</span></div>';}
+    }
+    if(groqKey){
+      html+='<div class="comp-item" style="text-align:center;border-bottom:none;padding:6px;"><span class="comp-badge" data-comp="__groq" style="background:rgba(110,220,255,.15);color:var(--cyan);">🤖 Générer avec IA</span></div>';
+    }
+    listEl.innerHTML=html;
+    listEl.querySelectorAll('.comp-badge').forEach(function(el){
+      el.addEventListener('click',function(e){
+        e.stopPropagation();
+        var comp=this.textContent.replace(/^[^]*?\uD83C\uDFAF\s*/,'').trim();
+        if(this.dataset.comp==='__groq'){
+          var val=document.getElementById('cfgCompetence').value.trim();
+          if(val){_selectedCompetence=val;showToast('🤖 Génération IA sur "'+val+'"');}
+          return;
+        }
+        document.getElementById('cfgCompetence').value=comp;
+        _selectedCompetence=comp;
+        listEl.style.display='none';
+      });
+    });
+    if(html)listEl.style.display='block';
+  }catch(e){}
+}
+document.getElementById('cfgCompetence').addEventListener('focus',function(){loadCompetenceList();document.getElementById('competenceList').style.display='block';});
+document.getElementById('cfgCompetence').addEventListener('blur',function(){setTimeout(function(){document.getElementById('competenceList').style.display='none';},200);});
+document.getElementById('cfgCompetence').addEventListener('input',function(){_selectedCompetence=this.value.trim();});
+
+// ===== GROQ AI GENERATION =====
+function generateQuestionsWithAI(competence,count,difficulty){
+  return new Promise(function(resolve){
+    var groqKey=_getGroqKey();
+    if(!groqKey){resolve(null);return;}
+    var diffMap=['facile','moyen','difficile'];
+    var diffLabel=diffMap[difficulty-1]||'moyen';
+    var prompt='Génère exactement '+count+' questions à choix multiples (QCM) sur le thème: "'+competence+'". Chaque question doit avoir 4 options dont une seule correcte. Retourne UNIQUEMENT un tableau JSON valide sans texte avant/après, au format: [{"q":"question","a":["opt1","opt2","opt3","opt4"],"c":0,"d":1}] où c est l\'index de la réponse correcte (0-3) et d est la difficulté (1='+diffLabel+').';
+    fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+groqKey},
+      body:JSON.stringify({model:'llama-3.1-8b-instant',messages:[{role:'user',content:prompt}],temperature:0.7,max_tokens:4096})
+    }).then(function(r){return r.json();}).then(function(j){
+      try{
+        var txt=j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content||'';
+        var json=JSON.parse(txt.replace(/```json|```|```/g,'').trim());
+        if(Array.isArray(json)&&json.length>=3){resolve(json);return;}
+        if(j.error){console.error('Groq API error:',j.error);}
+      }catch(e){console.error('Groq parse error:',e);}
+      resolve(null);
+    }).catch(function(e){console.error('Groq fetch error:',e);resolve(null);});
+  });
+}
+
+function generateQuestionsForCompetence(comp,count,diff){
+  return new Promise(function(resolve){
+    var groqKey=_getGroqKey();
+    if(groqKey&&comp&&comp!=='APC'){
+      showToast('🤖 Génération IA des questions sur "'+comp+'"...');
+      generateQuestionsWithAI(comp,count,diff).then(function(aiQs){
+        if(aiQs&&aiQs.length>=3){
+          showToast('✅ Questions générées par IA sur "'+comp+'"');
+          resolve(aiQs.map(function(q){return{q:q.q,a:q.a.slice(),c:q.c,d:q.d||1,type:Math.random()<0.15?'special':'normal',special:Math.random()<0.33?(Math.random()<0.33?'bonus':Math.random()<0.5?'gold':Math.random()<0.5?'surprise':'chrono'):''};}));
+          return;
+        }
+        showToast('📚 Utilisation des questions locales pour "'+comp+'"');
+        resolve(loadQuestions(comp));
+      });
+    }else{
+      if(comp&&comp!=='APC')showToast('📚 Questions locales sur "'+comp+'"');
+      resolve(loadQuestions(comp));
+    }
+  });
+}
+
+// ===== QUESTIONS =====
+var cardQuestions=[];
+var currentCardIndex=0;
+var correctCount=0;
+var totalScore=0;
+var bonusPoints=0;
+var currentCardType='normal';
+var chronoTimer=null;
+var chronoTime=10;
+var isAnswered=false;
+var isAnimating=false;
+
+function _matchCompTags(qTags,terms){
+  if(!qTags||!qTags.length||!terms||!terms.length)return false;
+  var tlower=terms.map(function(t){return t.toLowerCase();});
+  return qTags.some(function(tg){
+    var tgl=tg.toLowerCase();
+    return tlower.some(function(t){
+      return tgl.indexOf(t)>=0||t.indexOf(tgl)>=0||(t.length>=4&&tgl.indexOf(t.slice(0,4))>=0)||(tgl.length>=4&&t.indexOf(tgl.slice(0,4))>=0);
+    });
+  });
+}
+function loadQuestions(theme){
+  var fallback=[
+    {q:'Qu\'est-ce que l\'APC ?',a:['Une approche par compétences','Une méthode administrative','Un logiciel pédagogique','Un type d\'évaluation'],c:0,d:1,tags:['APC','définition','base']},
+    {q:'Quel est le rôle du formateur dans l\'APC ?',a:['Facilitateur','Directeur','Observateur','Correcteur'],c:0,d:1,tags:['APC','formateur','rôle']},
+    {q:'Que signifie "compétence" en APC ?',a:['Savoir-agir complexe','Une note','Un cours','Un exercice'],c:0,d:1,tags:['APC','compétence','définition']},
+    {q:'Qu\'est-ce qu\'une situation d\'apprentissage ?',a:['Un contexte pédagogique','Un examen','Un stage','Un manuel'],c:0,d:1,tags:['pédagogie','apprentissage','situation']},
+    {q:'Combien y a-t-il de phases dans un scénario APC ?',a:['5 phases','3 phases','7 phases','4 phases'],c:0,d:1,tags:['APC','scénario','phase']},
+    {q:'Que signifie "évaluation formative" ?',a:['Évaluation pour apprendre','Évaluation notée','Examen final','Test standardisé'],c:0,d:1,tags:['évaluation','formative','pédagogie']},
+    {q:'Qu\'est-ce qu\'un module en APC ?',a:['Une unité d\'enseignement','Un chapitre','Un exercice','Un projet'],c:0,d:1,tags:['APC','module','définition']},
+    {q:'Quel est le but de l\'approche par compétences ?',a:['Développer des savoir-agir','Mémoriser des cours','Obtenir des notes','Passer des examens'],c:0,d:1,tags:['APC','compétence','objectif']},
+    {q:'Qu\'est-ce qu\'une grille d\'évaluation ?',a:['Un outil de notation critériée','Une liste de cours','Un emploi du temps','Un formulaire'],c:0,d:1,tags:['évaluation','grille','critère']},
+    {q:'Que signifie "remédiation" en pédagogie ?',a:['Correction des difficultés','Un examen de rattrapage','Une punition','Un exercice supplémentaire'],c:0,d:2,tags:['pédagogie','remédiation','difficulté']},
+    {q:'Qu\'est-ce que la progressivité des apprentissages ?',a:['Une gradation des difficultés','Un programme fixe','Un rythme imposé','Une évaluation unique'],c:0,d:1,tags:['pédagogie','progressivité','apprentissage']},
+    {q:'Quel est l\'objectif de la phase d\'intégration ?',a:['Mobiliser plusieurs ressources','Introduire le cours','Évaluer','Conclure'],c:0,d:1,tags:['APC','intégration','phase']},
+    {q:'Que signifie "RMC" en APC ?',a:['Ressources, Méthodes, Compétences','Réforme du Ministère','Rapport de Mission','Règlement Intérieur'],c:0,d:2,tags:['APC','RMC','ressource']},
+    {q:'Qu\'est-ce qu\'un critère d\'évaluation ?',a:['Un indicateur de réussite','Une note minimale','Un délai','Un objectif'],c:0,d:1,tags:['évaluation','critère','indicateur']},
+    {q:'Comment appelle-t-on l\'ensemble des savoirs d\'un module ?',a:['Ressources','Contenu','Programme','Cours'],c:0,d:1,tags:['APC','module','ressource']},
+    {q:'Qu\'est-ce que la pédagogie active ?',a:['L\'apprenant est acteur','L\'enseignant parle','Travail individuel','Cours magistral'],c:0,d:1,tags:['pédagogie','active','apprenant']},
+    {q:'Que signifie "PF" en APC ?',a:['Projet de Formation','Préparation Finale','Phase Finale','Plan de Formation'],c:0,d:1,tags:['APC','formation','projet']},
+    {q:'Qu\'est-ce qu\'une situation-problème ?',a:['Un défi à résoudre','Un exercice simple','Une question de cours','Un test'],c:0,d:1,tags:['pédagogie','problème','situation']},
+    {q:'Quel est le rôle de l\'évaluation diagnostique ?',a:['Identifier les prérequis','Noter les élèves','Classer les étudiants','Valider un module'],c:0,d:1,tags:['évaluation','diagnostique','prérequis']},
+    {q:'Que signifie "auto-évaluation" ?',a:['L\'apprenant s\'évalue lui-même','L\'enseignant évalue','Une évaluation collective','Un test automatisé'],c:0,d:1,tags:['évaluation','auto-évaluation','apprenant']},
+    {q:'Qu\'est-ce qu\'un palier de compétence ?',a:['Un niveau de maîtrise','Une étape administrative','Un seuil de note','Un niveau scolaire'],c:0,d:1,tags:['compétence','palier','maîtrise']},
+    {q:'Que signifie "différenciation pédagogique" ?',a:['Adapter aux besoins','Donner le même cours','Accélérer le programme','Standardiser'],c:0,d:1,tags:['pédagogie','différenciation','adaptation']},
+    {q:'Qu\'est-ce que la métacognition ?',a:['Réfléchir sur sa pensée','Mémoriser','Apprendre par cœur','Répéter'],c:0,d:1,tags:['pédagogie','métacognition','réflexion']},
+    {q:'Comment évalue-t-on une compétence ?',a:['Dans une situation complexe','Par un QCM','Par un examen','Par un exercice'],c:0,d:1,tags:['évaluation','compétence','situation']},
+    {q:'Que signifie "transfert" en APC ?',a:['Réutiliser dans un nouveau contexte','Changer de module','Passer à la phase suivante','Copier'],c:0,d:1,tags:['APC','transfert','contexte']},
+    {q:'Qu\'est-ce qu\'un indicateur de performance ?',a:['Une mesure de réussite','Un objectif','Une note','Un délai'],c:0,d:1,tags:['évaluation','indicateur','performance']},
+    {q:'Qu\'est-ce que la contextualisation en APC ?',a:['Situer l\'apprentissage dans un contexte réel','Donner le cours théorique','Évaluer','Conclure'],c:0,d:1,tags:['APC','contextualisation','phase']},
+    {q:'Que signifie "déstabilisation" dans un scénario ?',a:['Créer un déséquilibre cognitif','Rassurer l\'apprenant','Donner la solution','Noter'],c:0,d:1,tags:['APC','déstabilisation','phase','scénario']},
+    {q:'Qu\'est-ce que la phase de construction ?',a:['Bâtir de nouvelles connaissances','Réciter le cours','Copier','Mémoriser'],c:0,d:1,tags:['APC','construction','phase','scénario']},
+    {q:'À quoi sert une situation d\'intégration ?',a:['Mobiliser plusieurs ressources','Tester la mémoire','Remplir du temps','Corriger'],c:0,d:1,tags:['APC','intégration','phase','scénario']},
+    {q:'Qu\'est-ce qu\'un savoir théorique ?',a:['Une connaissance conceptuelle','Une action pratique','Un outil','Une procédure'],c:0,d:1,tags:['pédagogie','savoir','théorie']},
+    {q:'Qu\'est-ce qu\'un savoir-faire ?',a:['Une capacité pratique','Un cours théorique','Une règle','Une définition'],c:0,d:1,tags:['pédagogie','savoir-faire','pratique']},
+    {q:'Qu\'est-ce qu\'un savoir-être ?',a:['Une attitude professionnelle','Un contenu de cours','Un outil','Une procédure'],c:0,d:1,tags:['pédagogie','savoir-être','attitude']},
+    {q:'Comment construire une grille critérielle ?',a:['Définir des critères et indicateurs','Lister des questions','Mettre des notes','Classer des élèves'],c:0,d:1,tags:['évaluation','grille','critère','construction']},
+    {q:'Qu\'est-ce qu\'une ressource en APC ?',a:['Tout ce qui aide l\'apprenant','Un livre uniquement','Un exercice','Une note'],c:0,d:1,tags:['APC','ressource','pédagogie']},
+    {q:'Qu\'est-ce que l\'approche inductive ?',a:['Partir du concret vers l\'abstrait','Partir de la théorie','Apprendre par cœur','Répéter'],c:0,d:1,tags:['pédagogie','inductive','méthode']},
+    {q:'Qu\'est-ce que l\'approche déductive ?',a:['Partir de la règle vers l\'exemple','Partir du concret','Observer','Pratiquer'],c:0,d:1,tags:['pédagogie','déductive','méthode']},
+    {q:'Que signifie "évaluation sommative" ?',a:['Évaluation bilan','Évaluation continue','Auto-évaluation','Évaluation par les pairs'],c:0,d:1,tags:['évaluation','sommative','bilan']},
+    {q:'Qu\'est-ce qu\'un objectif pédagogique ?',a:['Ce que l\'apprenant saura faire','Un contenu de cours','Une note minimale','Un chapitre'],c:0,d:1,tags:['pédagogie','objectif','apprentissage']},
+    {q:'Que signifie "taxonomie de Bloom" ?',a:['Une classification des objectifs','Un type d\'évaluation','Une méthode de cours','Un outil'],c:0,d:1,tags:['pédagogie','Bloom','taxonomie','objectif']},
+    {q:'Quelle est la première étape pour installer Windows 11 ?',a:['Vérifier la configuration minimale','Formater le disque','Activer le produit','Connecter à Internet'],c:0,d:1,tags:['Windows','installation','configuration','OS']},
+    {q:'Quel est le prérequis TPM pour Windows 11 ?',a:['TPM 2.0','TPM 1.2','TPM 3.0','Pas de TPM requis'],c:0,d:1,tags:['Windows','TPM','sécurité','configuration']},
+    {q:'Comment accéder aux paramètres réseau sous Windows 11 ?',a:['Paramètres → Réseau et Internet','Panneau de configuration','Invité de commandes','Gestionnaire de périphériques'],c:0,d:1,tags:['Windows','réseau','paramètres']},
+    {q:'Quel outil permet de partitionner un disque sous Windows 11 ?',a:['Gestion des disques','Explorateur de fichiers','Gestionnaire des tâches','Observateur d\'événements'],c:0,d:1,tags:['Windows','disque','partition','installation']},
+    {q:'Comment installer un pilote sous Windows 11 ?',a:['Gestionnaire de périphériques','Panneau de configuration','Paramètres Windows','Bureau'],c:0,d:1,tags:['Windows','pilote','périphérique']},
+    {q:'Quelle commande pour vérifier la version de Windows ?',a:['winver','verwindows','version','systeminfo'],c:0,d:1,tags:['Windows','commande','version']},
+    {q:'Comment créer un compte utilisateur local sous Windows 11 ?',a:['Paramètres → Comptes → Famille et autres utilisateurs','Panneau de configuration','Gestion de l\'ordinateur','CMD'],c:0,d:1,tags:['Windows','compte','utilisateur']},
+    {q:'Qu\'est-ce que le Secure Boot ?',a:['Une fonction de sécurité du démarrage','Un antivirus','Un pilote','Un logiciel Microsoft'],c:0,d:1,tags:['Windows','sécurité','Secure Boot','UEFI']},
+    {q:'Comment désactiver un programme au démarrage ?',a:['Gestionnaire des tâches → Démarrage','Paramètres Windows','Panneau de configuration','Explorateur de fichiers'],c:0,d:1,tags:['Windows','démarrage','performance']},
+    {q:'Quel système de fichiers est recommandé pour Windows 11 ?',a:['NTFS','FAT32','exFAT','FAT16'],c:0,d:1,tags:['Windows','NTFS','disque','stockage']},
+    {q:'Comment vérifier l\'état de la mémoire RAM sous Windows 11 ?',a:['Gestionnaire des tâches → Performances','Paramètres → Système','Panneau de configuration','CMD'],c:0,d:1,tags:['Windows','RAM','performance']},
+    {q:'Qu\'est-ce qu\'une sauvegarde système ?',a:['Une copie de l\'état du système','Un antivirus','Une mise à jour','Un pilote'],c:0,d:1,tags:['Windows','sauvegarde','système','maintenance']},
+    {q:'Comment restaurer Windows 11 à un point antérieur ?',a:['Paramètres → Windows Update → Options avancées → Récupération','Panneau de configuration','CMD','Bureau'],c:0,d:1,tags:['Windows','restauration','récupération']},
+    {q:'Qu\'est-ce que le BIOS/UEFI ?',a:['Un micrologiciel de démarrage','Un système d\'exploitation','Un logiciel antivirus','Un pilote'],c:0,d:1,tags:['Windows','BIOS','UEFI','installation']},
+    {q:'Comment configurer une adresse IP fixe sous Windows 11 ?',a:['Paramètres → Réseau → Modifier les options IP','CMD','Panneau de configuration','Explorateur'],c:0,d:1,tags:['Windows','IP','réseau','configuration']},
+    {q:'Quel outil pour diagnostiquer les problèmes réseau ?',a:['Dépannage réseau intégré','CMD','Panneau de configuration','Paramètres'],c:0,d:1,tags:['Windows','réseau','diagnostic']},
+    {q:'Comment mettre à jour Windows 11 ?',a:['Paramètres → Windows Update','Panneau de configuration','Microsoft Store','CMD'],c:0,d:1,tags:['Windows','mise à jour','update']},
+    {q:'Qu\'est-ce qu\'un point de restauration ?',a:['Un instantané du système','Un fichier temporaire','Une sauvegarde de fichiers','Un pilote'],c:0,d:1,tags:['Windows','restauration','point','système']},
+    {q:'Quelle est la configuration minimale RAM pour Windows 11 ?',a:['4 Go','2 Go','8 Go','16 Go'],c:0,d:1,tags:['Windows','configuration','RAM','prérequis']}
+  ];
+  var filtered=fallback;
+  if(theme&&theme!=='APC'){
+    var terms=theme.toLowerCase().split(/[\s,;]+/).filter(function(t){return t.length>2;});
+    var re=new RegExp(theme.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i');
+    filtered=fallback.filter(function(q){
+      if(re.test(q.q))return true;
+      if(q.tags){return _matchCompTags(q.tags,terms);}
+      return false;
+    });
+    if(filtered.length===0){
+      showToast('⚠️ Aucune question locale pour "'+theme+'", questions mélangées');
+      filtered=fallback.slice().sort(function(){return Math.random()-0.5;});
+    }
+  }
+  if(filtered.length<SETTINGS.qPerGame){
+    var pool=fallback.slice().sort(function(){return Math.random()-0.5;});
+    while(filtered.length<SETTINGS.qPerGame)filtered=filtered.concat(pool);
+  }
+  return filtered.slice(0,SETTINGS.qPerGame).sort(function(){return Math.random()-0.5;}).map(function(q){return{q:q.q,a:q.a.slice(),c:q.c,d:q.d||1,type:Math.random()<0.15?'special':'normal',special:Math.random()<0.33?(Math.random()<0.33?'bonus':Math.random()<0.5?'gold':Math.random()<0.5?'surprise':'chrono'):''};});
+}
+function generateQuestionsForCompetence(comp,count,diff){
+  return new Promise(function(resolve){
+    var groqKey=_getGroqKey();
+    if(groqKey&&comp&&comp!=='APC'){
+      showToast('🤖 Génération IA des questions sur "'+comp+'"...');
+      generateQuestionsWithAI(comp,count,diff).then(function(aiQs){
+        if(aiQs&&aiQs.length>=3){
+          resolve(aiQs.map(function(q){return{q:q.q,a:q.a.slice(),c:q.c,d:q.d||1,type:Math.random()<0.15?'special':'normal',special:Math.random()<0.33?(Math.random()<0.33?'bonus':Math.random()<0.5?'gold':Math.random()<0.5?'surprise':'chrono'):''};}));
+          return;
+        }
+        showToast('📚 Utilisation des questions locales');
+        resolve(loadQuestions(comp));
+      });
+    }else{
+      resolve(loadQuestions(comp));
+    }
+  });
+}
+
+// ===== GAME STATE =====
+var gameDeck=[];
+var gameActive=false;
+
+function getGameConfig(){
+  return{
+    competence:document.getElementById('cfgCompetence').value.trim()||'APC',
+    difficulty:parseInt(document.getElementById('cfgDifficulty').value)||2,
+    questionCount:parseInt(document.getElementById('cfgQuestionCount').value)||8
+  };
+}
+
+function startGame(){
+  var cfg=getGameConfig();
+  SETTINGS.qPerGame=cfg.questionCount;
+  var comp=cfg.competence;
+  generateQuestionsForCompetence(comp,cfg.questionCount,cfg.difficulty).then(function(qs){
+    cardQuestions=qs;
+    currentCardIndex=0;correctCount=0;totalScore=0;bonusPoints=0;
+    gameDeck=cardQuestions.map(function(q,i){return{idx:i,question:q,status:'pending'};});
+    gameActive=true;
+    document.getElementById('hudComp').textContent='🎯 '+comp;
+    showScreen('gameScreen');
+    Audio.startMusic();
+    Audio.sfx('click');
+    renderDeckCount();
+    showCard(0);
+    updateHUD();
+    document.getElementById('introScreen').classList.remove('open');
+  });
+}
+
+function showCard(idx){
+  if(idx>=cardQuestions.length){endGame();return;}
+  currentCardIndex=idx;
+  isAnswered=false;
+  isAnimating=false;
+  var q=cardQuestions[idx];
+  var card=document.getElementById('theCard');
+  card.className='card entering';
+  card.classList.remove('flipped','correct','wrong');
+  setTimeout(function(){card.className='card';card.classList.add('flipped');Audio.sfx('flip');},300);
+  document.getElementById('qText').textContent=q.q;
+  var badgeEl=document.getElementById('qBadge');
+  badgeEl.style.display='none';badgeEl.className='q-badge';
+  currentCardType='normal';
+  if(q.type==='special'&&q.special){
+    currentCardType=q.special;
+    badgeEl.style.display='inline-block';
+    if(q.special==='bonus'){badgeEl.textContent=t('cardBonus');badgeEl.className='q-badge bonus';}
+    else if(q.special==='gold'){badgeEl.textContent=t('cardGold');badgeEl.className='q-badge gold';}
+    else if(q.special==='surprise'){badgeEl.textContent=t('cardSurprise');badgeEl.className='q-badge surprise';}
+    else if(q.special==='chrono'){badgeEl.textContent=t('cardChrono');badgeEl.className='q-badge chrono';startChronoTimer();}
+  }
+  var ans=document.querySelectorAll('.answer-btn');
+  var labels=['A','B','C','D'];
+  ans.forEach(function(btn,i){
+    btn.className='answer-btn';
+    btn.querySelector('.ans-text').textContent=q.a[i]||'—';
+    btn.querySelector('.badge').textContent=labels[i];
+    btn.style.pointerEvents='auto';
+  });
+  if(currentCardType==='chrono')startChronoTimer();
+}
+
+function startChronoTimer(){
+  if(chronoTimer){clearInterval(chronoTimer);}
+  chronoTime=10;
+  var bar=document.getElementById('chronoBar');
+  if(!bar){
+    bar=document.createElement('div');bar.id='chronoBar';bar.className='chrono-bar';
+    bar.innerHTML='<div class="fill" id="chronoFill"></div>';
+    document.getElementById('answerRow').before(bar);
+  }
+  bar.style.display='block';
+  var fill=document.getElementById('chronoFill');
+  fill.style.width='100%';
+  chronoTimer=setInterval(function(){
+    chronoTime-=0.1;
+    if(fill)fill.style.width=(chronoTime/10*100)+'%';
+    if(chronoTime<=3&&chronoTime>0){Audio.sfx('tick');}
+    if(chronoTime<=0){
+      clearInterval(chronoTimer);chronoTimer=null;
+      Audio.sfx('timeUp');
+      handleAnswer(-1);
+    }
+  },100);
+}
+
+function selectAnswer(idx){
+  if(isAnswered||isAnimating)return;
+  if(chronoTimer){clearInterval(chronoTimer);chronoTimer=null;document.getElementById('chronoBar').style.display='none';}
+  isAnswered=true;
+  var q=cardQuestions[currentCardIndex];
+  var correct=q.c===idx;
+  var btns=document.querySelectorAll('.answer-btn');
+  btns.forEach(function(b){b.style.pointerEvents='none';});
+  btns[idx].classList.add(correct?'correct':'wrong');
+  if(!correct)btns[q.c].classList.add('correct');
+  if(correct){
+    Audio.sfx('correct');
+    var pts=10;
+    if(currentCardType==='bonus'){pts+=50;bonusPoints+=50;Audio.sfx('bonus');showToast(t('bonusLabel'));}
+    else if(currentCardType==='gold'){pts*=2;Audio.sfx('gold');showToast(t('goldLabel'));}
+    else if(currentCardType==='surprise'){showToast(t('surpriseLabel')+q.a[q.c]);}
+    totalScore+=pts;correctCount++;
+    var card=document.getElementById('theCard');
+    card.classList.add('correct');
+    setTimeout(function(){
+      Audio.sfx('slide');
+      addToPile(q,q.c);
+      setTimeout(function(){showCard(currentCardIndex+1);},200);
+    },400);
+  }else{
+    Audio.sfx('wrong');
+    var card=document.getElementById('theCard');
+    card.classList.add('wrong');
+    setTimeout(function(){
+      showCard(currentCardIndex+1);
+    },1200);
+  }
+  updateHUD();
+}
+function handleAnswer(idx){selectAnswer(idx);}
+
+function retryCard(){
+  if(isAnimating)return;
+  isAnswered=false;
+  isAnimating=true;
+  document.getElementById('retryRow').style.display='none';
+  var card=document.getElementById('theCard');
+  card.classList.remove('wrong','correct');
+  card.className='card flipped';
+  var btns=document.querySelectorAll('.answer-btn');
+  btns.forEach(function(b){b.className='answer-btn';b.style.pointerEvents='auto';});
+  Audio.sfx('click');
+  isAnimating=false;
+}
+
+function skipCard(){
+  if(isAnimating)return;
+  if(chronoTimer){clearInterval(chronoTimer);chronoTimer=null;}
+  isAnimating=true;
+  document.getElementById('retryRow').style.display='none';
+  var card=document.getElementById('theCard');
+  card.classList.remove('wrong');
+  card.className='card';
+  setTimeout(function(){
+    Audio.sfx('slide');
+    showCard(currentCardIndex+1);
+    isAnimating=false;
+  },200);
+}
+
+function addToPile(q,correctIdx){
+  var pile=document.getElementById('pileCards');
+  var el=document.createElement('div');
+  el.className='pile-card success';
+  el.style.cssText='position:absolute;bottom:'+(correctCount*2)+'px;right:'+(correctCount*1)+'px;z-index:'+correctCount;
+  pile.appendChild(el);
+}
+
+function renderDeckCount(){
+  var el=document.getElementById('deckCount');
+  var remaining=cardQuestions.length-currentCardIndex;
+  el.textContent='🃏 '+remaining+' / '+cardQuestions.length;
+}
+
+function updateHUD(){
+  document.getElementById('hudScore').textContent=totalScore;
+  document.getElementById('hudCorrect').textContent=correctCount+'/'+cardQuestions.length;
+  document.getElementById('hudRemaining').textContent=Math.max(0,cardQuestions.length-currentCardIndex-1);
+  document.getElementById('hudBonus').textContent=bonusPoints;
+  renderDeckCount();
+}
+
+function endGame(){
+  gameActive=false;
+  Audio.stopMusic();
+  Audio.sfx('victory');
+  showScreen('resultScreen');
+  var total=cardQuestions.length;
+  var pct=Math.round(correctCount/total*100);
+  document.getElementById('resultScore').textContent=correctCount+'/'+total;
+  document.getElementById('resultStars').textContent=ts('resultStars')(pct);
+  var compName=document.getElementById('cfgCompetence').value.trim()||'APC';
+  document.getElementById('resultDetail').textContent=ts('resultDetail')(correctCount,total)+' | '+totalScore+' pts | 🎯 '+compName;
+  var trophyEl=document.getElementById('resultTrophy');
+  trophyEl.className='trophy '+(pct>=90?'gold':pct>=75?'gold':pct>=50?'silver':'bronze');
+}
+
+// ===== SAVE GAME =====
+function saveGame(){
+  var cfg=getGameConfig();
+  showToast('🤖 Génération des questions...');
+  generateQuestionsForCompetence(cfg.competence,SETTINGS.qPerGame,cfg.difficulty).then(function(qs){
+    var pin=generatePin();
+    var saves=loadSaves();
+    while(saves.some(function(s){return s.pin===pin;}))pin=generatePin();
+    var trainerId=localStorage.getItem('sb_user_id')||'';
+    var d={
+      id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),
+      title:'Défi des Cartes du Savoir',
+      theme:cfg.competence,
+      specialty:'APC',
+      difficulty:cfg.difficulty,
+      questionCount:SETTINGS.qPerGame,
+      pin:pin,
+      trainer_id:trainerId,
+      rounds:[{name:'Round 1'}],
+      savedAt:new Date().toISOString()
+    };
+    saves.push(d);saveSaves(saves);
+    localStorage.setItem(GAME_PUBLISH_KEY,JSON.stringify(d));
+    showSaveResult(d);
+    renderSaveList();
+  });
+}
+
+function showSaveResult(d){
+  var sec=document.getElementById('gameSaveResult');
+  var secEnd=document.getElementById('gameSaveResultEnd');
+  if(!sec)return;
+  sec.style.display='block';
+  var pin=d.pin||'';
+  var link=_gameLink(d);
+  sec.innerHTML='<div class="sr-row"><img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(link)+'" width="120" height="120" alt="QR"><div><div style="font-size:10px;color:var(--text-dim);">PIN</div><div class="sr-pin">'+pin+'</div><div class="sr-actions"><button class="btn btn-sm btn-gold" id="btnCopyLink">📋 Copier</button><button class="btn btn-sm" id="btnDistrib">📤 Distribuer</button><button class="btn btn-sm" id="btnDownloadQR">⬇ QR</button></div></div></div>';
+  document.getElementById('btnCopyLink').addEventListener('click',function(){navigator.clipboard.writeText(link).then(function(){showToast('📋 Lien copié !');});});
+  document.getElementById('btnDistrib').addEventListener('click',function(){try{if(window.openChallengeDistribModal)openChallengeDistribModal(GAME_PUBLISH_KEY);else window.open(link,'_blank');}catch(e){window.open(link,'_blank');}});
+  document.getElementById('btnDownloadQR').addEventListener('click',function(){var a=document.createElement('a');a.href='https://api.qrserver.com/v1/create-qr-code/?size=400x400&data='+encodeURIComponent(link);a.download='carte_'+pin+'.png';a.click();});
+  if(secEnd){
+    secEnd.style.display='block';
+    document.getElementById('resultQRImg').src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(link);
+    document.getElementById('resultPin').textContent=pin;
+    document.getElementById('btnCopyResultLink').onclick=function(){navigator.clipboard.writeText(link).then(function(){showToast('📋 Lien copié !');});};
+    document.getElementById('btnDistribResult').onclick=function(){try{if(window.openChallengeDistribModal)openChallengeDistribModal(GAME_PUBLISH_KEY);else window.open(link,'_blank');}catch(e){window.open(link,'_blank');}};
+  }
+}
+
+// ===== SCREENS =====
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  var el=document.getElementById(id);if(el)el.classList.add('active');
+  if(id==='gameScreen')document.getElementById('hudBar').style.display='flex';
+  else if(id==='menuScreen'||id==='resultScreen')document.getElementById('hudBar').style.display='none';
+}
+
+// ===== RESULTS CARD FLOWER =====
+function saveCompetenceFlower(){
+  if(_savingFlower)return;
+  var cfg=getGameConfig();
+  var color=correctCount>=cardQuestions.length?'#ffd700':correctCount/cardQuestions.length>=0.8?'#ff88cc':'#ff6b6b';
+  var flowerTrainerId=localStorage.getItem('sb_user_id')||'';
+  if(!_sb){showToast('❌ Base de données non disponible.');return;}
+  _savingFlower=true;
+  var btn=document.getElementById('btnSaveResult');
+  btn.disabled=true;btn.textContent='⏳';
+  _sb.from('competence_flowers').insert({
+    prenom:localStorage.getItem('flower_prenom')||'','nom':localStorage.getItem('flower_nom')||'',
+    competence:cfg.competence||'APC',
+    specialite:'',
+    trainer_id:flowerTrainerId||null,
+    score:Math.round(correctCount/cardQuestions.length*100)||0,
+    couleur_fleur:color
+  }).then(function(resp){
+    _savingFlower=false;
+    btn.disabled=false;btn.textContent=t('btnSaveResult');
+    if(resp.error){showToast('❌ Erreur : '+resp.error.message);}
+    else{showToast('✅ Fleur plantée dans le jardin ! 🌸');}
+  });
+}
+
+// ===== LOADING SIM =====
+function runLoading(){
+  var pct=0,el=document.getElementById('loadPct'),lbl=document.getElementById('loadLabel');
+  var texts=ts('loadingTexts');
+  var iv=setInterval(function(){
+    pct+=2+Math.random()*5;if(pct>100)pct=100;
+    if(el)el.textContent=Math.round(pct)+'%';
+    if(lbl&&texts){var ti=Math.floor(pct/100*texts.length);if(ti>=texts.length)ti=texts.length-1;lbl.textContent=texts[ti]||t('loading');}
+    if(pct>=100){clearInterval(iv);setTimeout(function(){showScreen('menuScreen');Audio.init();},200);}
+  },60);
+}
+
+// ===== EVENT WIRING =====
+document.getElementById('btnStartGame').addEventListener('click',function(){
+  Audio.sfx('click');
+  var cfg=getGameConfig();SETTINGS.qPerGame=cfg.questionCount;
+  document.getElementById('introComp').textContent=t('introComp')+': '+cfg.competence;
+  document.getElementById('introScreen').classList.add('open');
+  document.getElementById('introStart').onclick=function(){startGame();};
+});
+document.getElementById('btnSaveGame').addEventListener('click',function(){Audio.sfx('click');saveGame();});
+document.getElementById('btnReplay').addEventListener('click',function(){Audio.sfx('click');showScreen('menuScreen');});
+document.getElementById('btnSaveResult').addEventListener('click',function(){Audio.sfx('click');saveCompetenceFlower();});
+
+document.querySelectorAll('.answer-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){selectAnswer(parseInt(btn.dataset.idx));});
+});
+document.getElementById('btnLang').addEventListener('click',function(){
+  var langs=['fr','ar','en'];var ci=langs.indexOf(LANG);LANG=langs[(ci+1)%langs.length];
+  localStorage.setItem('lang',LANG);applyI18N();
+  if(window.setLang)window.setLang(LANG);
+  Audio.sfx('click');
+});
+
+// ===== INIT =====
+(function(){
+  try{
+    var sp=new URLSearchParams(window.location.search);
+    var aPin=sp.get('challenge_pin'),aComp=sp.get('comp'),aDiff=sp.get('diff'),aCount=sp.get('count'),aTId=sp.get('t_id');
+    if(aTId){try{localStorage.setItem('plant_trainer_id',aTId);}catch(e){}}
+    if(aPin&&aComp&&aDiff&&aCount){
+      document.body.classList.add('lm');
+      SETTINGS.qPerGame=parseInt(aCount)||8;
+      document.getElementById('cfgCompetence').value=aComp;
+      document.getElementById('cfgDifficulty').value=aDiff;
+      document.getElementById('cfgQuestionCount').value=aCount;
+      startGame();
+      return;
+    }
+  }catch(e){}
+  try{
+    var raw=localStorage.getItem(GAME_PUBLISH_KEY);
+    if(raw){var d=JSON.parse(raw);if(d.pin)showSaveResult(d);}
+  }catch(e){}
+  renderSaveList();
+  syncSavesFromServer();
+  loadCompetenceList();
+  runLoading();
+})();
+</script>
+<script src="js/shared.v2.js?v=1.9.9"></script>
+<script src="js/challenges.js?v=1.8.7"></script>
+</body>
+</html>

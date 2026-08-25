@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Germination -->
+  <path d="M100 110 L100 75" stroke="#5a9e3a" stroke-width="2.5" stroke-linecap="round"/>
+  <ellipse cx="85" cy="82" rx="14" ry="7" fill="#6db84a" transform="rotate(-30 85 82)"/>
+  <ellipse cx="115" cy="82" rx="14" ry="7" fill="#6db84a" transform="rotate(30 115 82)"/>
+  <!-- Small stem highlight -->
+  <path d="M98 110 L98 75" stroke="#7acc5a" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+</svg>

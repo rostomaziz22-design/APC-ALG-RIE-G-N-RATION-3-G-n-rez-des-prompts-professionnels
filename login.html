@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' data: https://cdnjs.cloudflare.com; connect-src 'self' https://*.supabase.co https://openrouter.ai https://api.groq.com https://generativelanguage.googleapis.com https://api.emailjs.com https://api.ipify.org https://ipinfo.io https://ip-api.com; img-src 'self' data: https:; frame-ancestors 'none'; base-uri 'self';">
+    <title>APC Algérie G3 · Connexion</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#0a0f1e;position:relative;overflow:hidden;}
+        body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 20% 50%,rgba(0,119,204,.12) 0%,transparent 50%),radial-gradient(ellipse at 80% 20%,rgba(0,180,216,.08) 0%,transparent 50%),radial-gradient(ellipse at 50% 80%,rgba(99,102,241,.06) 0%,transparent 50%);z-index:0;}
+        .login-card{position:relative;z-index:1;background:#12192d;border-radius:20px;padding:44px 36px 36px;max-width:400px;width:92%;box-shadow:0 0 0 1px rgba(255,255,255,.06),0 32px 80px rgba(0,0,0,.5);text-align:center;animation:cardIn .35s ease-out;}
+        @keyframes cardIn{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+        .login-card .icon-wrap{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#0077CC,#6366f1);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:1.5rem;box-shadow:0 8px 32px rgba(0,119,204,.25);}
+        .login-card h2{margin:0 0 2px;color:#fff;font-size:1.25rem;font-weight:700;letter-spacing:-.3px;}
+        .login-card p.sub{color:rgba(255,255,255,.45);margin:0 0 28px;font-size:.85rem;}
+        .login-card .field{margin-bottom:18px;text-align:left;}
+        .login-card label{font-size:.75rem;font-weight:600;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px;}
+        .login-card input{width:100%;padding:12px 14px;border:1.5px solid rgba(255,255,255,.08);border-radius:12px;font-size:.92rem;background:rgba(255,255,255,.04);color:#fff;transition:border-color .2s, background .2s, box-shadow .2s;outline:none;}
+        .login-card input::placeholder{color:rgba(255,255,255,.2);}
+        .login-card input:focus{border-color:#0077CC;background:rgba(0,119,204,.06);box-shadow:0 0 0 3px rgba(0,119,204,.12);}
+        .login-card .forgot-link{text-align:right;margin-bottom:20px;}
+        .login-card .forgot-link button{background:none;border:none;color:rgba(255,255,255,.4);font-size:.8rem;cursor:pointer;padding:0;font-weight:500;transition:color .2s;}
+        .login-card .forgot-link button:hover{color:#0077CC;}
+        .login-card .btn-primary{width:100%;padding:13px;font-size:.95rem;border-radius:12px;background:linear-gradient(135deg,#0077CC,#6366f1);border:none;color:#fff;font-weight:600;cursor:pointer;box-shadow:0 8px 24px rgba(0,119,204,.25);transition:box-shadow .2s, transform .2s;letter-spacing:.3px;}
+        .login-card .btn-primary:hover{box-shadow:0 8px 40px rgba(0,119,204,.35);transform:translateY(-1px);}
+        .login-card .btn-primary:active{transform:translateY(0);}
+        .login-card .footer-text{margin-top:22px;padding-top:18px;border-top:1px solid rgba(255,255,255,.06);color:rgba(255,255,255,.25);font-size:.73rem;letter-spacing:.2px;}
+        .login-card .err-box{color:#f87171;font-size:.82rem;margin-bottom:14px;display:none;background:rgba(248,113,113,.1);padding:10px 14px;border-radius:10px;border:1px solid rgba(248,113,113,.15);}
+        .login-card .success-box{display:none;text-align:center;padding:24px 0;}
+        .login-card .success-box .big-icon{font-size:2.6rem;margin-bottom:10px;}
+        .login-card .success-box .msg{font-weight:600;color:#fff;font-size:.92rem;}
+        .login-card .success-box button{background:none;border:none;color:rgba(255,255,255,.4);font-size:.82rem;cursor:pointer;margin-top:16px;transition:color .2s;}
+        .login-card .success-box button:hover{color:#0077CC;}
+        .login-card .back-link{margin-top:14px;}
+        .login-card .back-link button{background:none;border:none;color:rgba(255,255,255,.35);font-size:.82rem;cursor:pointer;transition:color .2s;}
+        .login-card .back-link button:hover{color:#0077CC;}
+        .login-card .hidden{display:none;}
+        .page-exit{animation:fadeOut .3s ease forwards;}
+        @keyframes fadeOut{to{opacity:0;transform:scale(.96);}}
+        .login-card .remember-label{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.82rem;font-weight:500;color:rgba(255,255,255,.5);text-transform:none;letter-spacing:0;}
+        .login-card .remember-label input{width:16px;height:16px;cursor:pointer;accent-color:#0077CC;background:transparent;}
+        @media(max-width:480px){.login-card{padding:32px 24px 28px;}}
+    </style>
+    <script>console.log('📌 head script OK');
+    document.addEventListener('DOMContentLoaded', function() {
+        var btn = document.getElementById('loginBtn');
+        console.log('loginBtn trouvé:', btn);
+        if (btn) {
+            btn.addEventListener('click', function() {
+                console.log('🔘 bouton cliqué');
+                doLogin();
+            });
+        }
+    });
+    </script>
+</head>
+<body>
+<div id="apcCompatBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(135deg,#E65100,#FF8F00);color:#fff;padding:10px 16px;text-align:center;font-size:13px;font-weight:500;box-shadow:0 2px 12px rgba(0,0,0,.3);align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;"><i class="fas fa-exclamation-triangle" style="font-size:16px;"></i> <span>Mode de compatibilité activé pour votre navigateur. Certaines icônes peuvent être différentes.</span> <button id="apcCompatBannerClose" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);color:#fff;padding:4px 14px;border-radius:14px;font-size:12px;cursor:pointer;">OK</button></div>
+    <div class="login-card">
+        <div class="icon-wrap">🔐</div>
+        <h2>APC Algérie G3</h2>
+        <p class="sub">Plateforme de conception pédagogique</p>
+        <div id="loginForm">
+            <div class="field">
+                <label>Email</label>
+                <input type="email" id="authEmail" placeholder="votre@email.com">
+            </div>
+            <div class="field">
+                <label>Mot de passe</label>
+                <input type="password" id="authPassword" placeholder="••••••••">
+            </div>
+            <div class="forgot-link">
+                <button onclick="showForgot()">Mot de passe oublié ?</button>
+            </div>
+            <div class="field" style="margin-bottom:16px;text-align:left;">
+                <label class="remember-label">
+                    <input type="checkbox" id="rememberMe" checked> Se souvenir de moi
+                </label>
+            </div>
+            <div class="err-box" id="authError"></div>
+            <button class="btn-primary" id="loginBtn">🔑 Se connecter</button>
+            <div class="footer-text">Accès réservé aux formateurs autorisés</div>
+        </div>
+        <div id="forgotForm" class="hidden">
+            <div class="field">
+                <label>Email</label>
+                <input type="email" id="forgotEmail" placeholder="votre@email.com">
+            </div>
+            <div class="err-box" id="forgotError"></div>
+            <button class="btn-primary" id="forgotBtn" onclick="doForgot()">📧 Envoyer le lien</button>
+            <div class="back-link"><button onclick="showLogin()">← Retour à la connexion</button></div>
+        </div>
+        <div id="successBox" class="success-box hidden">
+            <div class="big-icon">📧</div>
+            <div class="msg" id="successMsg"></div>
+            <div><button onclick="showLogin()">← Retour</button></div>
+        </div>
+        <div id="resetForm" class="hidden">
+            <div class="field">
+                <label>Nouveau mot de passe</label>
+                <input type="password" id="newPassword" placeholder="••••••••">
+            </div>
+            <div class="field">
+                <label>Confirmer le mot de passe</label>
+                <input type="password" id="confirmPassword" placeholder="••••••••">
+            </div>
+            <div class="err-box" id="resetError"></div>
+            <button class="btn-primary" id="resetPwdBtn">🔑 Réinitialiser le mot de passe</button>
+            <div class="back-link"><button onclick="showLogin()">← Retour à la connexion</button></div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js?v=20260707"></script>
+    <script>
+        function doLogin() {
+            console.log('doLogin called');
+            var email = document.getElementById('authEmail').value.trim();
+            var pass = document.getElementById('authPassword').value;
+            var err = document.getElementById('authError');
+            if (!email || !pass) { err.textContent = 'Email et mot de passe requis'; err.style.display = 'block'; return; }
+            localStorage.setItem('saved_email', email);
+            if (document.getElementById('rememberMe').checked) {
+                localStorage.setItem('saved_pass', pass);
+            } else {
+                localStorage.removeItem('saved_pass');
+            }
+            setRememberMe(document.getElementById('rememberMe').checked);
+            signIn(email, pass).then(function() {
+                err.style.display = 'none';
+                document.querySelector('.login-card')?.classList.add('page-exit');
+                setTimeout(function() { window.location.href = 'loading.html'; }, 200);
+            }).catch(function(e) {
+                err.textContent = '❌ ' + e.message;
+                err.style.display = 'block';
+            });
+        }
+        function doForgot() {
+            var email = document.getElementById('forgotEmail').value.trim();
+            var err = document.getElementById('forgotError');
+            if (!email) { err.textContent = 'Entrez votre email'; err.style.display = 'block'; return; }
+            resetPassword(email).then(function() {
+                document.getElementById('forgotForm').classList.add('hidden');
+                document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('successBox').classList.remove('hidden');
+                document.getElementById('successMsg').textContent = '📧 Email de réinitialisation envoyé ! Vérifiez votre boîte.';
+            }).catch(function(e) {
+                err.textContent = '❌ ' + e.message;
+                err.style.display = 'block';
+            });
+        }
+        function showForgot() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('forgotForm').classList.remove('hidden');
+            document.getElementById('successBox').classList.add('hidden');
+            document.getElementById('resetForm').classList.add('hidden');
+            document.getElementById('authError').style.display = 'none';
+            document.getElementById('forgotError').style.display = 'none';
+        }
+        function showLogin() {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('forgotForm').classList.add('hidden');
+            document.getElementById('successBox').classList.add('hidden');
+            document.getElementById('resetForm').classList.add('hidden');
+            document.getElementById('authError').style.display = 'none';
+            document.getElementById('forgotError').style.display = 'none';
+            document.getElementById('resetError').style.display = 'none';
+        }
+        function doReset() {
+            var pass = document.getElementById('newPassword').value;
+            var confirm = document.getElementById('confirmPassword').value;
+            var err = document.getElementById('resetError');
+            if (!pass) { err.textContent = 'Entrez un nouveau mot de passe'; err.style.display = 'block'; return; }
+            if (pass.length < 8 || !/[A-Z]/.test(pass) || !/[0-9]/.test(pass) || !/[^A-Za-z0-9]/.test(pass)) { err.textContent = '8 caractères minimum, 1 majuscule, 1 chiffre, 1 caractère spécial requis'; err.style.display = 'block'; return; }
+            if (pass !== confirm) { err.textContent = 'Les mots de passe ne correspondent pas'; err.style.display = 'block'; return; }
+            if (typeof updatePassword !== 'function') { err.textContent = '❌ Erreur système'; err.style.display = 'block'; return; }
+            updatePassword(pass).then(function() {
+                err.style.display = 'none';
+                document.getElementById('resetForm').classList.add('hidden');
+                document.getElementById('successBox').classList.remove('hidden');
+                document.getElementById('successMsg').textContent = '✅ Mot de passe réinitialisé ! Vous pouvez vous connecter.';
+            }).catch(function(e) {
+                err.textContent = '❌ ' + e.message;
+                err.style.display = 'block';
+            });
+        }
+        function handleRecovery() {
+            var hash = window.location.hash;
+            if (!hash || !hash.includes('type=recovery')) return;
+            if (typeof supabaseClient === 'undefined' || !supabaseClient) { console.error('Supabase non initialisé'); return; }
+            var params = new URLSearchParams(hash.replace('#', ''));
+            var accessToken = params.get('access_token');
+            var refreshToken = params.get('refresh_token');
+            if (!accessToken || !refreshToken) return;
+            supabaseClient.auth.setSession({ access_token: accessToken, refresh_token: refreshToken }).then(function() {
+                document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('forgotForm').classList.add('hidden');
+                document.getElementById('successBox').classList.add('hidden');
+                document.getElementById('resetForm').classList.remove('hidden');
+                document.getElementById('resetError').style.display = 'none';
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }).catch(function(e) {
+                console.error('Erreur récupération session', e);
+            });
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            var savedEmail = localStorage.getItem('saved_email');
+            if (savedEmail) { document.getElementById('authEmail').value = savedEmail; }
+            var savedPass = localStorage.getItem('saved_pass');
+            if (savedPass) { document.getElementById('authPassword').value = savedPass; }
+            document.getElementById('authPassword').addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
+            document.getElementById('forgotEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') doForgot(); });
+            document.getElementById('resetPwdBtn').addEventListener('click', doReset);
+            document.getElementById('newPassword').addEventListener('keydown', function(e) { if (e.key === 'Enter') doReset(); });
+            document.getElementById('confirmPassword').addEventListener('keydown', function(e) { if (e.key === 'Enter') doReset(); });
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                supabaseClient.auth.getSession().then(function(res) {
+                    if (res.data.session) {
+                        currentUser = res.data.session.user;
+                        loadProfile().then(function() {
+                            window.location.href = 'index.html';
+                        });
+                    }
+                });
+            }
+            handleRecovery();
+        });
+    </script>
+</body>
+</html>

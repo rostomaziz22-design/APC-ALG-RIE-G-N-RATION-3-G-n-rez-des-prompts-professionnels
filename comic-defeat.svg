@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <radialGradient id="fireGlow" cx="50%" cy="60%" r="60%">
+      <stop offset="0%" stop-color="#ff3a00" stop-opacity="0.5"/>
+      <stop offset="50%" stop-color="#8a1a00" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shake"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2"/><feDisplacementMap in="SourceGraphic" scale="4"/></filter>
+    <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="800" height="500" fill="#1a0505"/>
+  <rect width="800" height="500" fill="url(#fireGlow)"/>
+  <!-- Sol fissuré -->
+  <path d="M0 420 L50 415 L100 430 L150 425 L200 440 L250 435 L300 450 L350 445 L400 460 L450 450 L500 455 L550 445 L600 460 L650 450 L700 455 L750 445 L800 460 L800 500 L0 500Z" fill="#2a0a0a"/>
+  <path d="M0 440 L60 435 L120 450 L180 445 L240 460 L300 455 L360 470 L420 465 L480 480 L540 470 L600 475 L660 465 L720 480 L780 470 L800 480 L800 500 L0 500Z" fill="#1a0505"/>
+  <!-- Fissures -->
+  <path d="M300 400 L320 420 L315 440 L340 460" stroke="#ff6b2a" stroke-width="2" fill="none" opacity="0.6"/>
+  <path d="M500 410 L490 430 L510 450 L500 470" stroke="#ff6b2a" stroke-width="2" fill="none" opacity="0.6"/>
+  <path d="M400 450 L410 470 L395 480" stroke="#ff6b2a" stroke-width="1.5" fill="none" opacity="0.5"/>
+  <!-- Terre impactée -->
+  <ellipse cx="400" cy="470" rx="300" ry="200" fill="#3a0a0a"/>
+  <ellipse cx="400" cy="470" rx="300" ry="200" fill="#5a1a0a" opacity="0.5"/>
+  <!-- Cratère d'impact -->
+  <ellipse cx="400" cy="350" rx="100" ry="40" fill="#1a0a00" stroke="#ff3a00" stroke-width="2" opacity="0.8"/>
+  <ellipse cx="400" cy="350" rx="60" ry="20" fill="#0a0000" stroke="#ff6b2a" stroke-width="1" opacity="0.9"/>
+  <!-- Météorite au centre -->
+  <ellipse cx="400" cy="340" rx="35" ry="25" fill="#5a2a0e"/>
+  <ellipse cx="400" cy="340" rx="35" ry="25" fill="none" stroke="#ffa03a" stroke-width="2" opacity="0.5"/>
+  <!-- Ondes de choc -->
+  <ellipse cx="400" cy="350" rx="150" ry="60" fill="none" stroke="#ff6b2a" stroke-width="1" opacity="0.3"/>
+  <ellipse cx="400" cy="350" rx="200" ry="80" fill="none" stroke="#ff3a00" stroke-width="1" opacity="0.2"/>
+  <!-- Feu et débris -->
+  <circle cx="350" cy="310" r="3" fill="#ff6b2a" opacity="0.7"/>
+  <circle cx="450" cy="300" r="4" fill="#ffa03a" opacity="0.6"/>
+  <circle cx="380" cy="290" r="2" fill="#ff3a00" opacity="0.8"/>
+  <circle cx="420" cy="280" r="2.5" fill="#ffd23b" opacity="0.5"/>
+  <circle cx="330" cy="340" r="2" fill="#ff6b2a" opacity="0.6"/>
+  <circle cx="470" cy="330" r="3" fill="#ffa03a" opacity="0.5"/>
+  <!-- Fumée -->
+  <ellipse cx="300" cy="280" rx="40" ry="20" fill="#444" opacity="0.3"/>
+  <ellipse cx="500" cy="270" rx="35" ry="18" fill="#444" opacity="0.25"/>
+  <ellipse cx="400" cy="260" rx="50" ry="25" fill="#333" opacity="0.2"/>
+  <!-- Bandeau DÉFAITE -->
+  <rect x="200" y="30" width="400" height="65" rx="10" fill="rgba(0,0,0,0.85)" stroke="#ff3a00" stroke-width="3"/>
+  <text x="400" y="62" font-family="Impact,sans-serif" font-size="34" fill="#ff3a00" text-anchor="middle" font-weight="bold">DÉFAITE</text>
+  <text x="400" y="82" font-family="Arial,sans-serif" font-size="13" fill="#dce6ff" text-anchor="middle">Le bouclier n'a pas tenu...</text>
+  <!-- Bulle triste -->
+  <rect x="120" y="120" width="200" height="50" rx="12" fill="#fff" stroke="#111" stroke-width="2" opacity="0.85"/>
+  <polygon points="220,170 240,195 200,170" fill="#fff" stroke="#111" stroke-width="2" opacity="0.85"/>
+  <text x="220" y="145" font-family="Arial,sans-serif" font-size="13" fill="#333" text-anchor="middle" font-weight="bold">Système hors service</text>
+  <text x="220" y="162" font-family="Arial,sans-serif" font-size="11" fill="#666" text-anchor="middle">Pertes totales...</text>
+  <!-- Texte bas -->
+  <rect x="50" y="440" width="700" height="50" rx="8" fill="rgba(0,0,0,0.8)" stroke="#ff3a00" stroke-width="1"/>
+  <text x="400" y="460" font-family="Georgia,serif" font-size="14" fill="#ff6b6b" text-anchor="middle">L'impact a été fatal. L'humanité n'a pas survécu.</text>
+  <text x="400" y="478" font-family="Arial,sans-serif" font-size="11" fill="#888" text-anchor="middle">Tu dois faire mieux, Commandant. Réessaie.</text>
+</svg>
