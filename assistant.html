@@ -1,14 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr" dir="ltr">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
         <title>APC Algérie G3 · Assistant IA</title>
-        <link rel="stylesheet" href="css/style.css?v=20260715">
+        <link rel="stylesheet" href="css/style.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
         <script>var l=localStorage.getItem('lang');if(l){document.documentElement.lang=l;if(l==='ar')document.documentElement.dir='rtl';}</script>
     </head>
     <body>
@@ -90,14 +87,14 @@
                         <div class="hero-text-group">
                             <h1>APC ALGÉRIE <span>GÉNÉRATION 3</span>
                             </h1>
-                            <div class="hero-sub" data-i18n="headerSub">Formateur 2.0<br>Le formateur augmenté par l'IA<br>Assistant intelligent de conception pédagogique selon l'Approche Par Compétences (APC).</div>
+                            <div class="hero-sub" data-i18n="headerSub">Formateur 2.0 – Assistant intelligent de conception pédagogique APC</div>
                             </div>
                             <div class="hero-flag-video">
                                 <video src="https://videos.pexels.com/video-files/13859860/13859860-hd_1280_720_25fps.mp4" autoplay loop muted playsinline>
                                 </video>
                             </div>
                         </div>
-                        <div class="hero-desc" data-i18n="headerDesc">Une IA pédagogique qui génère automatiquement des prompts professionnels, des scénarios pédagogiques, des présentations, des évaluations, des activités de gamification et des ressources conformes à l'Approche Par Compétences (APC) Algérie .</div>
+                        <div class="hero-desc" data-i18n="headerDesc">Générez des prompts professionnels pour ChatGPT, Claude, Gemini et Copilot afin de concevoir vos scénarios pédagogiques selon l'Approche Par Compétences.</div>
                             <div class="nav-links">
                                 <a class="nav-link" onclick="goTo('index.html')" data-i18n="tab_home">🏠 Accueil</a>
                                 <a class="nav-link" onclick="goTo('generator.html')" data-i18n="tab_generator">📝 Générateur de Prompts</a>
@@ -123,14 +120,12 @@
                                     </div>
                                 </div>
                                 <h3 data-i18n="historyLabel">📂 Historique</h3>
-                                <button class="clear-all-btn" onclick="clearAllHistory()" data-i18n="clearAllHistory">🗑 Tout effacer</button>
                                 <div id="historyList">
                                 </div>
                             </div>
                             <div class="ai-main">
                                 <div class="ai-toolbar">
                                     <button class="btn-icon" onclick="var s=document.querySelector('.ai-sidebar');var o=document.getElementById('aiSidebarOverlay');s.classList.toggle('open');if(s.classList.contains('open')){o.classList.add('show');}else{o.classList.remove('show');}" style="font-size:18px;padding:4px 8px;display:none;" id="aiSidebarToggle">☰</button>
-                                    <span class="admin-only ai-provider-section">
                                     <label data-i18n="providerLabel">Fournisseur IA :</label>
                                     <select id="providerSelect" class="ai-select" onchange="onProviderChange()">
                                         <option value="auto">🔄 Auto (Gemini → Groq → OpenRouter)</option>
@@ -144,8 +139,7 @@
                                     <select id="modelSelect" class="ai-select" style="min-width:160px;">
                                     </select>
                                     <span id="providerBadge" class="provider-badge">AUTO</span>
-                                    <span id="pedagogyBadge" class="pedagogy-badge">📘 APC</span>
-                                    </span>
+                                    <span id="pedagogyBadge" class="provider-badge" style="background:repeating-linear-gradient(135deg,#7C3AED,#A855F7);color:#fff;border-color:#A855F7;">📘 APC</span>
                                     <label class="web-search-toggle">
                                     <input type="checkbox" id="webSearchToggle"> 🌐 Recherche web</label>
                                     <button onclick="saveCurrentConversation()" class="btn btn-secondary" style="padding:6px 12px;font-size:11px;">💾 Sauvegarder</button>
@@ -161,10 +155,7 @@
                                         </div>
                                     </div>
                                     <div class="ai-input-area">
-                                        <div id="docChips" class="doc-chips" style="display:none"></div>
                                         <div class="ai-input-wrap">
-                                            <button id="docAttachBtn" class="btn-attach" title="📎 Joindre un fichier">📎</button>
-                                            <input type="file" id="docFileInput" multiple accept=".pdf,.docx,.xlsx,.csv,.txt,.json,.jpg,.jpeg,.png,.webp,.mp3,.wav,.m4a" hidden>
                                             <textarea id="aiInput" rows="1" data-i18n-placeholder="aiInputPlaceholder" placeholder="Écrivez votre message..." onkeydown="handleInputKey(event)" oninput="autoResize(this)">
                                             </textarea>
                                             <button id="micBtn" class="btn-mic" onclick="toggleMic()" title="🎤 Dicter">🎤</button>
@@ -222,7 +213,7 @@
                                                     </span>
                                                 </div>
                                             </div>
-                                            <div class="model-selector admin-only">
+                                            <div class="model-selector">
                                                 <div class="model-group-title" data-i18n="modelSelection">Modèle à utiliser</div>
                                                     <label>
                                                     <input type="radio" name="modelChoice" value="auto" checked>
@@ -230,11 +221,11 @@
                                                     </label>
                                                     <label>
                                                     <input type="radio" name="modelChoice" value="gemini-flash">
-                                                    <span data-i18n="modelGeminiFlash">☐ Gemini 2.0 Flash</span>
+                                                    <span data-i18n="modelGeminiFlash">☐ Gemini 1.5 Flash</span>
                                                     </label>
                                                     <label>
                                                     <input type="radio" name="modelChoice" value="gemini-pro">
-                                                    <span data-i18n="modelGeminiPro">☐ Gemini 2.5 Pro</span>
+                                                    <span data-i18n="modelGeminiPro">☐ Gemini 1.5 Pro</span>
                                                     </label>
                                                     <label>
                                                     <input type="radio" name="modelChoice" value="deepseek-v3">
@@ -249,29 +240,81 @@
                                                     <span data-i18n="modelLlama">☐ Llama 3.3 70B (OpenRouter)</span>
                                                     </label>
                                                     <label>
-<input type="radio" name="modelChoice" value="groq-70b"> <span data-i18n="modelGroq70b">☐ Llama 3.3 70B (Groq)</span>
-                                                    </label>
-                                                    
-                                                    <label>
-                                                    <input type="radio" name="modelChoice" value="or-nemotron-nano-free">
-                                                    <span data-i18n="modelNemotronNanoFree">☐ Nemotron 3 Nano 30B (OpenRouter free)</span>
+                                                    <input type="radio" name="modelChoice" value="groq-llama">
+                                                    <span data-i18n="modelGroqLlama">☐ GPT OSS 120B (Groq)</span>
                                                     </label>
                                                     <label>
-                                                    <input type="radio" name="modelChoice" value="or-gemma4-free">
-                                                    <span data-i18n="modelGemma4Free">☐ Gemma 4 31B (OpenRouter free)</span>
+                                                    <input type="radio" name="modelChoice" value="groq-scout">
+                                                    <span data-i18n="modelGroqScout">☐ GPT OSS 120B (Groq)</span>
                                                     </label>
                                                     <label>
-                                                    <input type="radio" name="modelChoice" value="or-gptoss20b-free">
-                                                    <span data-i18n="modelGptOss20bFree">☐ GPT OSS 20B (OpenRouter free)</span>
+                                                    <input type="radio" name="modelChoice" value="llama32-free">
+                                                    <span data-i18n="modelLlama32Free">☐ Llama 3.2 3B (OpenRouter free)</span>
                                                     </label>
                                                     <label>
-                                                    <input type="radio" name="modelChoice" value="or-ling3-free">
-                                                    <span data-i18n="modelLing3Free">☐ Ling 3.0 Flash (OpenRouter free)</span>
+                                                    <input type="radio" name="modelChoice" value="hermes405b-free">
+                                                    <span data-i18n="modelHermes405bFree">☐ Hermes 3 405B (OpenRouter free)</span>
                                                     </label>
                                                     <label>
-                                                    <input type="radio" name="modelChoice" value="or-nemotron-super-free">
-                                                    <span data-i18n="modelNemotronSuperFree">☐ Nemotron 3 Super 120B (OpenRouter free)</span>
+                                                    <input type="radio" name="modelChoice" value="deepseek-v3-free">
+                                                    <span data-i18n="modelDeepseekV3Free">☐ Nemotron 3 Super 120B (OpenRouter free)</span>
                                                     </label>
+                                                    <label>
+                                                    <input type="radio" name="modelChoice" value="owl-alpha">
+                                                    <span data-i18n="modelOwlAlpha">☐ Nemotron Nano 9B (OpenRouter free)</span>
+                                                    </label>
+                                                    <label>
+                                                    <input type="radio" name="modelChoice" value="llama4-scout-free">
+                                                    <span data-i18n="modelLlama4ScoutFree">☐ GPT OSS 20B (OpenRouter free)</span>
+                                                    </label>
+                                                </div>
+                                                <div class="field-group" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+                                                    <label>📧 <span data-i18n="emailjsLabel">EmailJS — Envoi d'invitations</span>
+                                                    </label>
+                                                    <div class="hint" data-i18n="emailjsHint">Créez un compte gratuit sur emailjs.com → connectez votre email → copiez vos clés ici.</div>
+                                                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                                                        <div>
+                                                            <label style="font-size:0.75rem;">Public Key</label>
+                                                            <input type="text" id="emailjsPublicKey" placeholder="ex: xxxxxxxxxxxxxxx" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;">
+                                                        </div>
+                                                        <div>
+                                                            <label style="font-size:0.75rem;">Service ID</label>
+                                                            <input type="text" id="emailjsServiceId" placeholder="service_xxxxxxx" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;">
+                                                        </div>
+                                                        <div>
+                                                            <label style="font-size:0.75rem;">Template ID</label>
+                                                            <input type="text" id="emailjsTemplateId" placeholder="template_xxxxxxx" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;">
+                                                        </div>
+                                                        <div>
+                                                            <label style="font-size:0.75rem;">Clé API (privée)</label>
+                                                            <input type="password" id="emailjsApiKey" placeholder="Pour créer le template" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;">
+                                                        </div>
+                                                        <div style="display:flex;align-items:flex-end;gap:4px;">
+                                                            <button class="btn btn-secondary" onclick="testEmailJS()" style="font-size:11px;">🔍 Tester</button>
+                                                            <button class="btn btn-secondary" onclick="createEmailJSTemplate()" style="font-size:11px;">⚙️ Créer le template</button>
+                                                            <span id="emailjsTestResult" style="font-size:0.75rem;margin-left:4px;">
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="field-group" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+                                                    <label><i class="fas fa-adjust"></i> <span data-i18n="compatLabel">Mode icônes</span>
+                                                    </label>
+                                                    <div class="hint" data-i18n="compatHint">Détecte automatiquement si vos icônes s'affichent correctement et bascule vers une version compatible si nécessaire.</div>
+                                                    <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
+                                                        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+                                                        <input type="radio" name="compatChoice" value="auto" checked>
+                                                        <span data-i18n="compatAuto">Auto (recommandé)</span>
+                                                        </label>
+                                                        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+                                                        <input type="radio" name="compatChoice" value="modern">
+                                                        <span data-i18n="compatModern">Moderne</span>
+                                                        </label>
+                                                        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+                                                        <input type="radio" name="compatChoice" value="compat">
+                                                        <span data-i18n="compatCompat">Compatible</span>
+                                                        </label>
+                                                    </div>
                                                 </div>
                                                 <div class="free-mode-row">
                                                     <label class="free-mode-label"><input type="checkbox" id="freeModeToggle"> 🔓 Mode libre (tous sujets)</label>
@@ -334,15 +377,16 @@
                                         </script>
                                         <script src="https://unpkg.com/@supabase/supabase-js@2">
                                         </script>
-                                        <script src="js/supabase.js?v=20260707">
+                                        <script src="js/supabase.js">
                                         </script>
                                         <script src="js/compat.js?v=2">
                                         </script>
-                                        <script src="js/shared.v2.js?v=1.9.9">
+                                        <script src="js/shared.v2.js">
                                         </script>
-                                        <script src="js/apc-glossary.js?v=1.8.7">
+                                        <script src="js/apc-glossary.js">
                                         </script>
-                                        <script src="js/assistant.js?v=1.9.9">
-                                        </script>
+<script src="js/assistant.js">
+                                         </script>
+                                         <script>console.log('assistant.html v1.4.5 — indicateur réflexion dans la bulle IA (typing-text)');</script>
                                     </body>
                                 </html>

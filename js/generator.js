@@ -35,7 +35,7 @@
         });
         function exportHeader() {
             return currentLang === 'fr'
-                ? '=== APC ALGÉRIE GÉNÉRATION 3 ===\nFormateur 2.0\nLe formateur augmenté par l\'IA\nAssistant intelligent de conception pédagogique selon l\'Approche Par Compétences (APC).\n\n'
+                ? '=== APC ALGÉRIE GÉNÉRATION 3 ===\nFormateur 2.0 – Assistant intelligent de conception pédagogique APC\n\n'
                 : currentLang === 'en' ? '=== APC ALGERIA GENERATION 3 ===\nTrainer 2.0 – Intelligent APC instructional design assistant\n\n'
                 : '=== APC الجزائر الجيل 3 ===\nالمكوِّن 2.0 – المساعد الذكي لتصميم السيناريوهات البيداغوجية\n\n';
         }
@@ -70,7 +70,7 @@
             URL.revokeObjectURL(a.href);
         });
         document.getElementById('resetBtn')?.addEventListener('click', () => {
-            showConfirmModal(currentLang === 'fr' ? 'Réinitialiser tous les champs ?' : currentLang === 'en' ? 'Reset all fields?' : 'إعادة تعيين جميع الحقول؟', function() {
+            if (!confirm(currentLang === 'fr' ? 'Réinitialiser tous les champs ?' : currentLang === 'en' ? 'Reset all fields?' : 'إعادة تعيين جميع الحقول؟')) return;
             ['roleIA', 'missionIA', 'specialite', 'module', 'competence', 'niveau', 'annee', 'duree', 'stagiaires', 'espace',
                 'ressources', 'contexte', 'difficultes', 'astMetier', 'astExtrait'
             ].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
@@ -82,7 +82,6 @@
             renderOptions();
             renderExamples();
             updatePrompt();
-            });
         });
         document.getElementById('sendToAIBtn')?.addEventListener('click', () => {
             const p = buildPrompt();

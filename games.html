@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr" dir="ltr">
 <head>
 <meta charset="UTF-8">
@@ -114,7 +114,7 @@
     </div>
   </main>
 </div>
-<script src="js/shared.v2.js?v=1.9.9"></script>
+<script src="js/shared.v2.js"></script>
 <script>
 (function(){
 var LANG='fr';
@@ -127,7 +127,7 @@ var I18N_GAMES={
   ar:{tab_games:"🎮 الألعاب",card_game1_title:"🚀 الدفاع المداري",card_game1_desc:"احمِ الأرض من النيازك بالإجابة على الأسئلة. درع، أقمار صناعية، حركة!",card_game2_title:"🌱 انمي نبتتك",card_game2_desc:"اسقِ معرفتك وشاهد نبتتك تزهر. لطيف، تعليمي، مريح.",card_game3_title:"🃏 بطاقات المعرفة",card_game3_desc:"اقلب البطاقات، أجب على الأسئلة وافتح البطاقات الخاصة. ذاكرة، تفكير، سرعة!",tag_space:"الفضاء",tag_reflexes:"ردود الفعل",tag_qcm:"اختيار من متعدد",tag_nature:"الطبيعة",tag_progressif:"تدريجي",tag_memory:"ذاكرة",btn_play:"🚀 العب",btn_play2:"🌱 العب",btn_play3:"🃏 العب"},
   en:{tab_games:"🎮 Games",card_game1_title:"🚀 Orbital Defense",card_game1_desc:"Protect Earth from meteors by answering questions. Shield, satellites, action!",card_game2_title:"🌱 Grow your plant",card_game2_desc:"Water your knowledge and watch your plant bloom. Gentle, educational, calming.",card_game3_title:"🃏 Knowledge Cards",card_game3_desc:"Flip cards, answer questions and unlock special cards. Memory, thinking, speed!",tag_space:"Space",tag_reflexes:"Reflexes",tag_qcm:"Quiz",tag_nature:"Nature",tag_progressif:"Progressive",tag_memory:"Memory",btn_play:"🚀 Play",btn_play2:"🌱 Play",btn_play3:"🃏 Play"}
 };
-function t(key){var v=(I18N_GAMES[LANG]||I18N_GAMES.fr)[key];if(v===undefined||v===key){if(typeof T!=='undefined'&&T[LANG]&&T[LANG][key]!==undefined)v=T[LANG][key];else if(typeof T!=='undefined'&&T.fr&&T.fr[key]!==undefined)v=T.fr[key];}return v||key;}
+function t(key){var v=(I18N_GAMES[LANG]||I18N_GAMES.fr)[key];return v||key;}
 function applyI18N(){
   document.documentElement.lang=LANG;
   document.documentElement.dir=LANG==='ar'?'rtl':'ltr';

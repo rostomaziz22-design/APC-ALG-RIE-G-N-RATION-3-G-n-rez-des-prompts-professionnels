@@ -1,8 +1,15 @@
 'use strict'; console.log('✅ shared.v2.js CHARGÉ');
-        const APP_VERSION = '1.9.9';
+        const APP_VERSION = '1.8.5';
         function checkVersionNotification() {
             var saved = localStorage.getItem('app_version');
             if (saved !== APP_VERSION) {
+                // Purge des cooldowns « modèle mort » de l'ancienne version : ils sont stockés par CLÉ de
+                // modèle (ex. 'gemini-flash') et restent valides jusqu'à minuit — si les noms d'API ont
+                // changé (ex. gemini-2.5-pro → gemini-3.1-pro-preview), les nouveaux noms seraient bloqués
+                // à tort jusqu'à 00:10. Un bump de version = configuration modèle possiblement changée → reset.
+                try {
+                    Object.keys(localStorage).forEach(function(k) { if (k.indexOf('axon_dead_') === 0) localStorage.removeItem(k); });
+                } catch (e) {}
                 var ver = APP_VERSION;
                 var cl = (typeof currentLang !== 'undefined' ? currentLang : null) || localStorage.getItem('lang') || 'fr';
                 var msg = cl === 'fr' ? 'APC Algérie GÉNÉRATION 3 a été mise à jour.' : cl === 'ar' ? 'تم تحديث APC Algérie GÉNÉRATION 3.' : 'APC Algérie GÉNÉRATION 3 has been updated.';
@@ -145,8 +152,8 @@
             fr: {
                 headerTitle: "APC ALGÉRIE <span>GÉNÉRATION 3</span>",
                 ministere: "Ministère de la Formation et de l'Enseignement Professionnels",
-                headerSub: "Formateur 2.0\nLe formateur augmenté par l'IA\nAssistant intelligent de conception pédagogique selon l'Approche Par Compétences (APC).",
-                headerDesc: "Une IA pédagogique qui génère automatiquement des prompts professionnels, des scénarios pédagogiques, des présentations, des évaluations, des activités de gamification et des ressources conformes à l'Approche Par Compétences (APC) Algérie .",
+                headerSub: "Formateur 2.0 – Assistant intelligent de conception pédagogique APC",
+                headerDesc: "Générez des prompts professionnels pour ChatGPT, Claude, Gemini et Copilot afin de concevoir vos scénarios pédagogiques selon l'Approche Par Compétences.",
                 headerSig: "",
                 tab_home: "🏠 Accueil",
                 tab_generator: "📝 Générateur de Prompts",
@@ -222,6 +229,7 @@
                 prompt_specialite: "Spécialité",
                 prompt_module: "Module",
                 prompt_competence: "Compétence visée",
+                checkCompetence: "🔍 Vérifier la compétence",
                 prompt_niveau: "Niveau",
                 prompt_annee: "Année",
                 prompt_duree: "Durée",
@@ -237,7 +245,7 @@
                 c2: "Construire un scénario pédagogique APC complet selon les 5 phases (Contextualisation, Déstabilisation, Construction, Intégration, Transfert). Pour chaque phase : donner un titre, une durée, un objectif, une situation proposée, les activités du formateur, les activités des stagiaires, et la production attendue.",
                 c3: "Créer une situation d'intégration authentique détaillée en lien avec le contexte professionnel, avec un scénario réaliste, une mission précise, des contraintes (temps, qualité, ressources) et une production attendue concrète.",
                 c4: "Produire une évaluation basée sur les compétences : type d'évaluation, tâche demandée détaillée, consignes claires pour le stagiaire.",
-                c5: "Générer une grille d'évaluation critérielle APC 4×4 avec 4 critères précis et 4 niveaux de maîtrise (Non maîtrisé, En cours, Maîtrisé, Expert). Le tableau markdown DOIT être COMPLET : en-tête | Critère | Non maîtrisé | En cours | Maîtrisé | Expert | SANS parenthèses ni caractères vides, puis UNE ligne par critère contenant EXACTEMENT 4 cases ☐ (une par niveau). JAMAIS de ligne de critère sans ses 4 cases. Ajouter un tableau des descripteurs de chaque niveau.",
+                c5: "Générer une grille d'évaluation critérielle APC 4×4 avec 4 critères précis et 4 niveaux de maîtrise (Non maîtrisé, En cours, Maîtrisé, Expert). Présenter le tableau markdown avec ☐ pour chaque case. Ajouter un tableau des descripteurs de chaque niveau.",
                 c6: "Générer les critères de performance observables détaillés pour chaque critère de la grille, sous forme de listes à puces avec des actions concrètes et vérifiables.",
                 c7: "Générer les indicateurs de réussite sous forme de liste avec ✅, décrivant précisément ce qui valide la compétence.",
                 c8: "Rédiger une conclusion pédagogique riche synthétisant les acquis (savoirs, savoir-faire, savoir-être), les perspectives d'apprentissage futur, et l'importance de la compétence dans le parcours professionnel.",
@@ -254,7 +262,7 @@
                 openrouterKeyLabel: "🔑 Clé API OpenRouter",
                 openrouterKeyHint: "Pour utiliser DeepSeek, Llama 3.3 via OpenRouter.",
                 geminiKeyLabel: "✦ Clé API Google Gemini",
-                geminiKeyHint: "Pour utiliser Gemini 2.0 Flash / 2.5 Pro (gratuit).",
+                geminiKeyHint: "Pour utiliser Gemini 3.6 Flash / 3.1 Pro (gratuit).",
                 emailjsLabel: "📧 EmailJS — Envoi d'invitations",
                 emailjsHint: "Créez un compte gratuit sur emailjs.com → connectez votre email → copiez vos clés ici.",
                 groqKeyLabel: "⚡ Clé API Groq",
@@ -262,30 +270,20 @@
                 verifyBtn: "Vérifier",
                 modelSelection: "Modèle à utiliser",
                 modelAuto: "☑ Auto (Gemini → Groq → OpenRouter)",
-                modelGeminiFlash: "☐ Gemini 2.0 Flash",
-                modelGeminiPro: "☐ Gemini 2.5 Pro",
+                modelGeminiFlash: "☐ Gemini 3.6 Flash",
+                modelGeminiPro: "☐ Gemini 3.1 Pro (Preview)",
                 modelV3: "☐ DeepSeek V3 (OpenRouter)",
                 modelR1: "☐ DeepSeek R1 (OpenRouter)",
                 modelLlama: "☐ Llama 3.3 70B (OpenRouter)",
                 modelGroqLlama: "☐ GPT OSS 120B (Groq)",
-                modelGroq70b: "☐ Llama 3.3 70B (Groq)",
-                modelGroqQwen: "☐ Qwen3.6 27B (Groq)",
-                modelNemotronSuperFree: "☐ Nemotron 3 Super 120B (OpenRouter free)",
-                modelGemma4Free: "☐ Gemma 4 31B (OpenRouter free)",
-                modelGptOss20bFree: "☐ GPT OSS 20B (OpenRouter free)",
-                modelLing3Free: "☐ Ling 3.0 Flash (OpenRouter free)",
-                modelNemotronNanoFree: "☐ Nemotron 3 Nano 30B (OpenRouter free)",
-                checkCompetence: "🔍 Vérifier la compétence",
+                modelGroqScout: "☐ GPT OSS 120B (Groq)",
+                modelLlama32Free: "☐ Llama 3.2 3B (OpenRouter free)",
+                modelHermes405bFree: "☐ Hermes 3 405B (OpenRouter free)",
+                modelDeepseekV3Free: "☐ Nemotron 3 Super 120B (OpenRouter free)",
+                modelOwlAlpha: "☐ Nemotron Nano 9B (OpenRouter free)",
+                modelLlama4ScoutFree: "☐ GPT OSS 20B (OpenRouter free)",
                 saveBtn: "Enregistrer",
                 clearBtn: "Effacer tout",
-                clearAllHistory: "🗑 Tout effacer",
-                confirmClearAll: "⚠️ Effacer tout l'historique ?",
-                renamePrompt: "Nouveau nom :",
-                confirmDelete: "🗑️ Supprimer cette conversation ?",
-                historyCleared: "✅ Historique effacé",
-                conversationDeleted: "🗑️ Conversation supprimée",
-                confirmClearAllMsg: "Cette action supprimera toutes les conversations. Les données associées seront définitivement perdues.",
-                confirmDeleteConvMsg: "Supprimer la conversation « {title} » ? Cette action est irréversible.",
                 cancelBtn: "Annuler",
                 closeBtn: "Fermer",
                 apiSaved: "✅ Clés API enregistrées !",
@@ -601,10 +599,6 @@
                 gamificationHallOfFame: "🏛 Hall of Fame",
                 gamificationHallOfFameEmpty: "Aucun champion encore. Lancez-vous !",
                 challengeHint: "💡 Générez un challenge directement depuis la dernière réponse de l'Assistant IA. L'IA crée les équipes, les épreuves et les questions automatiquement.",
-                docDropHint: "Déposez vos fichiers ici ou cliquez pour parcourir",
-                docBrowse: "Parcourir",
-                docExtracting: "Extraction en cours...",
-                docWhatNow: "📋 Que souhaitez-vous faire ?",
             },
             ar: {
                 headerTitle: "APC الجزائر <span>الجيل 3</span>",
@@ -686,6 +680,7 @@
                 prompt_specialite: "التخصص",
                 prompt_module: "الوحدة",
                 prompt_competence: "الكفاءة المستهدفة",
+                checkCompetence: "🔍 التحقق من الكفاءة",
                 prompt_niveau: "المستوى",
                 prompt_annee: "السنة",
                 prompt_duree: "المدة",
@@ -701,7 +696,7 @@
                 c2: "بناء سيناريو بيداغوجي APC كامل وفق المراحل الخمس (السياق، زعزعة التوازن، البناء، الإدماج، النقل). لكل مرحلة: عنوان، مدة زمنية، هدف، وضعية مقترحة، أنشطة المكوّن، أنشطة المتدرّب، والإنتاج المتوقع.",
                 c3: "إنشاء وضعية إدماج أصيلة مفصّلة مرتبطة بالسياق المهني، مع سيناريو واقعي ومهمة محددة وقيود (وقت، جودة، موارد) وإنتاج متوقع ملموس.",
                 c4: "إنتاج تقييم مبني على الكفاءات: نوع التقييم، المهمة المطلوبة مفصّلة، تعليمات واضحة للمتدرّب.",
-                c5: "توليد شبكة تقييم معيارية APC 4×4 مع 4 معايير محددة و4 مستويات إتقان (غير مكتسب، قيد الاكتساب، مكتسب، خبير). يجب أن يكون جدول الماركداون كاملاً: الترويسة | المعيار | غير مكتسب | قيد الاكتساب | مكتسب | خبير | بدون أقواس، ثم سطر لكل معيار يحتوي بالضبط 4 خانات ☐ (خانة لكل مستوى). ممنوع سطر معيار بدون خاناته الأربع. إضافة جدول وصفي لكل مستوى.",
+                c5: "توليد شبكة تقييم معيارية APC 4×4 مع 4 معايير محددة و4 مستويات إتقان (غير مكتسب، قيد الاكتساب، مكتسب، خبير). عرض جدول ماركداون مع ☐ لكل خانة. إضافة جدول وصفي لكل مستوى.",
                 c6: "توليد معايير أداء قابلة للملاحظة مفصّلة لكل معيار من الشبكة، على شكل قوائم نقطية بإجراءات ملموسة وقابلة للتحقق.",
                 c7: "توليد مؤشرات النجاح على شكل قائمة مع ✅، تصف بدقة ما يثبت اكتساب الكفاءة.",
                 c8: "كتابة خاتمة بيداغوجية غنية تلخّص المكتسبات (معارف، مهارات، سلوكيات)، آفاق التعلم المستقبلية، وأهمية الكفاءة في المسار المهني.",
@@ -718,7 +713,7 @@
                 openrouterKeyLabel: "🔑 مفتاح API OpenRouter",
                 openrouterKeyHint: "لاستخدام DeepSeek، Llama 3.3 عبر OpenRouter.",
                 geminiKeyLabel: "✦ مفتاح API Google Gemini",
-                geminiKeyHint: "لاستخدام Gemini 2.0 Flash / 2.5 Pro (مجاني).",
+                geminiKeyHint: "لاستخدام Gemini 3.6 Flash / 3.1 Pro (مجاني).",
                 emailjsLabel: "📧 EmailJS — إرسال الدعوات",
                 emailjsHint: "أنشئ حسابًا مجانيًا على emailjs.com → وصّل بريدك الإلكتروني → انسخ مفاتيحك هنا.",
                 groqKeyLabel: "⚡ مفتاح API Groq",
@@ -726,30 +721,20 @@
                 verifyBtn: "تحقق",
                 modelSelection: "النموذج المستخدم",
                 modelAuto: "☑ تلقائي (Gemini → Groq → OpenRouter)",
-                modelGeminiFlash: "☐ Gemini 2.0 Flash",
-                modelGeminiPro: "☐ Gemini 2.5 Pro",
+                modelGeminiFlash: "☐ Gemini 3.6 Flash",
+                modelGeminiPro: "☐ Gemini 3.1 Pro (Preview)",
                 modelV3: "☐ DeepSeek V3 (OpenRouter)",
                 modelR1: "☐ DeepSeek R1 (OpenRouter)",
                 modelLlama: "☐ Llama 3.3 70B (OpenRouter)",
                 modelGroqLlama: "☐ GPT OSS 120B (Groq)",
-                modelGroq70b: "☐ Llama 3.3 70B (Groq)",
-                modelGroqQwen: "☐ Qwen3.6 27B (Groq)",
-                modelNemotronSuperFree: "☐ Nemotron 3 Super 120B (OpenRouter مجاني)",
-                modelGemma4Free: "☐ Gemma 4 31B (OpenRouter مجاني)",
-                modelGptOss20bFree: "☐ GPT OSS 20B (OpenRouter مجاني)",
-                modelLing3Free: "☐ Ling 3.0 Flash (OpenRouter مجاني)",
-                modelNemotronNanoFree: "☐ Nemotron 3 Nano 30B (OpenRouter مجاني)",
-                checkCompetence: "🔍 التحقق من الكفاءة",
+                modelGroqScout: "☐ GPT OSS 120B (Groq)",
+                modelLlama32Free: "☐ Llama 3.2 3B (OpenRouter مجاني)",
+                modelHermes405bFree: "☐ Hermes 3 405B (OpenRouter مجاني)",
+                modelDeepseekV3Free: "☐ Nemotron 3 Super 120B (OpenRouter مجاني)",
+                modelOwlAlpha: "☐ Nemotron Nano 9B (OpenRouter مجاني)",
+                modelLlama4ScoutFree: "☐ GPT OSS 20B (OpenRouter مجاني)",
                 saveBtn: "حفظ",
                 clearBtn: "حذف الكل",
-                clearAllHistory: "🗑 حذف الكل",
-                confirmClearAll: "⚠️ حذف كل المحادثات؟",
-                renamePrompt: "الاسم الجديد:",
-                confirmDelete: "🗑️ حذف هذه المحادثة؟",
-                historyCleared: "✅ تم حذف المحادثات",
-                conversationDeleted: "🗑️ تم حذف المحادثة",
-                confirmClearAllMsg: "سيتم حذف جميع المحادثات. لا يمكن التراجع عن هذا الإجراء.",
-                confirmDeleteConvMsg: "حذف المحادثة « {title} » ? هذا الإجراء لا يمكن التراجع عنه.",
                 cancelBtn: "إلغاء",
                 closeBtn: "إغلاق",
                 apiSaved: "✅ تم حفظ المفاتيح!",
@@ -1064,10 +1049,6 @@
                 gamificationHallOfFame: "🏛 قاعة الشهرة",
                 gamificationHallOfFameEmpty: "لا يوجد أبطال بعد. ابدأ الآن!",
                 challengeHint: "💡 قم بإنشاء تحدي مباشرة من آخر رد للمساعد الذكي. يقوم الذكاء الاصطناعي بإنشاء الفرق والجولات والأسئلة تلقائياً.",
-                docDropHint: "قم بإسقاط ملفاتك هنا أو انقر للتصفح",
-                docBrowse: "تصفح",
-                docExtracting: "جاري الاستخراج...",
-                docWhatNow: "📋 ماذا تريد أن تفعل؟",
             },
             en: {
                 headerTitle: "APC ALGERIA <span>GENERATION 3</span>",
@@ -1149,6 +1130,7 @@
                 prompt_specialite: "Specialty",
                 prompt_module: "Module",
                 prompt_competence: "Target Competency",
+                checkCompetence: "🔍 Check competency",
                 prompt_niveau: "Level",
                 prompt_annee: "Year",
                 prompt_duree: "Duration",
@@ -1164,7 +1146,7 @@
                 c2: "Build a complete APC pedagogical scenario according to the 5 phases (Contextualization, Destabilization, Construction, Integration, Transfer). For each phase provide: title, duration, objective, proposed situation, trainer activities, trainee activities, and expected production.",
                 c3: "Create a detailed authentic integration situation linked to the professional context, with a realistic scenario, precise mission, constraints (time, quality, resources) and concrete expected production.",
                 c4: "Produce a competency-based evaluation: assessment type, detailed task description, clear instructions for the trainee.",
-                c5: "Generate a 4×4 APC criterion-referenced evaluation grid with 4 specific criteria and 4 mastery levels (Not mastered, In progress, Mastered, Expert). The markdown table MUST be COMPLETE: header | Criteria | Not mastered | In progress | Mastered | Expert | with NO empty parentheses, then ONE row per criterion containing EXACTLY 4 ☐ cells (one per level). NEVER a criterion row without its 4 cells. Add a descriptor table for each level.",
+                c5: "Generate a 4×4 APC criterion-referenced evaluation grid with 4 specific criteria and 4 mastery levels (Not mastered, In progress, Mastered, Expert). Present the markdown table with ☐ for each cell. Add a descriptor table for each level.",
                 c6: "Generate detailed observable performance criteria for each grid criterion, as bullet lists with concrete and verifiable actions.",
                 c7: "Generate success indicators as a list with ✅, describing precisely what validates the competency.",
                 c8: "Write a rich pedagogical conclusion synthesizing achievements (knowledge, skills, attitudes), future learning perspectives, and the importance of the competency in the professional career path.",
@@ -1181,7 +1163,7 @@
                 openrouterKeyLabel: "🔑 OpenRouter API Key",
                 openrouterKeyHint: "To use DeepSeek, Llama 3.3 via OpenRouter.",
                 geminiKeyLabel: "✦ Google Gemini API Key",
-                geminiKeyHint: "To use Gemini 2.0 Flash / 2.5 Pro (free).",
+                geminiKeyHint: "To use Gemini 3.6 Flash / 3.1 Pro (free).",
                 emailjsLabel: "📧 EmailJS — Send invitations",
                 emailjsHint: "Create a free account at emailjs.com → connect your email → paste your keys here.",
                 groqKeyLabel: "⚡ Groq API Key",
@@ -1189,30 +1171,20 @@
                 verifyBtn: "Verify",
                 modelSelection: "Model to use",
                 modelAuto: "☑ Auto (Gemini → Groq → OpenRouter)",
-                modelGeminiFlash: "☐ Gemini 2.0 Flash",
-                modelGeminiPro: "☐ Gemini 2.5 Pro",
+                modelGeminiFlash: "☐ Gemini 3.6 Flash",
+                modelGeminiPro: "☐ Gemini 3.1 Pro (Preview)",
                 modelV3: "☐ DeepSeek V3 (OpenRouter)",
                 modelR1: "☐ DeepSeek R1 (OpenRouter)",
                 modelLlama: "☐ Llama 3.3 70B (OpenRouter)",
                 modelGroqLlama: "☐ GPT OSS 120B (Groq)",
-                modelGroq70b: "☐ Llama 3.3 70B (Groq)",
-                modelGroqQwen: "☐ Qwen3.6 27B (Groq)",
-                modelNemotronSuperFree: "☐ Nemotron 3 Super 120B (OpenRouter free)",
-                modelGemma4Free: "☐ Gemma 4 31B (OpenRouter free)",
-                modelGptOss20bFree: "☐ GPT OSS 20B (OpenRouter free)",
-                modelLing3Free: "☐ Ling 3.0 Flash (OpenRouter free)",
-                modelNemotronNanoFree: "☐ Nemotron 3 Nano 30B (OpenRouter free)",
-                checkCompetence: "🔍 Check competency",
+                modelGroqScout: "☐ GPT OSS 120B (Groq)",
+                modelLlama32Free: "☐ Llama 3.2 3B (OpenRouter free)",
+                modelHermes405bFree: "☐ Hermes 3 405B (OpenRouter free)",
+                modelDeepseekV3Free: "☐ Nemotron 3 Super 120B (OpenRouter free)",
+                modelOwlAlpha: "☐ Nemotron Nano 9B (OpenRouter free)",
+                modelLlama4ScoutFree: "☐ GPT OSS 20B (OpenRouter free)",
                 saveBtn: "Save",
                 clearBtn: "Clear all",
-                clearAllHistory: "🗑 Clear all",
-                confirmClearAll: "⚠️ Clear all history?",
-                renamePrompt: "New name:",
-                confirmDelete: "🗑️ Delete this conversation?",
-                historyCleared: "✅ History cleared",
-                conversationDeleted: "🗑️ Conversation deleted",
-                confirmClearAllMsg: "This will delete all conversations. This action cannot be undone.",
-                confirmDeleteConvMsg: "Delete conversation « {title} » ? This action cannot be undone.",
                 cancelBtn: "Cancel",
                 closeBtn: "Close",
                 apiSaved: "✅ API keys saved!",
@@ -1528,10 +1500,6 @@
                 gamificationHallOfFame: "🏛 Hall of Fame",
                 gamificationHallOfFameEmpty: "No champions yet. Get started!",
                 challengeHint: "💡 Generate a challenge directly from the last AI Assistant response. The AI creates teams, rounds and questions automatically.",
-                docDropHint: "Drop your files here or click to browse",
-                docBrowse: "Browse",
-                docExtracting: "Extracting...",
-                docWhatNow: "📋 What would you like to do?",
             }
         };
         const aboutFR = `\
@@ -1886,6 +1854,61 @@
             _clearDeadModels();
             updateApiBadge();
         }
+        // ===== Cooldown intelligent des modèles (v1.4.4) =====
+        // Un modèle en 429/413/401... est marqué indisponible (deadUntil) → skip immédiat dans les boucles,
+        // AUCUNE attente bloquante. Persisté dans localStorage avec clé JOURNALIÈRE (purge automatique à minuit).
+        function _deadModelsKey() {
+            var d = new Date();
+            return 'axon_dead_' + d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+        }
+        function _modelDisplayName(modelKey) {
+            try {
+                var m = MODEL_MAP[modelKey];
+                return m ? (m.provider + '/' + m.model) : modelKey;
+            } catch (e) { return modelKey; }
+        }
+        function _markModelDead(modelKey, msg) {
+            try {
+                msg = msg || '';
+                var key = _deadModelsKey();
+                var deadMap = JSON.parse(localStorage.getItem(key) || '{}');
+                var wasDead = deadMap[modelKey] && Date.now() < deadMap[modelKey];
+                var now = Date.now();
+                var eod = new Date(); eod.setHours(24, 0, 0, 0);
+                var until, reason = 'unknown';
+                if (/per\s*day|daily|TPD|tokens per day/i.test(msg)) {
+                    until = eod.getTime() + 10 * 60 * 1000; reason = '429_daily';
+                } else if (/limit:\s*0|quota exceeded|RESOURCE_EXHAUSTED/i.test(msg)) {
+                    until = eod.getTime() + 10 * 60 * 1000; reason = '429_daily';
+                } else if (msg.includes('429')) {
+                    var m429 = msg.match(/retry\s+in\s+(\d+(?:\.\d+)?)\s*s/i);
+                    until = m429 ? Math.min(now + (Math.max(parseInt(m429[1], 10) + 5, 10)) * 1000, now + 300 * 1000) : now + 300 * 1000;
+                    reason = '429';
+                } else if (/413|Request too large|Content Too Large/i.test(msg)) {
+                    until = now + 60 * 1000; reason = '413';
+                } else if (/401|403|unauthorized|forbidden/i.test(msg)) {
+                    until = now + 15 * 60 * 1000; reason = '401/403';
+                } else if (/400|404|not a valid model|no endpoints|model[^\n]*not found/i.test(msg)) {
+                    until = eod.getTime() + 10 * 60 * 1000; reason = '400/404';
+                } else if (/50[0-9]|52[0-9]|internal server|bad gateway|service unavailable/i.test(msg)) {
+                    until = now + 3 * 60 * 1000; reason = '5xx';
+                } else {
+                    until = now + 5 * 60 * 1000; reason = 'autre';
+                }
+                until = Math.min(until, eod.getTime() + 10 * 60 * 1000);
+                deadMap[modelKey] = { until: until, reason: reason, lastError: msg.substring(0, 300), lastFailure: now };
+                localStorage.setItem(key, JSON.stringify(deadMap));
+                if (!wasDead) {
+                    var t = new Date(until);
+                    var hh = ('0' + t.getHours()).slice(-2), mm = ('0' + t.getMinutes()).slice(-2);
+                    console.warn('🚫 ' + _modelDisplayName(modelKey) + ' [' + reason + '] → skip jusqu\'à ' + hh + ':' + mm);
+                    try { if (typeof showToast === 'function') showToast('🚫 ' + _modelDisplayName(modelKey) + ' indisponible (' + reason + ') → bascule auto, réessai ' + hh + ':' + mm); } catch (e2) {}
+                }
+            } catch (e) {}
+        }
+        function _clearDeadModels() {
+            try { localStorage.removeItem(_deadModelsKey()); } catch (e) {}
+        }
 function updateApiBadge() {
     const badge = document.getElementById('apiBadge');
     if (!badge) return;
@@ -1918,8 +1941,7 @@ function testEmailJS() {
     var sid = stripBOM(document.getElementById('emailjsServiceId').value).trim() || cfg.serviceId;
     var tid = stripBOM(document.getElementById('emailjsTemplateId').value).trim() || cfg.templateId;
     if (!pk || !sid || !tid) { showToast('❌ Configurez Public Key, Service ID et Template ID dans Paramètres.'); return; }
-    var ak = stripBOM(document.getElementById('emailjsApiKey')?.value || '').trim() || cfg.apiKey || '';
-    saveEmailJSConfig(pk, sid, tid, ak);
+    saveEmailJSConfig(pk, sid, tid);
     console.log('EmailJS test - pk:', pk.substring(0,6)+'...', 'sid:', sid, 'tid:', tid);
     var el = document.getElementById('emailjsTestResult');
     el.textContent = '⏳ Test...';
@@ -1931,10 +1953,47 @@ function testEmailJS() {
     });
 }
 function createEmailJSTemplate() {
+    var cfg = getEmailJSConfig();
+    var pk = stripBOM(document.getElementById('emailjsPublicKey')?.value || '').trim() || cfg.publicKey;
+    var sid = stripBOM(document.getElementById('emailjsServiceId')?.value || '').trim() || cfg.serviceId;
+    var ak = stripBOM(document.getElementById('emailjsApiKey')?.value || '').trim() || cfg.apiKey || '';
+    if (!pk || !sid) { showToast('❌ Remplissez d\'abord Public Key et Service ID.'); return; }
+    if (!ak) { showToast('❌ Collez votre clé API privée EmailJS (Account → API Keys).'); return; }
     var el = document.getElementById('emailjsTestResult');
-    if (el) el.textContent = '📋 Créez le template manuellement sur dashboard.emailjs.com';
-    window.open('https://dashboard.emailjs.com/admin', '_blank');
-    showToast('📋 Créez le template manuellement sur le tableau de bord EmailJS.');
+    el.textContent = '⏳ Création du template...';
+    var templateContent = 'Bonjour {{to_name}},<br><br>{{message}}<br><br><div style="background:#f5f5f5;padding:16px;border-radius:8px;text-align:center;margin:16px 0;"><strong style="font-size:18px;">Code d\'accès : {{code}}</strong><br><br><a href="{{link}}" style="background:#1B5E20;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:600;display:inline-block;">Accéder au quiz</a></div><br><small>Lien direct : {{link}}</small><br><br>{{from_name}}';
+    var body = JSON.stringify({
+        name: 'APC Algérie G3 - Distribution',
+        subject: '🎯 Quiz : {{quiz_name}} - Code d\'accès',
+        content: templateContent,
+        toField: '{{to_email}}',
+        fromName: '{{from_name}}',
+        isCopyToSender: false,
+        isIncludeReplyTo: false,
+        variables: ['to_name', 'from_name', 'message', 'to_email', 'quiz_name', 'code', 'link', 'qr_url']
+    });
+    fetch('https://api.emailjs.com/api/v1.0/templates', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + ak, 'Content-Type': 'application/json' },
+        body: body
+    }).then(function(r) {
+        if (!r.ok) return r.text().then(function(t) { throw new Error(t || 'Erreur ' + r.status); });
+        return r.json();
+    }).then(function(data) {
+        var tid = data.template_id || data.id || '';
+        if (tid) {
+            document.getElementById('emailjsTemplateId').value = tid;
+            saveEmailJSConfig(pk, sid, tid);
+            el.textContent = '✅ Template créé : ' + tid;
+            showToast('✅ Template EmailJS créé automatiquement !');
+        } else {
+            el.textContent = '✅ Template créé, mais ID introuvable. Vérifiez EmailJS.';
+        }
+    }).catch(function(err) {
+        el.textContent = '❌ ' + (err.message || err);
+        showToast('❌ Erreur : ' + (err.message || err));
+        console.error('EmailJS template creation error:', err);
+    });
 }
         async function verifyKey(url, key) {
             try {
@@ -1956,8 +2015,7 @@ function createEmailJSTemplate() {
                     "nvidia/nemotron-3-super-120b-a12b:free", "nvidia/nemotron-nano-9b-v2:free",
                     "openai/gpt-oss-20b:free"
                 ], apiKeyName: "OPENROUTER_API_KEY", url: "https://openrouter.ai/api/v1/chat/completions" },
-            { id: "groq", name: "Groq", icon: "⚡", models: ["openai/gpt-oss-120b", "llama-3.1-8b-instant",
-                    "qwen/qwen3.6-27b"
+            { id: "groq", name: "Groq", icon: "⚡", models: ["openai/gpt-oss-120b", "llama-3.1-8b-instant"
                 ], apiKeyName: "GROQ_API_KEY", url: "https://api.groq.com/openai/v1/chat/completions" },
             { id: "ollama", name: "Ollama (local)", icon: "🏠", models: ["llama3", "mistral", "qwen2", "deepseek-r1",
                     "gemma"
@@ -1968,14 +2026,16 @@ function createEmailJSTemplate() {
             'gemini-pro': { provider: 'gemini', model: 'gemini-3.1-pro-preview' },
             'groq-llama': { provider: 'groq', model: 'openai/gpt-oss-120b' },
             'groq-fast': { provider: 'groq', model: 'llama-3.1-8b-instant' },
-            'groq-qwen': { provider: 'groq', model: 'qwen/qwen3.6-27b' },
+            'groq-scout': { provider: 'groq', model: 'openai/gpt-oss-120b' },
             'deepseek-v3': { provider: 'openrouter', model: 'deepseek/deepseek-v3' },
             'deepseek-r1': { provider: 'openrouter', model: 'deepseek/deepseek-r1' },
             'llama3.3': { provider: 'openrouter', model: 'meta-llama/llama-3.3-70b-instruct' },
+            'llama3.3-free': { provider: 'openrouter', model: 'meta-llama/llama-3.3-70b-instruct:free' },
+            'llama32-free': { provider: 'openrouter', model: 'meta-llama/llama-3.2-3b-instruct:free' },
+            'hermes405b-free': { provider: 'openrouter', model: 'nousresearch/hermes-3-llama-3.1-405b:free' },
             'deepseek-v3-free': { provider: 'openrouter', model: 'nvidia/nemotron-3-super-120b-a12b:free' },
             'owl-alpha': { provider: 'openrouter', model: 'nvidia/nemotron-nano-9b-v2:free' },
             'llama4-scout-free': { provider: 'openrouter', model: 'openai/gpt-oss-20b:free' },
-            'groq-scout': { provider: 'groq', model: 'openai/gpt-oss-120b' },
         };
         const FALLBACK_ORDER = ['gemini-flash', 'groq-llama', 'gemini-pro', 'groq-fast', 'groq-scout', 'deepseek-v3-free', 'owl-alpha', 'llama4-scout-free'];
         function getApiKey(name) {
@@ -1986,11 +2046,6 @@ function createEmailJSTemplate() {
         }
         function markdownToHtml(md) {
             if (!md) return '';
-            // Anti-corruption post-génération : nettoie les scripts exotiques parasites (chinois, coréen, tamoul,
-            // cyrillique...) et les fragments HTML bruts que les modèles faibles laissent échapper.
-            // L'arabe (U+0600-06FF) est volontairement préservé.
-            md = md.replace(/[\u0900-\u0DFF\u0B80-\u0BFF\u0E00-\u0E7F\u2E80-\u2EFF\u3040-\u30FF\u31F0-\u31FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\uAC00-\uD7AF\u1100-\u11FF\u0400-\u04FF\u0370-\u03FF\u0590-\u05FF\u200B\uFEFF]/g, ' ')
-                .replace(/<\/?[a-zA-Z][a-zA-Z0-9-]*(\s+[^<>]*?)?\s*\/?>/g, ' ');
             // Convert tab-separated tables (AI often outputs these instead of markdown pipes)
             md = md.replace(/(?:^|\n)([^\n]+(?:\t[^\t]+)+)\n((?:[^\n]+\t[^\n]+\n?)+)/g, (m, hdr, bdy) => {
                 const hc = hdr.split('\t').map(c => c.trim());
@@ -2006,6 +2061,9 @@ function createEmailJSTemplate() {
             let lines = md.split('\n');
             lines = lines.map(line => line.replace(/^(\d+\.\s+)/, '').replace(/^(\d+\.\d+\.\s+)/, ''));
             md = lines.join('\n');
+            // Protéger les <br> de l'IA AVANT l'échappement : sinon ils deviennent du texte littéral
+            // « &lt;br&gt; » dans les cellules de tableaux markdown (règles de lettrage, savoir-faire...).
+            md = md.replace(/<\s*br\s*\/?>/gi, '@@BR@@');
             let html = md.replace(/[&<>]/g, function(m) { if (m === '&') return '&amp;';
                 if (m === '<') return '&lt;';
                 if (m === '>') return '&gt;'; return m; });
@@ -2039,7 +2097,8 @@ function createEmailJSTemplate() {
                     cell.innerHTML = cell.innerHTML.replace(/☐/g, '<input type="checkbox" class="apc-checkbox" onclick="this.checked=!this.checked">');
                     cell.innerHTML = cell.innerHTML.replace(/☑/g, '<input type="checkbox" class="apc-checkbox" checked onclick="return false">');
                 });
-                return doc.body.innerHTML;
+                tableHtml = doc.body.innerHTML;
+                return tableHtml;
             });
             html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function(m, text, url) {
                 url = url.replace(/javascript\s*:/gi, 'blocked:');
@@ -2047,10 +2106,9 @@ function createEmailJSTemplate() {
             });
             html = html.replace(/\n\n/g, '</p><p>');
             html = html.replace(/\n/g, '<br>');
+            html = html.replace(/@@BR@@/g, '<br>');
             if (!html.startsWith('<')) html = '<p>' + html + '</p>';
             html = html.replace(/<p><\/p>/g, '');
-            html = html.replace(/<p>(\s*<(?:ul|ol|li|h[1-3]|table|blockquote))/gi, '$1');
-            html = html.replace(/(<\/(?:ul|ol|h[1-3]|table|blockquote)>\s*)<\/p>/gi, '$1');
             return html;
         }
         function sanitizeHtml(dirty) {
@@ -2148,6 +2206,7 @@ function createEmailJSTemplate() {
         let currentConvId = null;
         let isGenerating = false;
         let abortController = null;
+        let _abortReason = null;
         let currentMessages = [];
         let usedModel = '';
         const LOADING_MSGS = [
@@ -2176,16 +2235,16 @@ function createEmailJSTemplate() {
                 role_fr: "Vous êtes un expert mondial en ingénierie pédagogique, conception de programmes d'études, approche par compétences (APC), andragogie, pédagogie active, et vous vous spécialisez dans la préparation de leçons et de scénarios éducatifs pour la formation professionnelle algérienne conformément aux programmes officiels approuvés.",
                 role_ar: "أنت خبير عالمي في الهندسة البيداغوجية، وتصميم المناهج الدراسية، والمقاربة بالكفاءات (APC)، وأندراغوجيا، والبيداغوجيا النشطة، وتتخصص في إعداد الدروس والسيناريوهات التعليمية للتكوين المهني الجزائري وفقاً للبرامج الرسمية المعتمدة.",
                 mission_fr: "Construire un scénario pédagogique complet pour l'installation de Windows 11 selon l'APC Algérie.",
-                mission_ar: "بناء سيناريو بيداغوجي كامل لتثبيت وينداوز 11 وفق APC الجزائر.",
+                mission_ar: "بناء سيناريو بيداغوجي كامل لتثبيت Windows 11 وفق APC الجزائر.",
                 specialite_fr: "Techniques de l'Informatique", specialite_ar: "تقنيات الإعلام الآلي",
                 module_fr: "Systèmes d'exploitation", module_ar: "أنظمة التشغيل",
                 competence_fr: "Installer et configurer Windows 11 sur un poste de travail.",
-                competence_ar: "تثبيت وضبط وينداوز 11 على محطة عمل.",
+                competence_ar: "تثبيت وضبط Windows 11 على محطة عمل.",
                 niveau_fr: "Technicien Supérieur", niveau_ar: "تقني سامٍ", annee_fr: "1ère année", annee_ar: "السنة الأولى",
                 duree_fr: "4 heures", duree_ar: "4 ساعات", stagiaires: "20",
                 espace_fr: "Laboratoire informatique", espace_ar: "مخبر الإعلام الآلي",
                 ressources_fr: "20 PC, Data Show, Clé USB bootable, ISO Windows 11",
-                ressources_ar: "20 حاسوب، داتاشو، مفتاح USB، نسخة ISO وينداوز 11",
+                ressources_ar: "20 حاسوب، داتاشو، مفتاح USB، نسخة ISO Windows 11",
                 contexte_fr: "Préparation des postes informatiques d'une entreprise avant leur mise en service.",
                 contexte_ar: "تجهيز حواسيب المؤسسة قبل الشروع في العمل.",
                 difficultes_fr: "Mauvaise maîtrise du BIOS, erreurs de partitionnement, gestion des pilotes",
@@ -2307,48 +2366,42 @@ function createEmailJSTemplate() {
         ];
         const OPT_CKEYS = ['c1','c2','c3','c4','c5','c6','c7','c8','c9'];
         const OPT_IDS = ['analyse','scenario','integration','evaluation','grille','criteres','indicateurs','conclusion','activities'];
-        function _isAbortErr(e) {
-            return !!(e && (e.name === 'AbortError' || /aborted|AbortError|signal is aborted|Génération interrompue/i.test(e.message || '')));
-        }
         async function callAI(messages, onChunk, onModelChange, forceProvider = null, forceModel = null) {
-            // Limiter l'historique pour ne pas dépasser les quotas (TPM Groq 8000, Gemini free)
+            // Règle anti-TPM (copiée du projet principal) : trim du sysPrompt 700+700 et de l'historique ~2500
+            // caractères — sinon Groq free (TPM 6000-8000) répond HTTP 413 (Request too large) au-delà de ~8000 tokens
             var sysIdx = messages.findIndex(function(m) { return m.role === 'system'; });
             var sysMsg = sysIdx !== -1 ? messages.splice(sysIdx, 1)[0] : null;
-            if (sysMsg && sysMsg.content.length > 1400) {
-                sysMsg.content = sysMsg.content.substring(0, 700) + '\n\n[...]\n\n' + sysMsg.content.substring(sysMsg.content.length - 700);
+            // Le glossaire officiel APC est placé en FIN de sysPrompt (assistant.js) : la troncature garde
+            // 600 chars début + 2200 chars fin → la définition officielle (OC, OS, RMC...) survit toujours au trim.
+            if (sysMsg && sysMsg.content.length > 3400) {
+                sysMsg.content = sysMsg.content.substring(0, 600) + '\n\n[...]\n\n' + sysMsg.content.substring(sysMsg.content.length - 2200);
             }
-            // Règle anti-corruption GLOBALE (ajoutée APRÈS le trim → ne coupe aucun bloc tail critique) :
-            // s'applique à TOUS les chemins de génération (assistant, from-doc, generator, quiz, challenges)
-            if (sysMsg) {
-                var _sc = sysMsg.content;
-                if (/[\u0600-\u06FF]/.test(_sc)) {
-                    sysMsg.content = _sc + '\n📛 القاعدة : لا تنتج أبداً رموزاً غريبة أو شظايا HTML أو كلمات مبتورة أو نصاً غير مفهوم. يجب أن يكون كل نص نظيفاً وكاملاً وبالعربية الصحيحة.';
-                } else if (/answer in english|in english only/i.test(_sc)) {
-                    sysMsg.content = _sc + '\n📛 RULE: never produce stray characters, HTML fragments (KHTML), truncated words or incomprehensible text. Every generated text must be clean, complete and correct.';
-                } else {
-                    sysMsg.content = _sc + '\n📛 RÈGLE : ne produis JAMAIS de caractères parasites, de fragments HTML (KHTML, balises) ni de mots tronqués — tout texte généré doit être propre, complet, en français correct.';
-                }
+            var lastU = messages[messages.length - 1];
+            // Le prompt généré (générateur) fait ~3000 chars : il doit passer INTACT — la coupe ne s'applique
+            // qu'au-delà de 8000 chars (pages de documents collés). Sinon le « Contexte de la formation »
+            // (spécialité, module, compétence, durée...) est détruit → l'IA redemande les infos.
+            if (lastU && lastU.role === 'user' && lastU.content.length > 8000) {
+                lastU.content = lastU.content.substring(0, 3000) + '\n[...] (texte tronqué pour les quotas TPM gratuits) ' + lastU.content.substring(lastU.content.length - 5000);
             }
             var totalChars = sysMsg ? sysMsg.content.length : 0;
             var trimmed = [];
             for (var i = messages.length - 1; i >= 0; i--) {
                 var added = totalChars + messages[i].content.length;
-                if (added > 2500 && trimmed.length >= 1) break;
+                if (added > 4800 && trimmed.length >= 1) break;
                 totalChars = added;
                 trimmed.unshift(messages[i]);
             }
             messages = sysMsg ? [sysMsg].concat(trimmed) : trimmed;
-            if (sysMsg) console.log('📏 Historique limité à ~' + totalChars + ' caractères (' + messages.length + ' messages)');
+            console.log('📏 [trim] payload ≈ ' + totalChars + ' chars / ' + messages.length + ' messages (sysPrompt=' + (sysMsg ? sysMsg.content.length : 0) + ')');
             const provSel = forceProvider || document.getElementById('providerSelect')?.value || 'auto';
             const modelSel = forceModel || document.getElementById('modelSelect')?.value || 'auto';
             let selectedModelChoice = getSelectedModel();
             if (forceProvider === 'groq') {
-                const groqModels = ['groq-llama'];
+                const groqModels = ['groq-llama', 'groq-fast', 'groq-scout'];
                 for (const m of groqModels) {
                     try {
                         return await callModel(m, messages, onChunk, onModelChange);
                     } catch (e) {
-                        if (_isAbortErr(e)) throw e;
                         console.warn(`Groq ${m} échoué:`, e);
                         continue;
                     }
@@ -2361,7 +2414,6 @@ function createEmailJSTemplate() {
                     try {
                         return await callModel(m, messages, onChunk, onModelChange);
                     } catch (e) {
-                        if (_isAbortErr(e)) throw e;
                         console.warn(`OpenRouter ${m} échoué:`, e);
                         continue;
                     }
@@ -2381,7 +2433,6 @@ function createEmailJSTemplate() {
                     try {
                         return await callModel(m, messages, onChunk, onModelChange);
                     } catch (e) {
-                        if (_isAbortErr(e)) throw e;
                         lastError = e;
                         console.warn(`Modèle ${m} échoué:`, e.message);
                         continue;
@@ -2396,44 +2447,15 @@ function createEmailJSTemplate() {
             return await callProvider(p, modelSel || p.models[0], messages, onChunk);
         }
         function extractRetryDelay(errMsg) {
-            if (/per\s*day|daily|limit: 0|quota exceeded|RESOURCE_EXHAUSTED/i.test(errMsg)) return null;
+            if (/per\s*day|daily/i.test(errMsg)) return null;
             const m = errMsg.match(/(?:retry|again)\s+in\s+(\d+)(?:m(\d+))?/i);
             if (m) {
                 let sec = parseInt(m[1]);
                 if (m[2]) sec = sec * 60 + parseInt(m[2]);
                 if (sec > 60) return null;
-                return Math.min(sec + 2, 60);
+                return Math.min(sec + 2, 30);
             }
             return null;
-        }
-        // --- Cache des modèles en quota 429 : skip immédiat mémorisé (reset quotidien) ---
-        // Améliore la latence sans changer le comportement : un modèle déjà 429 définitif
-        // (quota quotidien épuisé) n'est plus re-testé à chaque requête (économise les POST morts).
-        function _deadModelsKey() {
-            var d = new Date();
-            return 'axon_dead_' + d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
-        }
-        function _markModelDead(modelKey, msg) {
-            try {
-                var key = _deadModelsKey();
-                var deadMap = JSON.parse(localStorage.getItem(key) || '{}');
-                var eod = new Date(); eod.setHours(24, 0, 0, 0);
-                var until;
-                if (/tokens per day \(TPD\)|on tokens per day/i.test(msg)) {
-                    var hm = msg.match(/(\d+)h(\d+)m/);
-                    until = hm ? Date.now() + ((parseInt(hm[1], 10) * 3600 + parseInt(hm[2], 10) * 60 + 300) * 1000) : eod.getTime() + 10 * 60 * 1000;
-                } else if (/limit: 0|quota exceeded|RESOURCE_EXHAUSTED/i.test(msg)) {
-                    until = eod.getTime() + 10 * 60 * 1000;
-                } else {
-                    until = Date.now() + 5 * 60 * 1000;
-                }
-                deadMap[modelKey] = until;
-                localStorage.setItem(key, JSON.stringify(deadMap));
-                console.warn('🚫 ' + modelKey + ' quota 429 mémorisé → skip immédiat jusqu\'à ' + new Date(until).toLocaleTimeString());
-            } catch (e) {}
-        }
-        function _clearDeadModels() {
-            try { localStorage.removeItem(_deadModelsKey()); } catch (e) {}
         }
         async function callModel(modelKey, messages, onChunk, onModelChange) {
             const mapping = MODEL_MAP[modelKey];
@@ -2446,45 +2468,33 @@ function createEmailJSTemplate() {
             }
             var deadMap = null;
             try { deadMap = JSON.parse(localStorage.getItem(_deadModelsKey()) || '{}'); } catch (e) { deadMap = {}; }
-            if (deadMap && deadMap[modelKey] && Date.now() < deadMap[modelKey]) {
-                throw new Error('Modèle ' + modelKey + ' en quota 429 (skip immédiat)');
+            if (deadMap && deadMap[modelKey] && deadMap[modelKey].until && Date.now() < deadMap[modelKey].until) {
+                var dt = new Date(deadMap[modelKey].until);
+                var dh = ('0' + dt.getHours()).slice(-2), dm = ('0' + dt.getMinutes()).slice(-2);
+                throw new Error('Modèle ' + modelKey + ' en cooldown [' + (deadMap[modelKey].reason || '?') + '] → skip immédiat, réessai ' + dh + ':' + dm);
             }
             if (onModelChange) onModelChange(modelKey);
+            console.log('🎯 [callAI] essai ' + modelKey + ' → ' + mapping.provider + '/' + mapping.model + ' ...');
             messages = messages.map(m => {
                 const clean = { role: m.role, content: m.content };
                 if (m.name) clean.name = m.name;
                 return clean;
             });
-            for (let retry = 0; retry < 3; retry++) {
-                try {
-                    return await callProvider(provider, mapping.model, messages, onChunk);
-                } catch (e) {
-                    // Abort = arrêt volontaire (bouton stop) : NE PAS basculer vers le modèle suivant,
-                    // sinon les modèles de secours (en cooldown quota) enchaînent les AbortError inutiles
-                    if (e && (e.name === 'AbortError' || /aborted|AbortError|signal is aborted/i.test(e.message || ''))) {
-                        const isTimeout = e.reason === 'timeout' || /timeout/i.test(e.message || '');
-                        throw new Error(isTimeout ? 'Réponse serveur trop lente (timeout 180s), réessayez' : 'Génération interrompue (arrêt manuel)');
+            try {
+                return await callProvider(provider, mapping.model, messages, onChunk);
+            } catch (e) {
+                if (e && (e.name === 'AbortError' || /aborted|AbortError|signal is aborted/i.test(e.message || ''))) {
+                    if (_abortReason === 'connect-timeout' || _abortReason === 'stream-timeout') {
+                        _abortReason = null;
+                        _markModelDead(modelKey, 'timeout réseau (pas de réponse)');
+                        throw new Error('Modèle ' + modelKey + ' : réponse trop lente (timeout réseau)');
                     }
-                    const msg = e.message || '';
-                    const is429 = msg.includes('429');
-                    const is413 = msg.includes('413');
-                    if (is429) {
-                        var delay = extractRetryDelay(msg);
-                        if (delay && retry < 1) {
-                            if (onModelChange) onModelChange(modelKey);
-                            console.warn('⏳ 429, attente ' + delay + 's...');
-                            await new Promise(function(r) { setTimeout(r, delay * 1000); });
-                            continue;
-                        }
-                        if (delay === null) _markModelDead(modelKey, msg);
-                    }
-                    if (is413) {
-                        console.warn('⏳ 413 TPM Groq, skip immédiat vers le modèle suivant');
-                    }
-                    throw e;
+                    _abortReason = null;
+                    throw new Error('Génération interrompue (arrêt manuel)');
                 }
+                _markModelDead(modelKey, e.message || '');
+                throw e;
             }
-            throw new Error(`Modèle ${modelKey} épuisé après tentatives`);
         }
         async function callProvider(p, model, messages, onChunk) {
             const localAbort = new AbortController();
@@ -2493,6 +2503,28 @@ function createEmailJSTemplate() {
             let url = p.url,
                 headers = { 'Content-Type': 'application/json' },
                 body;
+            // GARDE-FOU absolu anti-413 : payload total ≤ ~4800 chars (TPM gratuits Groq 6000-8000 / min)
+            // Le dernier message utilisateur (prompt généré ~3000 chars) est TOUJOURS ajouté en entier :
+            // seule l'HISTORIQUE est élaguée au-delà du budget. max_tokens Groq s'ajuste automatiquement
+            // (input + max_tokens = constante) → aucun risque 413 supplémentaire.
+            var _sysG = null, _nonSys = [];
+            for (var _j = 0; _j < messages.length; _j++) {
+                if (messages[_j].role === 'system') _sysG = messages[_j]; else _nonSys.push(messages[_j]);
+            }
+            for (var _l = 0; _l < _nonSys.length; _l++) {
+                if (_nonSys[_l].content.length > 8000) {
+                    _nonSys[_l] = { role: _nonSys[_l].role, content: _nonSys[_l].content.substring(0, 3000) + '\n[...] ' + _nonSys[_l].content.substring(_nonSys[_l].content.length - 5000) };
+                }
+            }
+            var _tot2 = _sysG ? _sysG.content.length : 0, _cut2 = [];
+            for (var _k = _nonSys.length - 1; _k >= 0; _k--) {
+                var _a2 = _tot2 + _nonSys[_k].content.length;
+                if (_a2 > 4800 && _cut2.length >= 1) break;
+                _tot2 = _a2;
+                _cut2.unshift(_nonSys[_k]);
+            }
+            messages = _sysG ? [_sysG].concat(_cut2) : _cut2;
+            console.log('🛡️ [garde-fou] payload final ≈ ' + _tot2 + ' chars / ' + messages.length + ' messages');
             if (p.id === 'anthropic') {
                 headers['x-api-key'] = key;
                 headers['anthropic-version'] = '2023-06-01';
@@ -2519,39 +2551,46 @@ function createEmailJSTemplate() {
                 }
                 if (p.id === 'groq') {
                     headers['Authorization'] = 'Bearer ' + key;
+                    // 413/429 Groq = input + max_tokens vs TPM gratuits (gpt-oss-120b: 8000, autres: 6000),
+                    // avec fenêtre roulante : Used (déjà consommé sur 60 s) + Requested > limit → 429.
+                    // max_tokens GÉNÉREUX (85 % de la limite − input) : les documents pédagogiques longs
+                    // (grille 4×4 + critères + indicateurs + conclusion ≈ 15-20k chars) doivent passer ENTIERS.
+                    // Requested = input + max_tokens ≈ 85 % TPM − 200 < TPM → jamais de 413 par taille ;
+                    // si la fenêtre roulante Used est haute → 429 → cooldown intelligent + fallback (géré).
+                    var _tpm = /llama-3\.1-8b-instant|openai\/gpt-oss-20b|qwen\/qwen3\.6-27b/.test(model) ? 6000 : 8000;
+                    var _inTok = Math.ceil((_sysG ? _sysG.content.length : 0) / 3.2);
+                    for (var _m = 0; _m < messages.length; _m++) if (messages[_m].role !== 'system') _inTok += Math.ceil(messages[_m].content.length / 3.2);
+                    var _maxTok = Math.max(2048, Math.min(8192, Math.floor(_tpm * 0.85) - _inTok - 200));
+                    console.log('🔧 [groq] TPM=' + _tpm + ' input≈' + _inTok + ' → max_tokens=' + _maxTok);
+                    body = JSON.stringify({ model, messages, stream: true, max_tokens: _maxTok, temperature: 0.7 });
+                } else {
+                    body = JSON.stringify({ model, messages, stream: true, max_tokens: 8192, temperature: 0.7 });
                 }
-                body = JSON.stringify({ model, messages, stream: true, max_tokens: 8192, temperature: 0.7 });
             }
-            if (p.id === 'groq') {
-                console.log('📤 GROQ body=' + body.length + ' chars, model=' + model + ', ' + messages.length + ' messages');
-                var parsedBody = JSON.parse(body);
-                console.log('  model=' + parsedBody.model + ' | json.length=' + body.length);
-                for (var mi = 0; mi < messages.length; mi++) {
-                    var mc = messages[mi];
-                    console.log('  msg[' + mi + '] role=' + mc.role + ' content=' + (mc.content || '').length + ' chars debut=' + (mc.content || '').substring(0, 80));
-                }
-            }
-            console.log('🚀 POST ' + url.substring(0, 80) + ' | model=' + model + ' | body=' + body.length + ' chars | ' + messages.length + ' msgs');
-            // Timeout limité au TTFB (time-to-first-byte) : un stream qui avance ne doit JAMAIS être coupé
-            const timeoutId = setTimeout(() => {
-                localAbort.abort('timeout');
-            }, 180000);
+            let timeoutId = null;
+            const connectTimer = setTimeout(() => {
+                console.warn('⏱️ [callAI] connexion lente (>25s, aucune réponse HTTP) → abandon du modèle ' + model);
+                _abortReason = 'connect-timeout';
+                localAbort.abort();
+            }, 25000);
             try {
                 const resp = await fetch(url, { method: 'POST', headers, body, signal: localAbort.signal });
-                clearTimeout(timeoutId);
+                clearTimeout(connectTimer);
                 if (!resp.ok) {
                     const errText = await resp.text();
-                    if (p.id === 'openrouter' && !key && (resp.status === 401 || resp.status === 403 || resp.status === 429)) {
-                        throw new Error(`OR_NO_KEY: ${resp.status} - ta clé OpenRouter n'est pas enregistrée (requête anonyme). Colle-la dans ⚙️ Paramètres → 🔑 Clé API OpenRouter puis clique ENREGISTRER (le bouton Vérifier ne sauvegarde pas).`);
-                    }
                     if (p.id === 'groq' && (resp.status === 401 || resp.status === 429 || resp.status === 403)) {
                         throw new Error(`GROQ_ERROR: ${resp.status} - ${errText}`);
                     }
                     throw new Error(`HTTP ${resp.status}: ${errText}`);
                 }
+                timeoutId = setTimeout(() => {
+                    console.warn('⏱️ [callAI] timeout 120s (stream) → abandon du modèle ' + model);
+                    _abortReason = 'stream-timeout';
+                    localAbort.abort();
+                }, 120000);
                 const reader = resp.body.getReader();
                 const decoder = new TextDecoder();
-                let buf = '';
+                let buf = '', _firstChunk = true, _lastJson = null;
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
@@ -2563,16 +2602,25 @@ function createEmailJSTemplate() {
                         const data = line.startsWith('data: ') ? line.slice(6) : line;
                         try {
                             const j = JSON.parse(data);
+                            _lastJson = j;
                             let chunk = '';
                             if (p.id === 'anthropic' && j.type === 'content_block_delta') chunk = j.delta?.text || '';
-                            else if (p.id === 'gemini') chunk = j.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                            else if (p.id === 'ollama') chunk = j.message?.content || '';
+                            else if (p.id === 'gemini') {
+                                const parts = j.candidates?.[0]?.content?.parts || [];
+                                chunk = parts.filter(x => !x.thought).map(x => x.text || '').join('') || parts.map(x => x.text || '').join('');
+                            } else if (p.id === 'ollama') chunk = j.message?.content || '';
                             else chunk = j.choices?.[0]?.delta?.content || '';
-                            if (chunk) onChunk(chunk);
+                            if (chunk) { if (_firstChunk) { _firstChunk = false; console.log('✅ [callAI] ' + model + ' : réponse reçue (stream)'); } onChunk(chunk); }
                         } catch (e) {}
                     }
                 }
+                if (_firstChunk) {
+                    console.warn('⚠️ [callAI] ' + model + ' : réponse VIDE (aucun contenu) — dernier chunk: ' + JSON.stringify(_lastJson || null).slice(0, 600));
+                    throw new Error('Réponse vide du modèle ' + model + ' (bloquée par le fournisseur)');
+                }
+                console.log('🏁 [callAI] ' + model + ' : stream terminé');
             } finally {
+                clearTimeout(connectTimer);
                 clearTimeout(timeoutId);
                 if (abortController === localAbort) abortController = null;
             }
@@ -2662,69 +2710,37 @@ function createEmailJSTemplate() {
                 return;
             }
             const lang = currentLang === 'fr' ? 'français' : currentLang === 'en' ? 'english' : 'arabe';
-            const withAct = options.activities !== false;
-            const prompt = `Tu es un formateur expert en APC Algérie. Génère une présentation pédagogique TRÈS DÉTAILLÉE et RICHE de 16 slides en JSON, au niveau de détail d'un cours rédigé par un expert.
-CONTEXTE PÉDAGOGIQUE — sujet à respecter STRICTEMENT (ne dévie pas vers d'autres sujets) :
+            const prompt = `Tu es un expert en scénarios pédagogiques APC Algérie. Génère une présentation de 15 slides en JSON.
+
+CONTEXTE PÉDAGOGIQUE :
 ${subject}
-STYLE D'ÉCRITURE (obligatoire) :
-- Rédige comme un formateur expert : texte professionnel, riche, technique et pédagogique
-- Chaque slide : 10 à 20 lignes de contenu EXPLICITE avec exemples concrets TIRÉS UNIQUEMENT du sujet ci-dessus
-- Tu DOIS inclure des « ### » comme sous-titres dans le contenu des slides (ex: ### Objectif, ### Situation proposée${withAct ? ', ### Activités du formateur, ### Activités des stagiaires' : ''}, ### Durée, ### Production attendue)
-- Utilise --- comme séparateurs entre sections dans le contenu
-- Donne des commandes, outils, procédures, temps précis — TOUJOURS en lien avec le sujet
-- Vocabulaire technique et pédagogique précis propre au sujet traité
-- Pour les slides d'analyse (savoirs, savoir-faire, savoir-être, ressources) : utilise des listes à puces • avec 8-10 items détaillées chacune
-- Pour les autres slides : écris en phrases complètes et paragraphes, PAS de listes à puces
-- PAS de tableaux sauf pour la grille critérielle
-- NE PAS mélanger les sujets : tout le contenu doit porter UNIQUEMENT sur le sujet ci-dessus
-${withAct ? '' : '- RÈGLE ABSOLUE : NE PAS inclure de sections ni de mentions "Activités du formateur" ni "Activités des stagiaires" dans AUCUN slide, ni dans les titres, ni dans les sous-titres, ni dans le contenu\n'}
-STRUCTURE : les 16 slides suivent strictement l'ordre de l'analyse pédagogique complète APC Algérie ci-dessous.
-ANALYSE APC (slides 1-4) :
-Slide 1 → content commence par "### ANALYSE APC — SAVOIRS"
-1. **Analyse APC — Savoirs (théoriques et professionnels)** — liste détaillée des savoirs théoriques et professionnels propres au sujet (8-10 items), organisés en catégories cohérentes (ex: concepts, définitions, types, composants, terminologie)
-Slide 2 → content commence par "### ANALYSE APC — SAVOIR-FAIRE"
-2. **Analyse APC — Savoir-faire** — liste détaillée des savoir-faire pratiques opérationnels (préparer, installer, configurer, contrôler avec actions précises), 8-10 items propres au sujet
-Slide 3 → content commence par "### ANALYSE APC — SAVOIR-ÊTRE"
-3. **Analyse APC — Savoir-être** — liste détaillée des savoir-être professionnels requis (8-10 items) : rigueur, organisation, esprit d'analyse, sécurité, travail collaboratif, etc. adaptés au sujet
-Slide 4 → content commence par "### ANALYSE APC — RESSOURCES"
-4. **Analyse APC — Ressources** — ressources internes (cognitives, procédurales, comportementales) et externes (matérielles avec quantités, documentaires avec titres, humaines) propres au sujet
-SCÉNARIO PÉDAGOGIQUE — 5 PHASES (slides 5-9) :
-Slide 5 → content commence par "### PHASE 1 — CONTEXTUALISATION"
-5. **Phase 1 — Contextualisation** — durée (15 min), objectif (situer l'importance dans le contexte professionnel), situation proposée CONCRÈTE ET RÉALISTE tirée du milieu professionnel${withAct ? ', activités du formateur, activités des stagiaires' : ''}, production attendue
-Slide 6 → content commence par "### PHASE 2 — DÉSTABILISATION"
-6. **Phase 2 — Déstabilisation** — durée (30 min), objectif (faire prendre conscience des difficultés potentielles), situation problème RÉALISTE${withAct ? ', activités du formateur, activités des stagiaires' : ''}, production attendue
-Slide 7 → content commence par "### PHASE 3 — CONSTRUCTION"
-7. **Phase 3 — Construction** — durée (120 min), objectif (acquérir les compétences nécessaires), situation proposée avec étapes pratiques détaillées${withAct ? ', activités du formateur (démonstration, conseils), activités des stagiaires (pratique guidée)' : ''}, production attendue
-Slide 8 → content commence par "### PHASE 4 — INTÉGRATION"
-8. **Phase 4 — Intégration** — durée (30 min), objectif (intégrer les connaissances en environnement simulé), situation proposée AUTHENTIQUE${withAct ? ', activités du formateur, activités des stagiaires' : ''}, production attendue
-Slide 9 → content commence par "### PHASE 5 — TRANSFERT"
-9. **Phase 5 — Transfert** — durée (15 min), objectif (appliquer les compétences en contexte réel), situation proposée DIFFÉRENTE mais dans le même domaine${withAct ? ', activités des stagiaires' : ''}, production attendue
-Slide 10 → content commence par "### SITUATION D'INTÉGRATION AUTHENTIQUE"
-10. **Situation d'Intégration Authentique** — scénario réaliste détaillé, mission précise avec actions concrètes, contraintes (temps, qualité, ressources), production attendue concrète et vérifiable
-Slide 11 → content commence par "### ÉVALUATION BASÉE SUR LES COMPÉTENCES"
-11. **Évaluation basée sur les Compétences** — type d'évaluation (pratique), tâche demandée détaillée avec consignes claires pour le stagiaire, conditions de réalisation
-Slide 12 → content commence par "### GRILLE D'ÉVALUATION CRITÉRIELLE"
-12. **Grille d'Évaluation Critérielle APC** — tableau markdown COMPLET 5 colonnes × 5 lignes : en-tête | Critères | Non maîtrisé | En cours | Maîtrisé | Expert | (SANS parenthèses ni cellules vides), puis 4 critères observables mesurables propres au sujet, chacun sur SA ligne avec EXACTEMENT 4 cases ☐ (une par niveau). JAMAIS de ligne de critère sans ses 4 cases.
-Slide 13 → content commence par "### DESCRIPTEURS DES NIVEAUX"
-13. **Descripteurs des niveaux de maîtrise** — description explicite de chaque niveau pour chaque critère : Non maîtrisé (l'installation/configuration ne respecte pas les procédures), En cours (partiellement réussie, supervision nécessaire), Maîtrisé (réussie, conforme aux procédures), Expert (réussie et optimisée)
-Slide 14 → content commence par "### CRITÈRES DE PERFORMANCE OBSERVABLES"
-14. **Critères de Performance Observables** — critères observables détaillés avec actions concrètes et vérifiables classés par catégorie, chaque critère avec 2-3 actions observables précises
-Slide 15 → content commence par "### INDICATEURS DE RÉUSSITE"
-15. **Indicateurs de Réussite** — indicateurs avec ✅ décrivant ce qui valide la compétence (5-6 indicateurs concrets et vérifiables propres au sujet)
-Slide 16 → content commence par "### CONCLUSION PÉDAGOGIQUE"
-16. **Conclusion Pédagogique** — synthèse des acquis (savoirs, savoir-faire, savoir-être), objectifs atteints avec indicateurs concrets, compétences développées, autonomie acquise, perspectives d'apprentissage futur, importance de la compétence dans le parcours professionnel
-FORMAT JSON : {"slides":[{"title":"Titre","image_prompt":"prompt illustrant tout le contenu du slide","content":["### Sous-titre","texte détaillé en phrases complètes...","---","| tableau |"]}]}
-- CHAQUE image_prompt doit décrire TOUT LE CONTENU du slide (titre + sous-titres + points clés), pas seulement le titre
-- L'image_prompt doit décrire une scène visuelle cohérente avec le sujet du slide
-- L'image_prompt doit permettre de générer une image qui résume visuellement l'ENSEMBLE du slide
-- RÈGLE ABSOLUE : contenu CONCRET et TECHNIQUE propre au sujet, PAS de généralités vagues
-- RÈGLE ABSOLUE : ne PAS mélanger les domaines — si le sujet est la comptabilité, ne parle pas d'informatique ni d'autres domaines
+
+STRUCTURE DES SLIDES (obligatoire) :
+1. Scénario Pédagogique APC — spécialité, module, niveau, compétence, durée, formateur, public
+2. Analyse APC — tableau | Savoirs | Savoir-faire | Savoir-être |
+3. Ressources — tableau | Internes | Externes |
+4. Situation Professionnelle de Référence — contexte métier, mission, tâches
+5. Phase 1 Contextualisation — objectif, activité formateur, activité stagiaires, production, durée
+6. Phase 2 Déstabilisation — situation-problème, questions, activités, difficultés, durée
+7. Phase 3 Construction Partie 1 — 3 activités avec étapes
+8. Phase 3 Construction Partie 2 — 2 activités, méthodes pédagogiques, durée
+9. Phase 4 Intégration — situation d'intégration, mission, 7 tâches, production, durée
+10. Phase 5 Transfert — nouvelle situation, tâches stagiaire, durée
+11. Évaluation Par Compétences — tâche, conditions, type
+12. Critères de Performance — 10 critères observables
+13. Grille Critérielle 4×4 — tableau | Critères | Non maîtrisé | En cours | Maîtrisé | Expert |
+14. Indicateurs de Réussite — 10 indicateurs
+15. Conclusion Pédagogique — synthèse des acquis, compétences, perspective
+
+FORMAT JSON ATTENDU : {"slides":[{"title":"Titre","image_prompt":"prompt pour image illustrative","content":["ligne1","ligne2","| tableau |"]}]}
+- Les lignes commençant et finissant par | seront rendues en tableau
+- Contenu CONCRET et adapté au contexte fourni
 - Génère en ${lang}
-- SORTIE : UNIQUEMENT le JSON valide`
+- SORTIE : UNIQUEMENT le JSON valide, sans texte avant/après`
             gammaData = null;
             localStorage.removeItem('gammaData');
             showToast("Génération de la présentation en cours...");
-            const msgs = [{ role: 'user', content: prompt }];
+            const msgs = [{ role: 'system', content: prompt }];
             let fullResponse = '';
             const startTime = Date.now();
             let msgIndex = 0;
@@ -2749,9 +2765,10 @@ FORMAT JSON : {"slides":[{"title":"Titre","image_prompt":"prompt illustrant tout
                     const loadingSub = document.getElementById('loadingSub');
                     const m = MODEL_MAP[modelId];
                     if (loadingSub && m) { var lt = `⏱ ${Math.round((Date.now() - startTime) / 1000)}s écoulées — Modèle ${m.model}`; if (window.__compat && window.__compat.isEnabled) loadingSub.innerHTML = window.__compat.replaceEmoji(lt); else loadingSub.textContent = lt; }
-                });
+                }, 'groq', 'groq-llama');
                 clearInterval(msgInterval);
                 let jsonStr = fullResponse.trim();
+                jsonStr = jsonStr.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim();
                 try {
                     gammaData = JSON.parse(jsonStr);
                 } catch (e) {
@@ -2762,10 +2779,26 @@ FORMAT JSON : {"slides":[{"title":"Titre","image_prompt":"prompt illustrant tout
                         if (jsonStr[i] === '{') depth++;
                         else if (jsonStr[i] === '}') { depth--; if (depth === 0) { end = i; break; } }
                     }
-                    if (end === -1) throw new Error("Le modèle n'a pas retourné de JSON valide.");
-                    jsonStr = jsonStr.slice(start, end + 1);
-                    jsonStr = jsonStr.replace(/,\s*}/g, '}').replace(/,\s*\]/g, ']');
-                    gammaData = JSON.parse(jsonStr);
+                    let candidate = end !== -1 ? jsonStr.slice(start, end + 1) : null;
+                    if (!candidate) {
+                        // JSON TRONQUÉ (max_tokens atteint) : réparation — on ferme les { et [ restants
+                        candidate = jsonStr.slice(start).replace(/,\s*([}\]])/g, '$1').replace(/,\s*$/, '');
+                        let dO = 0, dA = 0;
+                        for (let i = 0; i < candidate.length; i++) {
+                            if (candidate[i] === '{') dO++;
+                            else if (candidate[i] === '}') dO--;
+                            else if (candidate[i] === '[') dA++;
+                            else if (candidate[i] === ']') dA--;
+                        }
+                        candidate = candidate + ']'.repeat(Math.max(dA, 0)) + '}'.repeat(Math.max(dO, 0));
+                    }
+                    candidate = candidate.replace(/,\s*}/g, '}').replace(/,\s*\]/g, ']');
+                    try {
+                        gammaData = JSON.parse(candidate);
+                    } catch (e2) {
+                        console.warn('⚠️ [gamma] JSON irréparable — réponse brute (600):', fullResponse.slice(0, 600));
+                        throw new Error("Le modèle n'a pas retourné de JSON valide.");
+                    }
                 }
                 gammaIndex = 0;
                 console.log('gammaData keys:', Object.keys(gammaData), JSON.stringify(gammaData).slice(0, 300));
@@ -2821,8 +2854,11 @@ FORMAT JSON : {"slides":[{"title":"Titre","image_prompt":"prompt illustrant tout
                 clearInterval(msgInterval);
                 const el = document.getElementById('loadingText');
                 const sub = document.getElementById('loadingSub');
-                if (el) { var err1 = "❌ Aucun fournisseur IA disponible"; if (window.__compat && window.__compat.isEnabled) el.innerHTML = window.__compat.replaceEmoji(err1); else el.textContent = err1; }
-                if (sub) { var err2 = "Tous les quotas gratuits sont épuisés (Gemini, Groq, OpenRouter). Attends la réinitialisation (~24h) ou ajoute une clé API payante dans ⚙️ Paramètres."; if (window.__compat && window.__compat.isEnabled) sub.innerHTML = window.__compat.replaceEmoji(err2); else sub.textContent = err2; }
+                // Affiche l'ERREUR RÉELLE (clé manquante, 404 modèle, 429 quota...) au lieu du
+                // message générique « quotas épuisés » qui masquait le vrai diagnostic.
+                const realErr = (err && err.message) ? String(err.message) : String(err || 'Erreur inconnue');
+                if (el) { var err1 = "❌ Échec de la génération de la présentation"; if (window.__compat && window.__compat.isEnabled) el.innerHTML = window.__compat.replaceEmoji(err1); else el.textContent = err1; }
+                if (sub) { var err2 = realErr + (/(429|per\s*day|daily|quota|limit|épuis|exhausted|RESOURCE_EXHAUSTED)/i.test(realErr) ? " — Quotas gratuits épuisés (réinitialisation ~24h) ou ajoutez une clé API payante dans ⚙️ Paramètres." : ''); if (window.__compat && window.__compat.isEnabled) sub.innerHTML = window.__compat.replaceEmoji(err2); else sub.textContent = err2; }
                 console.error(err);
             }
         }
@@ -2839,7 +2875,7 @@ FORMAT JSON : {"slides":[{"title":"Titre","image_prompt":"prompt illustrant tout
             if (!Array.isArray(items)) items = [];
             let html = '';
             let tableRows = [];
-            function esc(t) { return t ? t.replace(/</g,'&lt;').replace(/>/g,'&gt;') : ''; }
+            function esc(t) { return t.replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
             function inlineMd(t) {
                 return t.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/`(.*?)`/g, '<code style="background:'+textColor+'18;padding:1px 4px;border-radius:3px;font-size:0.85em;">$1</code>');
             }
@@ -3292,7 +3328,7 @@ FORMAT JSON : {"slides":[{"title":"Titre","image_prompt":"prompt illustrant tout
             }
             exportGammaPDF();
         }
-        function esc(s) { return s ? s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : ''; }
+        function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
         let toastTimer;
         function showToast(msg) {
             let t = document.getElementById('__toast');
@@ -3508,7 +3544,7 @@ applyTheme();
                         quick_eval: `Génère une évaluation APC basée sur les compétences avec critères et indicateurs en tableau.\n\n${ctx}`,
                         quick_fiche: `Crée une fiche pédagogique APC complète avec objectifs, déroulement et évaluation.\n\n${ctx}`,
                         quick_integration: `Crée une situation d'intégration authentique et contextualisée pour l'APC Algérie.\n\n${ctx}`,
-                        quick_grille: `Étape 1 : analyse le contexte de formation ci-dessous.\nÉtape 2 : génère UNIQUEMENT le tableau markdown ci-dessous en remplaçant (critère 1-4) par les vrais critères adaptés au contexte. Les en-têtes restent SANS parenthèses (Non maîtrisé, En cours, Maîtrisé, Expert — pas de « () »). Chaque critère DOIT rester sur une ligne avec ses 4 cases ☐ (aucune ligne de critère sans cases). STRICTEMENT AUCUN texte avant ni après le tableau.\n\n| Critère | Non maîtrisé | En cours | Maîtrisé | Expert |\n|---------|--------------|----------|----------|--------|\n| (critère 1) | ☐ | ☐ | ☐ | ☐ |\n| (critère 2) | ☐ | ☐ | ☐ | ☐ |\n| (critère 3) | ☐ | ☐ | ☐ | ☐ |\n| (critère 4) | ☐ | ☐ | ☐ | ☐ |\n\n${ctx}`,
+                        quick_grille: `Étape 1 : analyse le contexte de formation ci-dessous.\nÉtape 2 : génère UNIQUEMENT le tableau markdown ci-dessous en remplaçant (critère 1-4) par les vrais critères adaptés au contexte. STRICTEMENT AUCUN texte avant ni après le tableau.\n\n| Critère | Non maîtrisé | En cours | Maîtrisé | Expert |\n|---------|--------------|----------|----------|--------|\n| (critère 1) | ☐ | ☐ | ☐ | ☐ |\n| (critère 2) | ☐ | ☐ | ☐ | ☐ |\n| (critère 3) | ☐ | ☐ | ☐ | ☐ |\n| (critère 4) | ☐ | ☐ | ☐ | ☐ |\n\n${ctx}`,
                         quick_cours: `Crée un cours complet APC avec introduction, développement, exemples, exercices et évaluation.\n\n${ctx}`,
                     };
                     const arPrompts = {
@@ -3516,7 +3552,7 @@ applyTheme();
                         quick_eval: `أنشئ تقييماً APC مبنياً على الكفاءات مع معايير ومؤشرات في جدول.\n\n${ctx}`,
                         quick_fiche: `أنشئ بطاقة بيداغوجية APC كاملة مع الأهداف والسير والتقييم.\n\n${ctx}`,
                         quick_integration: `أنشئ وضعية إدماج أصيلة ومسيَّقة للـ APC الجزائري.\n\n${ctx}`,
-                        quick_grille: `الخطوة 1 : حلل سياق التكوين أدناه.\nالخطوة 2 : أخرِج فقط جدول الماركداون أدناه مع استبدال (معيار 1-4) بالمعايير الحقيقية المتناسبة مع السياق. الترويسات بدون أقواس (غير مكتسب، قيد الاكتساب، مكتسب، خبير — دون «()»). كل معيار يجب أن يبقى في سطر واحد مع خاناته الأربع ☐ (ممنوع سطر معيار بدون خانات). ممنوع إضافة أي نص قبل أو بعد الجدول.\n\n| المعيار | غير مكتسب | قيد الاكتساب | مكتسب | خبير |\n|---------|-----------|-------------|--------|------|\n| (معيار 1) | ☐ | ☐ | ☐ | ☐ |\n| (معيار 2) | ☐ | ☐ | ☐ | ☐ |\n| (معيار 3) | ☐ | ☐ | ☐ | ☐ |\n| (معيار 4) | ☐ | ☐ | ☐ | ☐ |\n\n${ctx}`,
+                        quick_grille: `الخطوة 1 : حلل سياق التكوين أدناه.\nالخطوة 2 : أخرِج فقط جدول الماركداون أدناه مع استبدال (معيار 1-4) بالمعايير الحقيقية المتناسبة مع السياق. ممنوع إضافة أي نص قبل أو بعد الجدول.\n\n| المعيار | غير مكتسب | قيد الاكتساب | مكتسب | خبير |\n|---------|-----------|-------------|--------|------|\n| (معيار 1) | ☐ | ☐ | ☐ | ☐ |\n| (معيار 2) | ☐ | ☐ | ☐ | ☐ |\n| (معيار 3) | ☐ | ☐ | ☐ | ☐ |\n| (معيار 4) | ☐ | ☐ | ☐ | ☐ |\n\n${ctx}`,
                         quick_cours: `أنشئ درساً كاملاً APC مع مدخل وتطوير وأمثلة وتمارين وتقييم.\n\n${ctx}`,
                     };
                     const msg = currentLang === 'ar' ? arPrompts[k] : prompts[k];
@@ -3573,20 +3609,20 @@ applyTheme();
                     '، وأنشطة للمكوّن والمتدرب') : '';
             var formatSuffix = currentLang === 'fr' ?
                 (options.activities !== false ?
-                    ' Chaque section DOIT commencer par un titre (Titre : ...) et inclure les sous-sections Objectif, Situation proposée, Activités du formateur, Activités des stagiaires, Production attendue.' :
-                    ' Chaque section DOIT commencer par un titre (Titre : ...) et inclure les sous-sections Objectif, Situation proposée, Production attendue.') :
+                    ' Chaque section DOIT commencer par un titre (### Titre : ...) et inclure les sous-sections ### Objectif, ### Situation proposée, ### Activités du formateur, ### Activités des stagiaires, ### Production attendue.' :
+                    ' Chaque section DOIT commencer par un titre (### Titre : ...) et inclure les sous-sections ### Objectif, ### Situation proposée, ### Production attendue.') :
                 currentLang === 'en' ?
                 (options.activities !== false ?
-                    ' Each section MUST start with a title (Title: ...) and include the subsections Objective, Proposed situation, Trainer activities, Trainee activities, Expected production.' :
-                    ' Each section MUST start with a title (Title: ...) and include the subsections Objective, Proposed situation, Expected production.') :
+                    ' Each section MUST start with a title (### Title: ...) and include the subsections ### Objective, ### Proposed situation, ### Trainer activities, ### Trainee activities, ### Expected production.' :
+                    ' Each section MUST start with a title (### Title: ...) and include the subsections ### Objective, ### Proposed situation, ### Expected production.') :
                 (options.activities !== false ?
-                    ' يجب أن يبدأ كل قسم بعنوان (العنوان: ...) ويتضمن الأقسام الفرعية الهدف، الوضعية المقترحة، أنشطة المكوّن، أنشطة المتدرّب، الإنتاج المنتظر.' :
-                    ' يجب أن يبدأ كل قسم بعنوان (العنوان: ...) ويتضمن الأقسام الفرعية الهدف، الوضعية المقترحة، الإنتاج المنتظر.');
+                    ' يجب أن يبدأ كل قسم بعنوان (### العنوان: ...) ويتضمن الأقسام الفرعية ### الهدف، ### الوضعية المقترحة، ### أنشطة المكوّن، ### أنشطة المتدرّب، ### الإنتاج المنتظر.' :
+                    ' يجب أن يبدأ كل قسم بعنوان (### العنوان: ...) ويتضمن الأقسام الفرعية ### الهدف، ### الوضعية المقترحة، ### الإنتاج المنتظر.');
             const header = currentLang === 'fr' ?
                 'Tu es un formateur expert en APC Algérie. À partir des informations ci-dessous, génère un DOCUMENT PÉDAGOGIQUE COMPLET, TRÈS DÉTAILLÉ et de qualité professionnelle comme un expert en ingénierie pédagogique. Tu dois produire un contenu RICHE, STRUCTURÉ et EXHAUSTIF, organisé en sections avec titres (###), sous-titres, tableaux markdown, listes, gras, et émoticônes pertinentes. Chaque section doit être développée en profondeur avec des explications, des durées' + actPhrase + ', des productions attendues et des exemples concrets.' + formatSuffix :
                 currentLang === 'en' ?
                 'You are an expert APC Algeria trainer. Based on the information below, generate a COMPLETE, VERY DETAILED, professional-quality PEDAGOGICAL DOCUMENT like an instructional design expert. Produce RICH, STRUCTURED and EXHAUSTIVE content organized in sections with titles (###), subtitles, markdown tables, lists, bold, and relevant emojis. Each section must be developed in depth with explanations, durations' + actPhrase + ', expected productions, and concrete examples.' + formatSuffix :
-                'أنت خبير عالمي في الهندسة البيداغوجية، وتصميم المناهج الدراسية، والمقاربة بالكفاءات (APC)، وأندراغوجيا، والبيداغوجيا النشطة، وتتخصص في إعداد الدروس والسيناريوهات التعليمية للتكوين المهني الجزائري وفقاً للبرامج الرسمية المعتمدة.' + formatSuffix;
+                'أنت خبير تكوين في APC الجزائر. بناءً على المعلومات أدناه، أنشئ وثيقة بيداغوجية كاملة ومفصّلة جداً وبجودة مهنية مثل خبير في الهندسة البيداغوجية. يجب أن تنتج محتوى غنياً ومنظماً وشاملاً، مقسماً إلى أقسام بعناوين (###) وعناوين فرعية وجداول ماركداون وقوائم وخط عريض ورموز تعبيرية مناسبة. يجب تطوير كل قسم بعمق مع شروحات ومدد زمنية' + actPhrase + ' وإنتاجات متوقعة وأمثلة ملموسة.' + formatSuffix;
             return `${header}\n\n${t('prompt_role')} : ${role||'—'}\n${t('prompt_mission')} : ${mission||'—'}\n${t('prompt_langue')} : ${currentLang==='fr'?'Français':currentLang==='en'?'English':'العربية'}\n\n${t('prompt_context')} :\n- ${t('prompt_specialite')} : ${spec||'—'}\n- ${t('prompt_module')} : ${mod||'—'}\n- ${t('prompt_competence')} : ${comp||'—'}\n- ${t('prompt_niveau')} : ${niv||'—'} (${ann||'—'})\n- ${t('prompt_duree')} : ${dur||'—'} | ${t('prompt_stagiaires')} : ${stag||'—'}\n- ${t('prompt_espace')} : ${esp||'—'}\n- ${t('prompt_ressources')} : ${res||'—'}\n- ${t('prompt_contexte')} : ${ctx||'—'}\n- ${t('prompt_difficultes')} : ${diff||'—'}\n${ast}\n${t('prompt_consignes')} :\n${cons}`;
         }
         function updatePrompt() { const el = document.getElementById('promptPreview'); if (el) el.textContent = buildPrompt(); }
@@ -3616,14 +3652,16 @@ applyTheme();
             const sid = document.getElementById('emailjsServiceId')?.value.trim();
             const tid = document.getElementById('emailjsTemplateId')?.value.trim();
             const ak = document.getElementById('emailjsApiKey')?.value.trim();
-            saveEmailJSConfig(pk || '', sid || '', tid || '', ak || '');
+            if (pk || sid || tid) {
+                try { localStorage.setItem('emailjs_config', JSON.stringify({ publicKey: pk || '', serviceId: sid || '', templateId: tid || '', apiKey: ak || '' })); } catch(e) {}
+            }
             var compatChoice = document.querySelector('input[name="compatChoice"]:checked');
             if (compatChoice && window.__compat) window.__compat.setSetting(compatChoice.value);
             showToast(t('apiSaved'));
             modal?.classList.remove('open');
         });
         document.getElementById('modalClearBtn')?.addEventListener('click', () => {
-            showConfirmModal(currentLang === 'fr' ? 'Effacer toutes les clés API ?' : currentLang === 'en' ? 'Clear all API keys?' : 'حذف جميع مفاتيح API؟', function() {
+            if (!confirm(currentLang === 'fr' ? 'Effacer toutes les clés ?' : currentLang === 'en' ? 'Clear all keys?' : 'حذف جميع المفاتيح؟')) return;
             setOpenRouterKey('');
             setGroqKey('');
             setGeminiKey('');
@@ -3633,7 +3671,6 @@ applyTheme();
             if (geminiInput) geminiInput.value = '';
             showToast(t('apiCleared'));
             modal?.classList.remove('open');
-            });
         });
         document.getElementById('verifyORKeyBtn')?.addEventListener('click', async () => {
             const key = stripBOM(document.getElementById('openrouterApiKeyInput').value);
@@ -3688,33 +3725,48 @@ applyTheme();
         document.querySelectorAll('input[name="modelChoice"]').forEach(r =>
             r.addEventListener('change', () => localStorage.setItem('model_choice', r.value))
         );
-        window.updateAdminModelsVisibility = function() {
-            document.querySelectorAll('.admin-only').forEach(el => {
-                el.style.display = localStorage.getItem('isAdmin') === 'true' ? '' : 'none';
-            });
-        };
-        updateAdminModelsVisibility();
         window.getFreeMode = function() { return localStorage.getItem('free_mode') === 'true'; };
         window.setFreeMode = function(val) { localStorage.setItem('free_mode', val ? 'true' : 'false'); };
+        window.updateModeBadge = function() {
+            var pb = document.getElementById('pedagogyBadge');
+            if (pb) pb.textContent = getAxonMode() ? '🧠 AXON' : getFreeMode() ? '🔓 Libre' : '📘 APC';
+        };
         var ft = document.getElementById('freeModeToggle');
-        if (ft) { ft.checked = getFreeMode(); ft.addEventListener('change', function() { setFreeMode(this.checked); }); }
-        // --- AXON Intelligence ---
+        if (ft) { ft.checked = getFreeMode(); ft.addEventListener('change', function() { setFreeMode(this.checked); updateModeBadge(); }); }
         window.getAxonMode = function() { return localStorage.getItem('axon_mode') === 'true'; };
         window.setAxonMode = function(val) { localStorage.setItem('axon_mode', val ? 'true' : 'false'); };
         var at = document.getElementById('axonToggle');
-        if (at) { at.checked = getAxonMode(); at.addEventListener('change', function() { setAxonMode(this.checked); }); }
+        if (at) { at.checked = getAxonMode(); at.addEventListener('change', function() { setAxonMode(this.checked); updateModeBadge(); }); }
+        updateModeBadge();
         window.initAxonMemory = function() {
             var stores = ['axon_user','axon_conversation','axon_knowledge','axon_corrections','axon_documents','axon_statistics','axon_cache'];
             stores.forEach(function(s) { if (!localStorage.getItem(s)) localStorage.setItem(s, JSON.stringify([])); });
-            // Purge des faux noms stockés par les versions précédentes ("mon", "nom", "moi"...)
+            // Purge des faux noms stockés par les versions précédentes ("mon", "nom", "moi", "de", "ziz"...)
             try {
                 var u = JSON.parse(localStorage.getItem('axon_user') || '[]');
-                var u2 = u.filter(function(x) { return !(x && x.name && /^(mon|nom|moi|ton|ta|tes|votre|vos|vôtre|mien|your|my|name|his|her|their)$/i.test(x.name.trim())); });
+                var u2 = u.filter(function(x) { return !(x && x.name && /^(mon|nom|moi|ton|ta|tes|votre|vos|vôtre|mien|your|my|name|his|her|their|de|du|des|le|la|les|un|une|toi|deux|trois|ziz)$/i.test(x.name.trim())); });
+                // Purge des noms à 1re lettre minuscule (corruption du replace v1.5.3 : "ziz Mohamed Rostom", "de..." )
+                u2 = u2.filter(function(x) { return !(x && x.name && /^[a-zà-ÿ]/.test(x.name.trim()) && x.name.trim().length > 1); });
                 if (u2.length !== u.length) localStorage.setItem('axon_user', JSON.stringify(u2));
             } catch(e) {}
         };
-        window._axonValidName = function(n) {
-            return !!(n && typeof n === 'string' && n.trim() && !/^(mon|nom|moi|ton|ta|tes|votre|vos|vôtre|mien|your|my|name|his|her|their)$/i.test(n.trim()));
+        window.        _axonValidName = function(n) {
+            if (!(n && typeof n === 'string' && n.trim())) return false;
+            if (/^(mon|nom|moi|ton|ta|tes|votre|vos|vôtre|mien|your|my|name|his|her|their|de|du|des|le|la|les|un|une|toi|deux|trois)$/i.test(n.trim())) return false;
+            // Un nom latin doit commencer par une MAJUSCULE (rejette "ziz Mohamed Rostom").
+            // Les noms arabes (lettres uniquement arabes) sont toujours acceptés.
+            if (/[A-Za-zÀ-ÿ]/.test(n) && !/^[A-ZÀ-Ü]/.test(n.trim())) return false;
+            return true;
+        };
+        // Nettoyage d'un nom brut capturé ("de mon nom complet" → vire mots vides et fragments)
+        window._axonCleanName = function(n) {
+            if (!n) return '';
+            n = n.replace(/^(de\s+|mon\s+|mes\s+|ton\s+|ton\s+nom\s+|de\s+mon\s+|mon\s+nom\s+|nom\s+(complet\s+)?|c['’]est\s+|est\s+|عني\s+|اسمي\s+|الكامل\s+)+/i, '');
+            n = n.replace(/[\s:=\-–—،,.;]+$/g, '').trim();
+            n = n.replace(/\s{2,}/g, ' ');
+            if (!_axonValidName(n)) return '';
+            if (n.split(/\s+/).length > 6) n = n.split(/\s+/).slice(0, 6).join(' ');
+            return n;
         };
         // --- AXON Supabase sync ---
         window._axonSyncQueue = {};
@@ -3827,15 +3879,27 @@ applyTheme();
             var lang = document.documentElement?.lang || 'fr';
             // Moteur de décision (⑥)
             var decisions = decisionEngine(userText);
-            // Nom préféré (ne PAS déclencher si l'utilisateur DEMANDE son nom : "rappelle moi mon nom" ≠ "appelle-moi X")
-            var nameQuestion = /(rappelle[\w-]*\s+moi\s+mon\s+nom|dis[\w-]*\s+moi\s+mon\s+nom|dit[\w-]*\s+moi\s+mon\s+nom|donne[\w-]*\s+moi\s+mon\s+nom|c['’]est quoi mon nom|what('|i)?s\s+my\s+name|what\s+is\s+my\s+name|ما\s*اسمي|كيف\s*اسمي|شنو\s*اسمي|اشنو\s*اسمي|إيه\s*اسمي|ما\s*هو\s*اسمي)/i.test(userText);
-            var nameMatch = nameQuestion ? null : userText.match(/(appelle[\w-]*\s*moi|call\s+me|اسمي|ادعني|نادني)\s+(\S+)/i);
-            if (nameMatch) {
+            // Nom préféré (ne PAS déclencher si l'utilisateur DEMANDE son nom : "rappelle moi de mon nom complet" ≠ "appelle-moi X")
+            var nameQuestion = /(rappelle[\w-]*\s+moi\s+(de\s+)?(mon|mes)\s+nom|rappelle[\w-]*\s+moi\s+.{0,15}nom\s+complet|dis[\w-]*\s+moi\s+(de\s+)?(mon|mes)\s+nom|dit[\w-]*\s+moi\s+(de\s+)?(mon|mes)\s+nom|donne[\w-]*\s+moi\s+(de\s+)?(mon|mes)\s+nom|c['’]est quoi mon nom|quel est mon nom|what('|i)?s\s+my\s+(full\s+)?name|what\s+is\s+my\s+(full\s+)?name|ما\s*اسمي|كيف\s*اسمي|شنو\s*اسمي|اشنو\s*اسمي|إيه\s*اسمي|ما\s*هو\s*اسمي)/i.test(userText);
+            // Nom COMPLET — capture par GROUPE (groupe 1 = nom, la 1re lettre n'est plus mangée par le replace)
+            // "mon nom complet est X" / "je m'appelle X" / "my full name is X" / "اسمي الكامل X" / "mon prénom X"
+            var newName = null;
+            if (!nameQuestion) {
+                var nMatch = userText.match(/(?:mon\s+nom\s+(?:complet\s+)?(?:est|c['’]est|:|هو|هي)?\s*|je\s+m['’]appelle\s+|my\s+(?:full\s+)?name\s+is\s+|اسمي\s+(?:الكامل\s+)?|أنا\s+اسمي\s+|mon\s+prénom\s+(?:est\s+)?)([A-ZÀ-ÿ\u0600-\u06FF][A-Za-zÀ-ÿ\u0600-\u06FF'’\-\s]{2,59})/i);
+                // Correction explicite : "corrige c'est X pas Y" / "cé Aziz pas ziz" / "c'est X et non Y"
+                var fixMatch = userText.match(/(?:corrige[\w\s]{0,25}?)?(?:cé|c['’]est|c'est)\s+([A-ZÀ-ÿ][A-Za-zÀ-ÿ'’\-]{1,40})(?:\s+(?:pas|non|et\s+pas|et\s+non)\s+\S+)/i);
+                // "appelle-moi X" / "call me X" / "ادعني X" / "نادني X"
+                var nameMatch = userText.match(/(?:appelle[\w-]*\s*moi|call\s+me|ادعني|نادني)\s+([A-ZÀ-ÿ\u0600-\u06FF][A-Za-zÀ-ÿ\u0600-\u06FF'’\-\s]{1,59})/i);
+                if (nMatch) newName = nMatch[1].trim();
+                else if (fixMatch) newName = fixMatch[1].trim();
+                else if (nameMatch) newName = nameMatch[1].trim();
+            }
+            if (newName) {
                 var userStore = getAxonStore('axon_user');
                 var current = userStore.length ? userStore[userStore.length-1] : {};
-                var newName = nameMatch[2].trim().substring(0,50);
-                if (_axonValidName(newName)) {
-                    current.name = newName;
+                var cleaned = _axonCleanName(newName);
+                if (cleaned) {
+                    current.name = cleaned;
                     current.speciality = document.getElementById('specialite')?.value || current.speciality || '';
                     userStore.push(current);
                     setAxonStore('axon_user', userStore);
@@ -3888,7 +3952,7 @@ applyTheme();
         // ⑥ Moteur de décision
         window.decisionEngine = function(userText) {
             var d = [];
-            if (!/(rappelle[\w-]*\s+moi\s+mon\s+nom|dis[\w-]*\s+moi\s+mon\s+nom|dit[\w-]*\s+moi\s+mon\s+nom|donne[\w-]*\s+moi\s+mon\s+nom|what('|i)?s\s+my\s+name|what\s+is\s+my\s+name|ما\s*اسمي|كيف\s*اسمي|شنو\s*اسمي|اشنو\s*اسمي|إيه\s*اسمي|ما\s*هو\s*اسمي)/i.test(userText) && /(appelle[\w-]*\s*moi|call\s+me|اسمي|ادعني|نادني)/i.test(userText)) d.push({ action:'update_name', priority:95 });
+            if (!/(rappelle[\w-]*\s+moi\s+(de\s+)?(mon|mes)\s+nom|rappelle[\w-]*\s+moi\s+.{0,15}nom\s+complet|dis[\w-]*\s+moi\s+(de\s+)?(mon|mes)\s+nom|dit[\w-]*\s+moi\s+(de\s+)?(mon|mes)\s+nom|donne[\w-]*\s+moi\s+(de\s+)?(mon|mes)\s+nom|c['’]est quoi mon nom|quel est mon nom|what('|i)?s\s+my\s+(full\s+)?name|what\s+is\s+my\s+(full\s+)?name|ما\s*اسمي|كيف\s*اسمي|شنو\s*اسمي|اشنو\s*اسمي|إيه\s*اسمي|ما\s*هو\s*اسمي)/i.test(userText) && /(appelle[\w-]*\s*moi|call\s+me|اسمي|ادعني|نادني)/i.test(userText)) d.push({ action:'update_name', priority:95 });
             if (/(non|faux|pas|error|wrong|خطأ|لا|غلط|تصحيح)/i.test(userText)) d.push({ action:'correct', priority:85 });
             if (/(je préfère|j'aime|je veux|I prefer|I like|I use|أفضل|أحب|أستخدم)/i.test(userText)) d.push({ action:'store_preference', priority:75 });
             if (/(compétence|compétence|APC|règle|rule|قاعدة|كفاءة)\s*[:=]/i.test(userText) && userText.length > 20) d.push({ action:'learn_knowledge', priority:65 });
@@ -3979,10 +4043,6 @@ applyTheme();
             return fallback || '';
         };
         initAxonMemory();
-        (function _axonWaitUser() {
-            if (typeof currentUser !== 'undefined' && currentUser && typeof initAxonSupabase === 'function') { initAxonSupabase(); }
-            else { setTimeout(_axonWaitUser, 500); }
-        })();
         var cb = document.getElementById('checkCompetenceBtn');
         if (cb) {
             cb.addEventListener('click', async function() {
@@ -4001,6 +4061,24 @@ applyTheme();
                 } catch(e) { res.innerHTML = '<span class="comp-msg error">' + (lang === 'ar' ? 'خطأ: ' : lang === 'en' ? 'Error: ' : 'Erreur : ') + e.message + '</span>'; }
             });
         }
+        (function _axonWaitUser() {
+            if (typeof currentUser !== 'undefined' && currentUser && typeof initAxonSupabase === 'function') {
+                // 🔐 Isolement multi-comptes : le localStorage appartient au user_id qui l'a peuplé.
+                // Si un AUTRE compte se connecte sur ce navigateur, on vide les stores axon_* AVANT
+                // la fusion/migration Supabase (sinon le nom/mémoire du compte précédent fuiterait
+                // dans la mémoire Supabase du nouveau compte).
+                try {
+                    var owner = localStorage.getItem('axon_owner');
+                    if (owner !== currentUser.id) {
+                        var allAxon = ['axon_user','axon_conversation','axon_knowledge','axon_corrections','axon_documents','axon_statistics','axon_cache'];
+                        allAxon.forEach(function(k) { localStorage.removeItem(k); });
+                        localStorage.setItem('axon_owner', currentUser.id);
+                    }
+                } catch(e) {}
+                initAxonSupabase();
+            }
+            else { setTimeout(_axonWaitUser, 500); }
+        })();
 restoreGammaData();
 loadExamplesFromDB();
 window.addEventListener('beforeunload', function() {
@@ -4346,18 +4424,7 @@ function openQuizGenerator(savedTimer, savedAttempts) {
     modal.className = 'modal-overlay quiz-modal open';
     modal.id = 'quizGeneratorModal';
     var hasQuizData = quizEditData && quizEditData.slides && quizEditData.slides.length > 0;
-    var compVal = (quizEditData?.competence || document.getElementById('competence')?.value?.trim() || '');
-    if (!compVal) {
-        try { compVal = (JSON.parse(sessionStorage.getItem('generator_form') || '{}').competence || '').trim(); } catch (e) {}
-    }
-    if (!compVal && typeof currentMessages !== 'undefined') {
-        var lastUserMsg = [...currentMessages].reverse().find(function(m) { return m.role === 'user'; });
-        if (lastUserMsg) {
-            var compMatch = String(lastUserMsg.content).match(/(?:Compétence visée|Target Competency|الكفاءة المستهدفة)\s*:\s*([^\n]+)/i);
-            if (compMatch) compVal = compMatch[1].replace(/\s*\(.*?\)\s*$/, '').trim();
-        }
-    }
-    compVal = compVal || gammaData?.title || '';
+    var compVal = (quizEditData?.competence || document.getElementById('competence')?.value?.trim() || gammaData?.title || '');
     var defaultTitle = quizEditData?.title || (compVal ? 'Quiz sur ' + compVal : '');
     modal.innerHTML = '<div class="modal" style="max-width:900px;">'
         + '<button class="modal-close" onclick="this.closest(\'.modal-overlay\').remove()">&times;</button>'
@@ -4492,7 +4559,7 @@ async function generateQuizQuestions() {
             generate: 'Génère EXACTEMENT {n} questions. Chaque question doit être basée UNIQUEMENT sur le contenu ci-dessus.',
             practical: 'Chaque question doit être une question PRATIQUE et PRÉCISE sur le sujet technique.',
             slideTitle: 'Le titre de chaque rubrique (slideTitle) doit être un sous-sujet technique du domaine.',
-            forbidden: 'INTERDICTION FORMELLE : AUCUNE question sur la pédagogie ni sur la structure du document (durées des phases, scénario pédagogique, activités du formateur ou des stagiaires, évaluation, grille critérielle, niveaux de maîtrise, indicateurs, objectifs de phase, savoirs/savoir-faire/savoir-être, contextualisation, déstabilisation, intégration, transfert, remédiation, conclusion). TOUTES les questions doivent porter UNIQUEMENT sur le SUJET TECHNIQUE du métier : procédures, étapes concrètes, outils, matériaux, calculs, normes, réglages, gestes professionnels, dépannage, vocabulaire technique du sujet lui-même.',
+            forbidden: 'INTERDICTION FORMELLE de ces mots : contextualisation, déstabilisation, intégration, transfert, critères de performance, grille critérielle, niveaux de maîtrise, indicateurs de réussite, évaluation, phase, objectif de la phase, remédiation, acquis, réinvestir, savoirs, attitudes.',
             format: '4 options par question, 1 seule correcte. Index 0-3.\nFormat JSON: {"slides":[{"slideTitle":"Sous-sujet technique","questions":[{"text":"Question?","options":["A","B","C","D"],"correctIndex":0}]}]}',
             output: 'Génère en français.\nSORS UNIQUEMENT le JSON valide.'
         },
@@ -4503,7 +4570,7 @@ async function generateQuizQuestions() {
             generate: 'Generate EXACTLY {n} questions. Each question must be based ONLY on the content above.',
             practical: 'Each question must be a PRACTICAL and PRECISE question about the technical subject.',
             slideTitle: 'The title of each section (slideTitle) must be a technical sub-topic of the domain.',
-            forbidden: 'STRICT FORBIDDEN: NO question about pedagogy or the document structure (phase durations, pedagogical scenario, trainer/trainee activities, assessment, competency grid, mastery levels, indicators, phase objectives, knowledge/know-how/life skills, contextualization, destabilization, integration, transfer, remediation, conclusion). ALL questions must focus ONLY on the TECHNICAL SUBJECT of the trade: procedures, concrete steps, tools, materials, calculations, standards, settings, professional gestures, troubleshooting, technical vocabulary of the subject itself.',
+            forbidden: 'STRICTLY FORBIDDEN words: contextualization, destabilization, integration, transfer, performance criteria, competency grid, mastery levels, success indicators, evaluation, phase, phase objective, remediation, acquired, reinvest, knowledge, attitudes.',
             format: '4 options per question, 1 correct. Index 0-3.\nJSON format: {"slides":[{"slideTitle":"Technical sub-topic","questions":[{"text":"Question?","options":["A","B","C","D"],"correctIndex":0}]}]}',
             output: 'Generate in English.\nOUTPUT ONLY valid JSON.'
         },
@@ -4514,7 +4581,7 @@ async function generateQuizQuestions() {
             generate: 'قم بإنشاء {n} سؤال بالضبط. يجب أن يعتمد كل سؤال فقط على المحتوى أعلاه.',
             practical: 'يجب أن يكون كل سؤال عمليًا ودقيقًا حول الموضوع التقني.',
             slideTitle: 'يجب أن يكون عنوان كل قسم (slideTitle) موضوعًا فرعيًا تقنيًا للمجال.',
-            forbidden: 'ممنوع منعًا باتًا: لا سؤال عن البيداغوجيا أو بنية الوثيقة (مدد المراحل، السيناريو التربوي، أنشطة المكوّن أو المتدرّب، التقييم، شبكة المعايير، مستويات الإتقان، المؤشرات، أهداف المرحلة، المعارف/المهارات/السلوكيات، السياق، زعزعة الاستقرار، التكامل، النقل، المعالجة، الخاتمة). يجب أن تتعلق كل الأسئلة فقط بالموضوع التقني للمهنة: الإجراءات، الخطوات العملية، الأدوات، المواد، الحسابات، المعايير، الضبط، الإيماءات المهنية، إصلاح الأعطال، المصطلحات التقنية للموضوع نفسه.',
+            forbidden: 'ممنوع منعًا باتًا هذه الكلمات: السياق، زعزعة الاستقرار، التكامل، النقل، معايير الأداء، شبكة المعايير، مستويات الإتقان، مؤشرات النجاح، التقييم، المرحلة، هدف المرحلة، المعالجة، المكتسبات، إعادة الاستثمار، المعارف، الاتجاهات.',
             format: '4 خيارات لكل سؤال، إجابة واحدة صحيحة. الفهرس 0-3.\nتنسيق JSON: {"slides":[{"slideTitle":"موضوع فرعي تقني","questions":[{"text":"سؤال؟","options":["أ","ب","ج","د"],"correctIndex":0}]}]}',
             output: 'قم بالإنشاء باللغة العربية.\nأخرج فقط JSON صالح.'
         }
@@ -4530,7 +4597,7 @@ async function generateQuizQuestions() {
         + p.format + '\n'
         + p.output;
     async function attemptGeneration(retries) {
-        var sysPrompt = "Tu es un expert en évaluation pédagogique et en conception de QCM technique de haute qualité. Tu conçois des questions qui testent la COMPRÉHENSION RÉELLE et la CAPACITÉ D'APPLICATION, pas la mémorisation.\n\nRÈGLES DE QUALITÉ :\n- Chaque question doit être PRATIQUE et SITUATIONNELLE : confronte l'apprenant à un cas concret, un diagnostic, une décision ou une action à prendre\n- Les 4 options doivent être TOUTES plausibles, mais une seule correcte. Les distracteurs doivent refléter des erreurs ou confusions RÉELLES que ferait un apprenant\n- Évite les questions trop faciles ou trop évidentes : privilégie le raisonnement et l'analyse\n- Les questions doivent couvrir différents aspects du sujet : concepts fondamentaux, procédures, bonnes pratiques, cas particuliers\n- Le titre de chaque rubrique (slideTitle) doit être un sous-sujet technique précis du domaine\n- Le JSON retourné doit être parfaitement valide et bien formé\n\nC'EST UN QUIZ POUR LES STAGIAIRES, PAS POUR LE FORMATEUR :\n- AUCUNE question sur la pédagogie : durées des phases, scénario pédagogique, activités du formateur ou des stagiaires, grille critérielle, niveaux de maîtrise, indicateurs de réussite, évaluation, objectifs de phase, savoirs/savoir-faire/savoir-être\n- TOUTES les questions doivent être TECHNIQUES et porter sur le métier du sujet : procédures concrètes, outils, matériaux, calculs, normes, réglages, gestes professionnels, dépannage, vocabulaire technique du sujet lui-même\n- Une question du type « Combien de temps dure la phase X ? » est STRICTEMENT INTERDITE car elle porte sur la pédagogie, pas sur le métier";
+        var sysPrompt = "Tu es un expert en évaluation pédagogique et en conception de QCM technique de haute qualité. Tu conçois des questions qui testent la COMPRÉHENSION RÉELLE et la CAPACITÉ D'APPLICATION, pas la mémorisation.\n\nRÈGLES DE QUALITÉ :\n- Chaque question doit être PRATIQUE et SITUATIONNELLE : confronte l'apprenant à un cas concret, un diagnostic, une décision ou une action à prendre\n- Les 4 options doivent être TOUTES plausibles, mais une seule correcte. Les distracteurs doivent refléter des erreurs ou confusions RÉELLES que ferait un apprenant\n- Évite les questions trop faciles ou trop évidentes : privilégie le raisonnement et l'analyse\n- Les questions doivent couvrir différents aspects du sujet : concepts fondamentaux, procédures, bonnes pratiques, cas particuliers\n- Le titre de chaque rubrique (slideTitle) doit être un sous-sujet technique précis du domaine\n- Le JSON retourné doit être parfaitement valide et bien formé";
         var msgs = [
             { role: 'system', content: sysPrompt },
             { role: 'user', content: prompt }
@@ -4640,8 +4707,7 @@ async function requestMoreQuestions() {
     showToast('🤖 Génération de ' + n + ' questions...');
     var lang = currentLang === 'fr' ? 'français' : currentLang === 'en' ? 'english' : 'arabe';
     var prompt = 'Génère ' + n + ' nouvelles questions QCM sur le sujet : "' + competence + '".\n\n'
-        + 'C\'EST UN QUIZ TECHNIQUE POUR LES STAGIAIRES : AUCUNE question sur la pédagogie (durées des phases, scénario pédagogique, activités du formateur ou des stagiaires, grille critérielle, évaluation, objectifs de phase, savoirs/savoir-faire/savoir-être).\n'
-        + 'Chaque question doit être technique et précise sur le métier : procédures, outils, matériaux, calculs, normes, réglages, gestes professionnels, dépannage, vocabulaire technique du sujet.\n'
+        + 'Chaque question doit être technique et précise, pas pédagogique.\n'
         + 'Chaque question est indépendante (pas de slideTitle, juste une question avec ses 4 options).\n'
         + 'Format JSON: {"questions":[{"text":"Q?","options":["A","B","C","D"],"correctIndex":0}]}\n'
         + 'Génère en ' + lang + '.\nSORS UNIQUEMENT le JSON valide.';
@@ -4909,38 +4975,3 @@ setTimeout(function(){
         f.appendChild(p);
     }
 }, 500);
-function showConfirmModal(msg, onConfirm, btnLabel) {
-    if (document.querySelector('.confirm-overlay')) return;
-    var overlay = document.createElement('div');
-    overlay.className = 'confirm-overlay';
-    var lang = typeof currentLang !== 'undefined' ? currentLang : (document.documentElement?.lang || 'fr');
-    var confirmLabel = btnLabel || (lang === 'ar' ? 'حذف' : lang === 'en' ? 'Delete' : 'Supprimer');
-    var title = lang === 'ar' ? 'تأكيد' : lang === 'en' ? 'Confirm' : 'Confirmer';
-    overlay.innerHTML = '<div class="confirm-box"><h4>' + title + '</h4><p>' + msg + '</p><div class="confirm-actions"><button class="btn-cancel" id="confirmCancel">' + (lang === 'ar' ? 'إلغاء' : lang === 'en' ? 'Cancel' : 'Annuler') + '</button><button class="btn-danger-sm" id="confirmOk">' + confirmLabel + '</button></div></div>';
-    document.body.appendChild(overlay);
-    setTimeout(function() { overlay.classList.add('show'); }, 10);
-    document.getElementById('confirmCancel').onclick = function() { overlay.classList.remove('show'); setTimeout(function() { overlay.remove(); }, 200); };
-    document.getElementById('confirmOk').onclick = function() { overlay.classList.remove('show'); setTimeout(function() { overlay.remove(); if (onConfirm) onConfirm(); }, 200); };
-    overlay.onclick = function(e) { if (e.target === overlay) { overlay.classList.remove('show'); setTimeout(function() { overlay.remove(); }, 200); } };
-}
-// === DOCUMENT UTILITY FUNCTIONS (AJOUTÉ) ===
-window.chunkText = function(text, maxSize) {
-    if (!text) return [];
-    var chunks = [], paragraphs = text.split('\n\n'), current = '';
-    for (var i = 0; i < paragraphs.length; i++) {
-        if ((current + paragraphs[i]).length < maxSize) { current += (current ? '\n\n' : '') + paragraphs[i]; }
-        else { if (current) chunks.push(current); current = paragraphs[i];
-            while (current.length > maxSize) { chunks.push(current.substring(0, maxSize)); current = current.substring(maxSize); } }
-    }
-    if (current) chunks.push(current);
-    return chunks.length ? chunks : [text];
-};
-window.detectDocType = function(text) {
-    if (/comp[eé]tence|APC|r[eé]f[eé]rentiel/i.test(text)) return 'referentiel';
-    if (/guide|manuel|notice/i.test(text)) return 'guide';
-    if (/cours|le[cç]on|lesson|module/i.test(text)) return 'cours';
-    if (/quiz|qcm|examen|evaluation|test/i.test(text)) return 'evaluation';
-    if (/sc[eé]nario|d[eé]roulement|deroulement/i.test(text)) return 'scenario';
-    if (/programme|curriculum|formation/i.test(text)) return 'programme';
-    return 'general';
-};

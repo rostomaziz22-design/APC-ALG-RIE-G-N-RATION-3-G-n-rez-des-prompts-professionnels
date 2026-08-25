@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr" dir="ltr">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' data: https://cdnjs.cloudflare.com; connect-src 'self' https://*.supabase.co https://openrouter.ai https://api.groq.com https://generativelanguage.googleapis.com https://api.emailjs.com https://api.ipify.org https://ipinfo.io https://ip-api.com; img-src 'self' data: https:; media-src 'self' https:; frame-ancestors 'none'; base-uri 'self';">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' data: https://cdnjs.cloudflare.com; connect-src 'self' https://*.supabase.co https://openrouter.ai https://api.groq.com https://generativelanguage.googleapis.com https://api.emailjs.com; img-src 'self' data: https:; media-src 'self' https:; frame-ancestors 'none'; base-uri 'self';">
         <title>APC Algérie G3 · Administration</title>
         <link rel="stylesheet" href="css/style.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -96,7 +96,7 @@
                                 </video>
                             </div>
                         </div>
-                        <div class="hero-desc" data-i18n="headerDesc">Une IA pédagogique qui génère automatiquement des prompts professionnels, des scénarios pédagogiques, des présentations, des évaluations, des activités de gamification et des ressources conformes à l'Approche Par Compétences (APC) Algérie .</div>
+                        <div class="hero-desc" data-i18n="headerDesc">Générez des prompts professionnels pour ChatGPT, Claude, Gemini et Copilot afin de concevoir vos scénarios pédagogiques selon l'Approche Par Compétences.</div>
                             <div class="nav-links">
                                 <a class="nav-link" onclick="goTo('index.html')" data-i18n="tab_home">🏠 Accueil</a>
                                 <a class="nav-link" onclick="goTo('generator.html')" data-i18n="tab_generator">📝 Générateur de Prompts</a>
@@ -166,64 +166,26 @@
                                                             </div>
                                                             <div class="result-msg" id="bulkProgress" style="display:none;">
                                                             </div>
-                                                                         </div>
-                                                                            <div class="admin-card" id="sessionsCard">
-                                                                                <h2>🟢 Sessions actives <span style="font-size:0.8rem;color:var(--text-muted);font-weight:400;" id="sessionsCount"></span></h2>
-                                                                                <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-                                                                                    <button class="btn btn-sm btn-primary" onclick="loadActivityLog()">🔄 Actualiser</button>
-                                                                                    <a href="admin-sessions.html" class="btn btn-sm btn-secondary" style="text-decoration:none;">⛶ Pleine page</a>
-                                                                                </div>
-                                                                                <div id="sessionsContent" style="font-size:0.85rem;display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto;padding-right:4px;">Cliquez sur Actualiser.</div>
-                                                                            </div>
-                                                                          <div class="admin-card" id="activityCard">
-                                                                              <h2>📊 Journal d'Activité</h2>
-                                                                              <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-                                                                                  <button class="btn btn-sm btn-primary" onclick="loadActivityLog()">🔄 Rafraîchir</button>
-                                                                                  <span style="font-size:0.8rem;color:var(--text-muted);" id="activityCount">—</span>
-                                                                                  <button class="btn btn-sm btn-secondary" id="enterFsBtn" onclick="document.getElementById('activityCard').requestFullscreen()" title="Plein écran" style="margin-left:auto;">⛶ Plein écran</button>
-                                                                                  <button class="btn btn-sm btn-secondary" id="exitFsBtn" onclick="document.exitFullscreen()" title="Quitter le plein écran" style="display:none;margin-left:auto;">✕ Quitter</button>
-                                                                              </div>
-                                                                               <div id="logFilters" style="margin-bottom:8px;display:none;gap:6px;flex-wrap:wrap;align-items:center;">
-                                                                                   <input id="logSearch" type="text" placeholder="🔍 Rechercher email / nom..." oninput="renderActivityLog()" style="flex:1;min-width:140px;padding:6px 10px;border:2px solid var(--border);border-radius:8px;font-size:.8rem;background:var(--bg);color:var(--text);">
-                                                                                   <select id="logFilterEvent" onchange="renderActivityLog()" style="padding:6px 10px;border:2px solid var(--border);border-radius:8px;font-size:.8rem;background:var(--bg);color:var(--text);">
-                                                                                       <option value="">Tous les événements</option>
-                                                                                       <option value="login">🔓 Connexion</option>
-                                                                                       <option value="logout">🔒 Déconnexion</option>
-                                                                                       <option value="profile_update">✏️ Mise à jour</option>
-                                                                                   </select>
-                                                                                    <span style="font-size:.8rem;color:var(--text-muted);">Du</span>
-                                                                                    <span style="position:relative;display:inline-flex;align-items:center;">
-                                                                                        <input id="logDateFrom" type="date" onchange="renderActivityLog()" style="padding:5px 8px;padding-right:26px;border:2px solid var(--border);border-radius:8px;font-size:.8rem;background:var(--bg);color:var(--text);">
-                                                                                        <button type="button" onclick="document.getElementById('logDateFrom').showPicker()" style="position:absolute;right:2px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:2px;font-size:1rem;line-height:1;">📅</button>
-                                                                                    </span>
-                                                                                    <span style="font-size:.8rem;color:var(--text-muted);">Au</span>
-                                                                                    <span style="position:relative;display:inline-flex;align-items:center;">
-                                                                                        <input id="logDateTo" type="date" onchange="renderActivityLog()" style="padding:5px 8px;padding-right:26px;border:2px solid var(--border);border-radius:8px;font-size:.8rem;background:var(--bg);color:var(--text);">
-                                                                                        <button type="button" onclick="document.getElementById('logDateTo').showPicker()" style="position:absolute;right:2px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:2px;font-size:1rem;line-height:1;">📅</button>
-                                                                                    </span>
-                                                                                    <button type="button" onclick="var d=new Date();document.getElementById('logDateFrom').value=d.toISOString().slice(0,10);document.getElementById('logDateTo').value=d.toISOString().slice(0,10);renderActivityLog();" style="padding:5px 10px;border:2px solid var(--border);border-radius:8px;font-size:.8rem;background:var(--bg);color:var(--text);cursor:pointer;">📅 Auj</button>
-                                                                                    <button type="button" onclick="document.getElementById('logSearch').value='';document.getElementById('logFilterEvent').value='';document.getElementById('logDateFrom').value='';document.getElementById('logDateTo').value='';document.getElementById('logSort').value='desc';renderActivityLog();" style="padding:5px 10px;border:2px solid var(--border);border-radius:8px;font-size:.8rem;background:var(--bg);color:var(--text);cursor:pointer;">✕ Réinitialiser</button>
-                                                                                    <select id="logSort" onchange="renderActivityLog()" style="padding:6px 10px;border:2px solid var(--border);border-radius:8px;font-size:.8rem;background:var(--bg);color:var(--text);">
-                                                                                        <option value="desc">📅 Plus récent</option>
-                                                                                        <option value="asc">📅 Plus ancien</option>
-                                                                                    </select>
-                                                                                </div>
-                                                                              <div style="overflow-x:auto;max-height:400px;overflow-y:auto;">
-                                                                                  <table>
+                                                                        </div>
+                                                                         <div class="admin-card" id="activityCard">
+                                                                             <h2>📊 Journal d'Activité</h2>
+                                                                             <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                                                                                 <button class="btn btn-sm btn-primary" onclick="loadActivityLog()">🔄 Rafraîchir</button>
+                                                                                 <span style="font-size:0.8rem;color:var(--text-muted);" id="activityCount">—</span>
+                                                                             </div>
+                                                                             <div style="overflow-x:auto;max-height:400px;overflow-y:auto;">
+                                                                                 <table>
                                                                                      <thead>
-                                                                                          <tr>
-                                                                                              <th>Email</th>
-                                                                                              <th>Nom complet</th>
-                                                                                              <th>Événement</th>
-                                                                                              <th>Appareil</th>
-                                                                                              <th>IP</th>
-                                                                                              <th>Région</th>
-                                                                                              <th>Date/Heure</th>
-                                                                                              <th>Détails</th>
-                                                                                          </tr>
-                                                                                      </thead>
-                                                                                      <tbody id="activityTableBody">
-                                                                                          <tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:20px;">Cliquez sur Rafraîchir</td></tr>
+                                                                                         <tr>
+                                                                                             <th>Email</th>
+                                                                                             <th>Nom complet</th>
+                                                                                             <th>Événement</th>
+                                                                                             <th>Date/Heure</th>
+                                                                                             <th>Détails</th>
+                                                                                         </tr>
+                                                                                     </thead>
+                                                                                     <tbody id="activityTableBody">
+                                                                                         <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:20px;">Cliquez sur Rafraîchir</td></tr>
                                                                                      </tbody>
                                                                                  </table>
                                                                              </div>
@@ -300,7 +262,7 @@
                                                                                         </span>
                                                                                     </div>
                                                                                 </div>
-                                                                                    <div class="model-selector admin-only">
+                                                                                <div class="model-selector">
                                                                                     <div class="model-group-title" data-i18n="modelSelection">Modèle à utiliser</div>
                                                                                         <label>
                                                                                         <input type="radio" name="modelChoice" value="auto" checked>
@@ -308,11 +270,11 @@
                                                                                         </label>
                                                                                         <label>
                                                                                         <input type="radio" name="modelChoice" value="gemini-flash">
-                                                                                        <span data-i18n="modelGeminiFlash">☐ Gemini 2.0 Flash</span>
+                                                                                        <span data-i18n="modelGeminiFlash">☐ Gemini 1.5 Flash</span>
                                                                                         </label>
                                                                                         <label>
                                                                                         <input type="radio" name="modelChoice" value="gemini-pro">
-                                                                                        <span data-i18n="modelGeminiPro">☐ Gemini 2.5 Pro</span>
+                                                                                        <span data-i18n="modelGeminiPro">☐ Gemini 1.5 Pro</span>
                                                                                         </label>
                                                                                         <label>
                                                                                         <input type="radio" name="modelChoice" value="deepseek-v3">
@@ -327,35 +289,33 @@
                                                                                         <span data-i18n="modelLlama">☐ Llama 3.3 70B (OpenRouter)</span>
                                                                                         </label>
                                                                                         <label>
-<input type="radio" name="modelChoice" value="groq-70b"> <span data-i18n="modelGroq70b">☐ Llama 3.3 70B (Groq)</span>
-                                                                                        </label>
-                                                                                        
-                                                                                        <label>
-                                                                                        <input type="radio" name="modelChoice" value="or-nemotron-nano-free">
-                                                                                        <span data-i18n="modelNemotronNanoFree">☐ Nemotron 3 Nano 30B (OpenRouter free)</span>
+                                                                                        <input type="radio" name="modelChoice" value="groq-llama">
+                                                                                        <span data-i18n="modelGroqLlama">☐ GPT OSS 120B (Groq)</span>
                                                                                         </label>
                                                                                         <label>
-                                                                                        <input type="radio" name="modelChoice" value="or-gemma4-free">
-                                                                                        <span data-i18n="modelGemma4Free">☐ Gemma 4 31B (OpenRouter free)</span>
+                                                                                        <input type="radio" name="modelChoice" value="groq-scout">
+                                                                                        <span data-i18n="modelGroqScout">☐ GPT OSS 120B (Groq)</span>
                                                                                         </label>
                                                                                         <label>
-                                                                                        <input type="radio" name="modelChoice" value="or-gptoss20b-free">
-                                                                                        <span data-i18n="modelGptOss20bFree">☐ GPT OSS 20B (OpenRouter free)</span>
+                                                                                        <input type="radio" name="modelChoice" value="llama32-free">
+                                                                                        <span data-i18n="modelLlama32Free">☐ Llama 3.2 3B (OpenRouter free)</span>
                                                                                         </label>
                                                                                         <label>
-                                                                                        <input type="radio" name="modelChoice" value="or-ling3-free">
-                                                                                        <span data-i18n="modelLing3Free">☐ Ling 3.0 Flash (OpenRouter free)</span>
+                                                                                        <input type="radio" name="modelChoice" value="hermes405b-free">
+                                                                                        <span data-i18n="modelHermes405bFree">☐ Hermes 3 405B (OpenRouter free)</span>
                                                                                         </label>
                                                                                         <label>
-                                                                                        <input type="radio" name="modelChoice" value="or-nemotron-super-free">
-                                                                                        <span data-i18n="modelNemotronSuperFree">☐ Nemotron 3 Super 120B (OpenRouter free)</span>
+                                                                                        <input type="radio" name="modelChoice" value="deepseek-v3-free">
+                                                                                        <span data-i18n="modelDeepseekV3Free">☐ Nemotron 3 Super 120B (OpenRouter free)</span>
                                                                                         </label>
-                                                                                    </div>
-                                                                                    <div class="free-mode-row">
-                                                                                        <label class="free-mode-label"><input type="checkbox" id="freeModeToggle"> 🔓 Mode libre (tous sujets)</label>
-                                                                                    </div>
-                                                                                    <div class="free-mode-row">
-                                                                                        <label class="free-mode-label"><input type="checkbox" id="axonToggle"> 🧠 AXON Intelligence (mémoire évolutive)</label>
+                                                                                        <label>
+                                                                                        <input type="radio" name="modelChoice" value="owl-alpha">
+                                                                                        <span data-i18n="modelOwlAlpha">☐ Nemotron Nano 9B (OpenRouter free)</span>
+                                                                                        </label>
+                                                                                        <label>
+                                                                                        <input type="radio" name="modelChoice" value="llama4-scout-free">
+                                                                                        <span data-i18n="modelLlama4ScoutFree">☐ GPT OSS 20B (OpenRouter free)</span>
+                                                                                        </label>
                                                                                     </div>
                                                                                     <div class="btn-row">
                                                                                         <button class="btn btn-primary" id="modalSaveBtn">💾 <span data-i18n="saveBtn">Enregistrer</span>
@@ -432,27 +392,30 @@
                                                                             </div>
                                                                             <script src="https://unpkg.com/@supabase/supabase-js@2">
                                                                             </script>
-                                                                            <script src="js/supabase.js?v=20260707">
+                                                                            <script src="js/supabase.js">
                                                                             </script>
                                                                             <script src="js/compat.js?v=2">
                                                                             </script>
-                                                                            <script src="js/shared.v2.js?v=1.9.9">
+                                                                            <script src="js/shared.v2.js">
                                                                             </script>
                                                                                                                                                          <script>
                                                                                  const ADMIN_PROJECT = 'zheglrzqzwopcfsdbztc';
-                                                                                  var srKeyMemory = localStorage.getItem('sb_sr_key') || sessionStorage.getItem('sb_sr_key') || '';
-                                                                                  function getSrKey() { return srKeyMemory || ''; }
-                                                                                  function setSrKey(key) {
-                                                                                      if (key && key.length > 20) {
-                                                                                          srKeyMemory = key.trim();
-                                                                                          localStorage.setItem('sb_sr_key', key.trim());
-                                                                                          sessionStorage.setItem('sb_sr_key', key.trim());
-                                                                                      } else {
-                                                                                          srKeyMemory = '';
-                                                                                          localStorage.removeItem('sb_sr_key');
-                                                                                          sessionStorage.removeItem('sb_sr_key');
-                                                                                      }
-                                                                                  }
+                                                                                 var oldKey = localStorage.getItem('supabase_service_role_key');
+                                                                                 if (oldKey && !sessionStorage.getItem('sb_sr_key')) {
+                                                                                     sessionStorage.setItem('sb_sr_key', oldKey);
+                                                                                 }
+                                                                                 localStorage.removeItem('supabase_service_role_key');
+                                                                                 var srKeyMemory = sessionStorage.getItem('sb_sr_key') || '';
+                                                                                 function getSrKey() { return srKeyMemory || sessionStorage.getItem('sb_sr_key') || ''; }
+                                                                                 function setSrKey(key) {
+                                                                                     if (key && key.length > 20) {
+                                                                                         srKeyMemory = key.trim();
+                                                                                         sessionStorage.setItem('sb_sr_key', key.trim());
+                                                                                     } else {
+                                                                                         srKeyMemory = '';
+                                                                                         sessionStorage.removeItem('sb_sr_key');
+                                                                                     }
+                                                                                 }
                                                                                  function closeSrModal() { document.getElementById('srKeyModal')?.classList.remove('open'); }
                                                                                  async function initAdmin() {
                                                                                      if (!supabaseClient) { await new Promise(r => setTimeout(r, 500)); initSupabase(); }
@@ -483,151 +446,70 @@
                                                                                      const has = getSrKey().length > 20;
                                                                                      warn.style.display = has ? 'none' : 'block';
                                                                                  }
-                                                                                    var _logsData = null;
-                                                                                    var _usersMapData = null;
-
-                                                                                    function renderSessions() {
-                                                                                        var el = document.getElementById('sessionsContent');
-                                                                                        var countEl = document.getElementById('sessionsCount');
-                                                                                        if (!_logsData || !_usersMapData) { el.innerHTML = 'Cliquez sur Rafraîchir.'; countEl.textContent = ''; return; }
-                                                                                        var srKey = getSrKey();
-                                                                                        if (!srKey) { el.innerHTML = 'Configurez la clé service_role.'; return; }
-                                                                                        var cutoff = new Date(Date.now() - 120000).toISOString();
-                                                                                        fetch('https://' + ADMIN_PROJECT + '.supabase.co/rest/v1/profiles?select=id,full_name,last_active&last_active=gt.' + cutoff + '&order=last_active.desc', {
-                                                                                            headers: { 'Authorization': 'Bearer ' + srKey, 'apikey': SUPABASE_ANON_KEY }
-                                                                                         }).then(function(r) { return r.json(); }).then(function(profs) {
-                                                                                             var html = '';
-                                                                                             countEl.textContent = '(' + (profs||[]).length + ')';
-                                                                                             if (!profs || profs.length === 0) {
-                                                                                                 html = '<div style="text-align:center;padding:20px;color:var(--text-muted);">😴 Personne actuellement sur la plateforme</div>';
-                                                                                             } else {
-                                                                                                 profs.forEach(function(p) {
-                                                                                                     var u = _usersMapData[p.id] || {};
-                                                                                                     var name = p.full_name || u.full_name || u.email || p.id.slice(0,8);
-                                                                                                     var since = p.last_active ? new Date(p.last_active).toLocaleString('fr-FR') : '—';
-                                                                                                     html += '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--border);border-radius:10px;background:var(--bg);box-shadow:0 1px 3px rgba(0,0,0,.06);">'
-                                                                                                         + '<span style="width:10px;height:10px;border-radius:50%;background:#28a745;box-shadow:0 0 6px rgba(40,167,69,.5);flex-shrink:0;"></span>'
-                                                                                                         + '<span style="flex:1;font-weight:600;font-size:0.88rem;">' + name + '</span>'
-                                                                                                         + '<span style="color:var(--text-muted);font-size:0.75rem;">📌 ' + since + '</span>'
-                                                                                                         + '</div>';
-                                                                                                 });
-                                                                                             }
-                                                                                            el.innerHTML = html;
-                                                                                        }).catch(function(e) {
-                                                                                            el.innerHTML = '<span style="color:var(--text-muted);">Erreur chargement : ' + e.message + '</span>';
-                                                                                        });
-                                                                                    }
-
-                                                                                    function renderActivityLog() {
-                                                                                       var tbody = document.getElementById('activityTableBody');
-                                                                                       var countEl = document.getElementById('activityCount');
-                                                                                       var statsEl = document.getElementById('activityStats');
-                                                                                        var search = (document.getElementById('logSearch').value || '').toLowerCase().trim();
-                                                                                        var filterEvent = document.getElementById('logFilterEvent').value;
-                                                                                        var dateFrom = document.getElementById('logDateFrom').value;
-                                                                                        var dateTo = document.getElementById('logDateTo').value;
-                                                                                        var fromTs = dateFrom ? new Date(dateFrom + 'T00:00:00').getTime() : 0;
-                                                                                        var toTs = dateTo ? new Date(dateTo + 'T23:59:59').getTime() : Infinity;
-                                                                                        var sortOrder = document.getElementById('logSort').value;
-                                                                                        if (!_logsData || !_usersMapData) return;
-                                                                                        var filtered = _logsData.filter(function(l) {
-                                                                                            if (filterEvent && l.event_type !== filterEvent) return false;
-                                                                                            var ts = l.created_at ? new Date(l.created_at).getTime() : 0;
-                                                                                            if (fromTs && ts < fromTs) return false;
-                                                                                            if (isFinite(toTs) && ts > toTs) return false;
-                                                                                            if (!search) return true;
-                                                                                            var u = _usersMapData[l.user_id] || {};
-                                                                                            return (u.email && u.email.toLowerCase().includes(search)) || (u.full_name && u.full_name.toLowerCase().includes(search));
-                                                                                        });
-                                                                                       if (sortOrder === 'asc') {
-                                                                                           filtered = filtered.slice().sort(function(a,b) { return (a.created_at||'').localeCompare(b.created_at||''); });
-                                                                                       }
-                                                                                       countEl.textContent = filtered.length + '/' + _logsData.length + ' entrées';
-                                                                                       if (filtered.length === 0) {
-                                                                                           tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:20px;">Aucun résultat</td></tr>';
-                                                                                           statsEl.innerHTML = '';
-                                                                                           return;
-                                                                                       }
-                                                                                       var userStats = {};
-                                                                                       filtered.forEach(function(l) {
-                                                                                           var uid = l.user_id;
-                                                                                           var u = _usersMapData[uid] || {};
-                                                                                           if (!userStats[uid]) userStats[uid] = { email: u.email || uid, name: u.full_name || '', logins: 0, logouts: 0, updates: 0, lastLogin: '' };
-                                                                                           if (l.event_type === 'login') { userStats[uid].logins++; if (l.created_at > userStats[uid].lastLogin) userStats[uid].lastLogin = l.created_at; }
-                                                                                           if (l.event_type === 'logout') userStats[uid].logouts++;
-                                                                                           if (l.event_type === 'profile_update') userStats[uid].updates++;
-                                                                                       });
-                                                                                       tbody.innerHTML = filtered.map(function(l) {
-                                                                                           var u = _usersMapData[l.user_id] || {};
-                                                                                           var email = u.email || '';
-                                                                                           var name = u.full_name || '';
-                                                                                           var ev = l.event_type === 'login' ? '<span style="color:#28a745;">🔓 Connexion</span>' : l.event_type === 'logout' ? '<span style="color:#dc3545;">🔒 Déconnexion</span>' : '<span style="color:#ffc107;">✏️ Mise à jour profil</span>';
-                                                                                           var dt = l.created_at ? new Date(l.created_at).toLocaleString('fr-FR') : '—';
-                                                                                           var details = l.details || {};
-                                                                                           var device = details.user_agent || '';
-                                                                                           var ip = details.ip || '—';
-                                                                                           var region = details.region || '—';
-                                                                                           var det = '';
-                                                                                           if (l.event_type === 'profile_update' && details.changes) {
-                                                                                               var c = details.changes;
-                                                                                               det = Object.keys(c).map(function(k) { return k + ': ' + (c[k].from || 'vide') + ' → ' + (c[k].to || 'vide'); }).join('<br>');
-                                                                                           }
-return '<tr><td style="font-size:0.8rem;" data-label="Email">' + email + '</td><td data-label="Nom">' + name + '</td><td data-label="Événement">' + ev + '</td>'
-                                                                                                + '<td style="font-size:0.7rem;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + esc(details.user_agent||'') + '" data-label="Appareil">' + esc(device) + '</td>'
-                                                                                                + '<td style="font-size:0.75rem;font-family:monospace;" data-label="IP">' + ip + '</td>'
-                                                                                                + '<td style="font-size:0.75rem;" data-label="Région">' + region + '</td>'
-                                                                                                + '<td style="font-size:0.8rem;white-space:nowrap;" data-label="Date/Heure">' + dt + '</td>'
-                                                                                                + '<td style="font-size:0.8rem;max-width:200px;overflow:hidden;" data-label="Détails">' + det + '</td></tr>';
-                                                                                       }).join('');
-                                                                                       var statsHtml = Object.keys(userStats).map(function(uid) {
-                                                                                           var s = userStats[uid];
-                                                                                           var last = s.lastLogin ? new Date(s.lastLogin).toLocaleString('fr-FR') : 'jamais';
-                                                                                           return '<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:0.8rem;line-height:1.6;"><strong>' + s.name + '</strong> <span style="color:var(--text-muted);font-size:0.75rem;">(' + s.email + ')</span><br>🔓 ' + s.logins + ' · 🔒 ' + s.logouts + ' · ✏️ ' + s.updates + ' · 🕐 ' + last + '</div>';
-                                                                                       }).join('');
-                                                                                       statsEl.innerHTML = statsHtml;
-                                                                                   }
-
-                                                                                   async function loadActivityLog() {
-                                                                                       const srKey = getSrKey();
-                                                                                       const tbody = document.getElementById('activityTableBody');
-                                                                                       const countEl = document.getElementById('activityCount');
-                                                                                       const statsEl = document.getElementById('activityStats');
-                                                                                        if (!srKey) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:20px;">Configurez la clé service_role</td></tr>'; return; }
-                                                                                        try {
-                                                                                            var [logResp, authResp, profResp] = await Promise.all([
-                                                                                                fetch('https://' + ADMIN_PROJECT + '.supabase.co/rest/v1/user_activity_log?order=created_at.desc&limit=200', {
-                                                                                                    headers: { 'Authorization': 'Bearer ' + srKey, 'apikey': SUPABASE_ANON_KEY }
-                                                                                                }),
-                                                                                                fetch('https://' + ADMIN_PROJECT + '.supabase.co/auth/v1/admin/users', {
-                                                                                                    headers: { 'Authorization': 'Bearer ' + srKey, 'apikey': SUPABASE_ANON_KEY }
-                                                                                                }),
-                                                                                                fetch('https://' + ADMIN_PROJECT + '.supabase.co/rest/v1/profiles?select=id,full_name', {
-                                                                                                    headers: { 'Authorization': 'Bearer ' + srKey, 'apikey': SUPABASE_ANON_KEY }
-                                                                                                })
-                                                                                            ]);
-                                                                                            if (!logResp.ok) throw new Error('Erreur chargement logs (' + logResp.status + ')');
-                                                                                            _logsData = await logResp.json();
-                                                                                            _usersMapData = {};
-                                                                                            var profMap = {};
-                                                                                            if (profResp.ok) {
-                                                                                                var profs = await profResp.json();
-                                                                                                (profs || []).forEach(function(p) { profMap[p.id] = p.full_name || ''; });
-                                                                                            }
-                                                                                            if (authResp.ok) {
-                                                                                                var authData = await authResp.json();
-                                                                                                (authData.users || []).forEach(function(u) {
-                                                                                                    var meta = u.user_metadata || {};
-                                                                                                    var fn = meta.full_name || profMap[u.id] || '';
-                                                                                                    _usersMapData[u.id] = { email: u.email || '—', full_name: fn };
-                                                                                                });
-                                                                                            }
-                                                                                            renderActivityLog();
-                                                                                            renderSessions();
-                                                                                         } catch (e) {
-                                                                                            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#e74c3c;padding:20px;">❌ ' + e.message + '</td></tr>';
-                                                                                       }
-                                                                                   }
-                                                                                   function saveSrKey() {
+                                                                                  async function loadActivityLog() {
+                                                                                      const srKey = getSrKey();
+                                                                                      const tbody = document.getElementById('activityTableBody');
+                                                                                      const countEl = document.getElementById('activityCount');
+                                                                                      const statsEl = document.getElementById('activityStats');
+                                                                                      if (!srKey) { tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px;">Configurez la clé service_role</td></tr>`; return; }
+                                                                                      try {
+                                                                                          var [logResp, authResp] = await Promise.all([
+                                                                                              fetch('https://' + ADMIN_PROJECT + '.supabase.co/rest/v1/user_activity_log?order=created_at.desc&limit=200', {
+                                                                                                  headers: { 'Authorization': 'Bearer ' + srKey, 'apikey': SUPABASE_ANON_KEY }
+                                                                                              }),
+                                                                                              fetch('https://' + ADMIN_PROJECT + '.supabase.co/auth/v1/admin/users', {
+                                                                                                  headers: { 'Authorization': 'Bearer ' + srKey, 'apikey': SUPABASE_ANON_KEY }
+                                                                                              })
+                                                                                          ]);
+                                                                                          if (!logResp.ok) throw new Error('Erreur chargement logs (' + logResp.status + ')');
+                                                                                          var logs = await logResp.json();
+                                                                                          var usersMap = {};
+                                                                                          if (authResp.ok) {
+                                                                                              var authData = await authResp.json();
+                                                                                              (authData.users || []).forEach(function(u) {
+                                                                                                  var meta = u.user_metadata || {};
+                                                                                                  usersMap[u.id] = { email: u.email || '—', full_name: meta.full_name || '' };
+                                                                                              });
+                                                                                          }
+                                                                                          countEl.textContent = logs.length + ' entrées';
+                                                                                          if (logs.length === 0) {
+                                                                                              tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px;">Aucune activité</td></tr>`;
+                                                                                              statsEl.innerHTML = '';
+                                                                                              return;
+                                                                                          }
+                                                                                          var userStats = {};
+                                                                                          logs.forEach(function(l) {
+                                                                                              var uid = l.user_id;
+                                                                                              var u = usersMap[uid] || {};
+                                                                                              if (!userStats[uid]) userStats[uid] = { email: u.email || uid, name: u.full_name || '', logins: 0, logouts: 0, updates: 0, lastLogin: '' };
+                                                                                              if (l.event_type === 'login') { userStats[uid].logins++; if (l.created_at > userStats[uid].lastLogin) userStats[uid].lastLogin = l.created_at; }
+                                                                                              if (l.event_type === 'logout') userStats[uid].logouts++;
+                                                                                              if (l.event_type === 'profile_update') userStats[uid].updates++;
+                                                                                          });
+                                                                                          tbody.innerHTML = logs.map(function(l) {
+                                                                                              var u = usersMap[l.user_id] || {};
+                                                                                              var email = u.email || '';
+                                                                                              var name = u.full_name || '';
+                                                                                              var ev = l.event_type === 'login' ? '<span style="color:#28a745;">🔓 Connexion</span>' : l.event_type === 'logout' ? '<span style="color:#dc3545;">🔒 Déconnexion</span>' : '<span style="color:#ffc107;">✏️ Mise à jour profil</span>';
+                                                                                              var dt = l.created_at ? new Date(l.created_at).toLocaleString('fr-FR') : '—';
+                                                                                              var det = '';
+                                                                                              if (l.event_type === 'profile_update' && l.details?.changes) {
+                                                                                                  var c = l.details.changes;
+                                                                                                  det = Object.keys(c).map(function(k) { return k + ': ' + (c[k].from || 'vide') + ' → ' + (c[k].to || 'vide'); }).join('<br>');
+                                                                                              }
+                                                                                              return '<tr><td style="font-size:0.8rem;">' + email + '</td><td>' + name + '</td><td>' + ev + '</td><td style="font-size:0.8rem;white-space:nowrap;">' + dt + '</td><td style="font-size:0.8rem;max-width:200px;overflow:hidden;">' + det + '</td></tr>';
+                                                                                          }).join('');
+                                                                                          var statsHtml = Object.keys(userStats).map(function(uid) {
+                                                                                              var s = userStats[uid];
+                                                                                              var last = s.lastLogin ? new Date(s.lastLogin).toLocaleString('fr-FR') : 'jamais';
+                                                                                              return '<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:0.8rem;line-height:1.6;"><strong>' + s.name + '</strong> <span style="color:var(--text-muted);font-size:0.75rem;">(' + s.email + ')</span><br>🔓 ' + s.logins + ' · 🔒 ' + s.logouts + ' · ✏️ ' + s.updates + ' · 🕐 ' + last + '</div>';
+                                                                                          }).join('');
+                                                                                          statsEl.innerHTML = statsHtml;
+                                                                                      } catch (e) {
+                                                                                          tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#e74c3c;padding:20px;">❌ ${e.message}</td></tr>`;
+                                                                                      }
+                                                                                  }
+                                                                                  function saveSrKey() {
                                                                                      const val = document.getElementById('srKeyInput').value.trim();
                                                                                      const el = document.getElementById('srKeyResult');
                                                                                      if (!val || val.length < 20) {
@@ -880,78 +762,8 @@ return '<tr><td style="font-size:0.8rem;" data-label="Email">' + email + '</td><
                                                                                  document.querySelector('#srKeyModal .modal-overlay')?.addEventListener('click', function(e) {
                                                                                      if (e.target === this) closeSrModal();
                                                                                  });
-                                                                              </script>
+                                                                             </script>
 
-<style>
-#activityCard table th { position:relative; user-select:none; }
-#activityCard .resize-handle { position:absolute; right:0; top:0; bottom:0; width:6px; cursor:col-resize; z-index:2; border-right:2px solid var(--border); background:transparent; }
-#activityCard .resize-handle:hover,
-#activityCard .resize-handle.active { border-right-color:rgba(0,119,204,.6); background:rgba(0,119,204,.12); }
-#activityCard .resize-handle:active { border-right-color:#0077CC; background:rgba(0,119,204,.2); }
-#activityCard:fullscreen table td,
-#activityCard:fullscreen table th { max-width:none!important; overflow:visible!important; text-overflow:clip!important; white-space:normal!important; word-break:break-all!important; }
-@media(max-width:768px){#activityCard table,#activityCard thead,#activityCard tbody,#activityCard th,#activityCard td,#activityCard tr{display:block}#activityCard thead{display:none}#activityCard tbody tr{margin-bottom:12px;border:1px solid var(--border);border-radius:8px;padding:8px;background:var(--bg)}#activityCard tbody td{padding:4px 8px;border:none;font-size:.7rem;white-space:normal;word-break:break-word}#activityCard tbody td:before{content:attr(data-label);font-weight:600;color:var(--text-muted);display:inline-block;width:90px;flex-shrink:0}#activityCard tbody td{display:flex;gap:4px}#activityCard .overflow-x-auto{max-height:none!important}}
-</style>
-<script>
-(function(){
-  var card = document.getElementById('activityCard');
-  var enterBtn = document.getElementById('enterFsBtn');
-  var exitBtn = document.getElementById('exitFsBtn');
-  var filters = document.getElementById('logFilters');
-
-  function onFsChange() {
-    var fs = document.fullscreenElement;
-    if (fs && (fs === card || fs.contains(card))) {
-      enterBtn.style.display = 'none';
-      exitBtn.style.display = '';
-      if (filters) filters.style.display = 'flex';
-    } else {
-      enterBtn.style.display = '';
-      exitBtn.style.display = 'none';
-      if (filters) filters.style.display = 'none';
-    }
-  }
-  document.addEventListener('fullscreenchange', onFsChange);
-  document.addEventListener('webkitfullscreenchange', onFsChange);
-
-  function initResizer() {
-    var table = card.querySelector('table');
-    if (!table) return;
-    var ths = table.querySelectorAll('thead th');
-    ths.forEach(function(th) {
-      var handle = document.createElement('div');
-      handle.className = 'resize-handle';
-      th.appendChild(handle);
-      handle.addEventListener('mousedown', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        var startX = e.clientX;
-        var startW = th.getBoundingClientRect().width;
-        th.classList.add('dragging');
-        handle.classList.add('active');
-        function onMove(ev) {
-          var diff = ev.clientX - startX;
-          th.style.width = Math.max(40, startW + diff) + 'px';
-        }
-        function onUp() {
-          th.classList.remove('dragging');
-          handle.classList.remove('active');
-          document.removeEventListener('mousemove', onMove);
-          document.removeEventListener('mouseup', onUp);
-        }
-        document.addEventListener('mousemove', onMove);
-        document.addEventListener('mouseup', onUp);
-      });
-    });
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initResizer);
-  } else {
-    initResizer();
-  }
-})();
-</script>
 
 </body>
 </html>

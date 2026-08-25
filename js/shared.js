@@ -3,8 +3,8 @@
             fr: {
                 headerTitle: "APC ALGÉRIE <span>GÉNÉRATION 3</span>",
                 ministere: "Ministère de la Formation et de l'Enseignement Professionnels",
-                headerSub: "Formateur 2.0\nLe formateur augmenté par l'IA\nAssistant intelligent de conception pédagogique selon l'Approche Par Compétences (APC).",
-                headerDesc: "Une IA pédagogique qui génère automatiquement des prompts professionnels, des scénarios pédagogiques, des présentations, des évaluations, des activités de gamification et des ressources conformes à l'Approche Par Compétences (APC) Algérie .",
+                headerSub: "Formateur 2.0 – Assistant intelligent de conception pédagogique APC",
+                headerDesc: "Générez des prompts professionnels pour ChatGPT, Claude, Gemini et Copilot afin de concevoir vos scénarios pédagogiques selon l'Approche Par Compétences.",
                 headerSig: "",
                 tab_generator: "📝 Générateur de Prompts",
                 tab_assistant: "🤖 Assistant IA",
@@ -557,8 +557,6 @@ function updateApiBadge() {}
             html = html.replace(/\n/g, '<br>');
             if (!html.startsWith('<')) html = '<p>' + html + '</p>';
             html = html.replace(/<p><\/p>/g, '');
-            html = html.replace(/<p>(\s*<(?:ul|ol|li|h[1-3]|table|blockquote))/gi, '$1');
-            html = html.replace(/(<\/(?:ul|ol|h[1-3]|table|blockquote)>\s*)<\/p>/gi, '$1');
             return html;
         }
         function getFormContext() {
@@ -623,16 +621,16 @@ function updateApiBadge() {}
                 role_fr: "Vous êtes un expert mondial en ingénierie pédagogique, conception de programmes d'études, approche par compétences (APC), andragogie, pédagogie active, et vous vous spécialisez dans la préparation de leçons et de scénarios éducatifs pour la formation professionnelle algérienne conformément aux programmes officiels approuvés.",
                 role_ar: "أنت خبير عالمي في الهندسة البيداغوجية، وتصميم المناهج الدراسية، والمقاربة بالكفاءات (APC)، وأندراغوجيا، والبيداغوجيا النشطة، وتتخصص في إعداد الدروس والسيناريوهات التعليمية للتكوين المهني الجزائري وفقاً للبرامج الرسمية المعتمدة.",
                 mission_fr: "Construire un scénario pédagogique complet pour l'installation de Windows 11 selon l'APC Algérie.",
-                mission_ar: "بناء سيناريو بيداغوجي كامل لتثبيت وينداوز 11 وفق APC الجزائر.",
+                mission_ar: "بناء سيناريو بيداغوجي كامل لتثبيت Windows 11 وفق APC الجزائر.",
                 specialite_fr: "Techniques de l'Informatique", specialite_ar: "تقنيات الإعلام الآلي",
                 module_fr: "Systèmes d'exploitation", module_ar: "أنظمة التشغيل",
                 competence_fr: "Installer et configurer Windows 11 sur un poste de travail.",
-                competence_ar: "تثبيت وضبط وينداوز 11 على محطة عمل.",
+                competence_ar: "تثبيت وضبط Windows 11 على محطة عمل.",
                 niveau_fr: "Technicien Supérieur", niveau_ar: "تقني سامٍ", annee_fr: "1ère année", annee_ar: "السنة الأولى",
                 duree_fr: "4 heures", duree_ar: "4 ساعات", stagiaires: "20",
                 espace_fr: "Laboratoire informatique", espace_ar: "مخبر الإعلام الآلي",
                 ressources_fr: "20 PC, Data Show, Clé USB bootable, ISO Windows 11",
-                ressources_ar: "20 حاسوب، داتاشو، مفتاح USB، نسخة ISO وينداوز 11",
+                ressources_ar: "20 حاسوب، داتاشو، مفتاح USB، نسخة ISO Windows 11",
                 contexte_fr: "Préparation des postes informatiques d'une entreprise avant leur mise en service.",
                 contexte_ar: "تجهيز حواسيب المؤسسة قبل الشروع في العمل.",
                 difficultes_fr: "Mauvaise maîtrise du BIOS, erreurs de partitionnement, gestion des pilotes",
@@ -1725,8 +1723,7 @@ FORMAT JSON ATTENDU : {"slides":[{"title":"Titre","image_prompt":"prompt pour im
         const modal = document.getElementById('settingsModal');
         document.getElementById('modalCloseBtn')?.addEventListener('click', () => modal?.classList.remove('open'));
         document.getElementById('modalCancelBtn')?.addEventListener('click', () => modal?.classList.remove('open'));
-        modal?.addEventListener('click', (e) => { if (e.target === modal)             modal?.classList.remove('open');
-            });
+        modal?.addEventListener('click', (e) => { if (e.target === modal) modal?.classList.remove('open'); });
         document.getElementById('modalSaveBtn')?.addEventListener('click', () => {
             const orKey = document.getElementById('openrouterApiKeyInput').value.trim();
             const groqKey = document.getElementById('groqApiKeyInput').value.trim();
@@ -1736,14 +1733,13 @@ FORMAT JSON ATTENDU : {"slides":[{"title":"Titre","image_prompt":"prompt pour im
             modal?.classList.remove('open');
         });
         document.getElementById('modalClearBtn')?.addEventListener('click', () => {
-            showConfirmModal(currentLang === 'fr' ? 'Effacer toutes les clés API ?' : 'حذف جميع مفاتيح API؟', function() {
+            if (!confirm(currentLang === 'fr' ? 'Effacer toutes les clés ?' : 'حذف جميع المفاتيح؟')) return;
             setOpenRouterKey('');
             setGroqKey('');
             document.getElementById('openrouterApiKeyInput').value = '';
             document.getElementById('groqApiKeyInput').value = '';
             showToast(t('apiCleared'));
             modal?.classList.remove('open');
-            });
         });
         document.getElementById('verifyORKeyBtn')?.addEventListener('click', async () => {
             const key = document.getElementById('openrouterApiKeyInput').value.trim();
@@ -1782,16 +1778,6 @@ FORMAT JSON ATTENDU : {"slides":[{"title":"Titre","image_prompt":"prompt pour im
         document.querySelectorAll('input[name="modelChoice"]').forEach(r =>
             r.addEventListener('change', () => localStorage.setItem('model_choice', r.value))
         );
-        window.updateAdminModelsVisibility = function() {
-            document.querySelectorAll('.admin-only').forEach(el => {
-                el.style.display = localStorage.getItem('isAdmin') === 'true' ? '' : 'none';
-            });
-        };
-        updateAdminModelsVisibility();
-        window.getFreeMode = function() { return localStorage.getItem('free_mode') === 'true'; };
-        window.setFreeMode = function(val) { localStorage.setItem('free_mode', val ? 'true' : 'false'); };
-        var ft = document.getElementById('freeModeToggle');
-        if (ft) { ft.checked = getFreeMode(); ft.addEventListener('change', function() { setFreeMode(this.checked); }); }
 restoreGammaData();
 window.addEventListener('beforeunload', function() {
     if (gammaData) localStorage.setItem('gammaData', JSON.stringify(gammaData));

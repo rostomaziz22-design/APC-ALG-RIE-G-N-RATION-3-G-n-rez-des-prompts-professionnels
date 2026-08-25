@@ -301,9 +301,6 @@ async function generateChallengeFromAssistant() {
     // Prompt court : uniquement les questions + critères, sans contexte pour éviter les limites API
     var qPerRound = 3;
     var prompt = 'Génère ' + (roundsCount * qPerRound) + ' questions QCM et 3 critères de performance (formation pro, thème: "' + theme + '").\n'
-        + 'C\'EST UN QUIZ TECHNIQUE POUR LES STAGIAIRES : AUCUNE question sur la pédagogie ni la structure du document (durées des phases, scénario pédagogique, activités du formateur ou des stagiaires, grille critérielle, niveaux de maîtrise, indicateurs de réussite, évaluation, objectifs de phase, savoirs/savoir-faire/savoir-être, contextualisation, déstabilisation, intégration, transfert, remédiation, conclusion).\n'
-        + 'TOUTES les questions doivent être TECHNIQUES sur le thème : procédures concrètes, outils, matériaux, calculs, normes, réglages, gestes professionnels, dépannage, vocabulaire technique du métier.\n'
-        + 'Les critères de performance doivent être techniques et observables sur le métier (ex: précision, sécurité, conformité aux normes, temps de réalisation), PAS pédagogiques.\n'
         + 'Questions réparties en ' + roundsCount + ' rounds (' + qPerRound + '/round).\n'
         + 'JSON: {"rounds":[{"questions":[{"text":"Q?","options":["A","B","C","D"],"correctIndex":0}]}],"criteria":[{"fr":"Critère","weight":33}]}\n'
         + 'Langue: ' + currentLang + '. JSON UNIQUEMENT.';
@@ -554,10 +551,9 @@ function editCriterion(idx) {
     showToast('✅ Critère modifié.');
 }
 function deleteCriterion(idx) {
-    showConfirmModal(t('challengeCriteriaDeleteConfirm') || 'Supprimer ce critère ?', function() {
+    if (!confirm(t('challengeCriteriaDeleteConfirm') || 'Supprimer ce critère ?')) return;
     challengeEditData.performanceCriteria.splice(idx, 1);
     renderChallengeEditor();
-    });
 }
 function getCriteriaTotalWeight() {
     var c = challengeEditData.performanceCriteria || [];
@@ -698,10 +694,8 @@ async function regenerateRound(idx) {
     showToast('🔄 Régénération du round ' + (idx+1) + '...');
     var lastResp = localStorage.getItem('lastAssistantResponse') || '';
     var theme = challengeEditData ? challengeEditData.theme || '' : '';
-    var prompt = 'Génère 5 questions QCM techniques pour un challenge APC, pour des stagiaires.'
+    var prompt = 'Génère 5 questions QCM techniques pour un challenge pédagogique APC.'
         + (theme ? '\nThème: ' + theme : '')
-        + '\nC\'EST UN QUIZ TECHNIQUE POUR LES STAGIAIRES : AUCUNE question sur la pédagogie ni la structure du document (durées des phases, scénario pédagogique, activités du formateur ou des stagiaires, grille critérielle, niveaux de maîtrise, indicateurs, évaluation, objectifs de phase, savoirs/savoir-faire/savoir-être, contextualisation, déstabilisation, intégration, transfert, remédiation, conclusion).'
-        + '\nTOUTES les questions doivent être TECHNIQUES sur le thème : procédures concrètes, outils, matériaux, calculs, normes, réglages, gestes professionnels, dépannage, vocabulaire technique du métier.'
         + '\nTitre du round: ' + round.title
         + '\n\nCONTENU:\n' + (lastResp.length > 4000 ? lastResp.slice(0, 4000) : lastResp)
         + '\n\nFormat JSON: {"questions":[{"text":"Question?","options":["A","B","C","D"],"correctIndex":0}]}'
@@ -1017,7 +1011,7 @@ function getObjectiveLabel(obj) {
 }
 
 function deleteChallenge(id) {
-    showConfirmModal(t('challengeDeleteConfirm'), function() {
+    if (!confirm(t('challengeDeleteConfirm'))) return;
     localStorage.removeItem(id);
     localStorage.removeItem(id + '_distrib');
     if (typeof supabaseClient !== 'undefined' && supabaseClient) {
@@ -1036,7 +1030,6 @@ function deleteChallenge(id) {
     currentChallengeId = null;
     loadPublishedChallenges();
     showToast(t('challengeDeleted'));
-    });
 }
 
 /* ===== DISTRIBUTION (comme quiz_access_codes) ===== */
@@ -1312,7 +1305,7 @@ function challengeRenderDistribTable() {
             + '<td style="padding:6px 8px;text-align:center;"><a href="' + qrUrl + '" target="_blank"><img src="' + qrUrl + '" alt="QR" style="width:28px;height:28px;border-radius:4px;cursor:pointer;" title="' + esc(p.code) + '"></a></td>'
             + '<td style="padding:6px 8px;text-align:center;"><span style="font-size:0.72rem;padding:2px 6px;border-radius:4px;background:' + (p.status === 'sent' ? 'var(--success-bg,#1b5e20)' : 'var(--warning-bg,#e65100)') + ';color:#fff;">' + esc(p.status) + '</span></td>'
             + '<td style="padding:6px 8px;text-align:center;white-space:nowrap;">'
-            + (p.email&&p.email.indexOf('@')>0?'<button class="btn-icon-sm" onclick="challengeDistribSendOne('+realIdx+')" style="font-size:9px;padding:2px 6px;background:linear-gradient(135deg,#0EA5E9,#06B6D4);color:#fff;border:none;border-radius:3px;cursor:pointer;" title="Envoyer">📧</button> ':'')
+            + (p.email&&p.email.indexOf('@')>0&&p.status!=='sent'?'<button class="btn-icon-sm" onclick="challengeDistribSendOne('+realIdx+')" style="font-size:9px;padding:2px 6px;background:linear-gradient(135deg,#0EA5E9,#06B6D4);color:#fff;border:none;border-radius:3px;cursor:pointer;" title="Envoyer">📧</button> ':'')
             + '<button class="btn-icon-sm" onclick="challengeDistribDeleteRow(' + realIdx + ')" style="font-size:9px;padding:2px 4px;" title="' + t('challengeDistribDeleteConfirm') + '">🗑</button>'
             + '</td></tr>';
     });
@@ -1336,67 +1329,67 @@ function challengeDistribEditTeam(idx) {
 }
 
 function challengeDistribDeleteRow(idx) {
-    showConfirmModal(t('challengeDistribDeleteConfirm'), function() {
+    if (!confirm(t('challengeDistribDeleteConfirm'))) return;
     challengeDistribData.splice(idx, 1);
     challengeUpdateFilters();
     challengeRenderDistribTable();
-    });
 }
 
 function challengeDistribSendAll() {
-    var unsent = challengeDistribData.filter(function(p) { return p.email && p.email.indexOf('@') > 0; });
-    if (unsent.length === 0) { showToast('✅ Aucun participant avec email.'); return; }
+    var unsent = challengeDistribData.filter(function(p) { return p.email && p.email.indexOf('@') > 0 && p.status !== 'sent'; });
+    if (unsent.length === 0) { showToast('✅ Tous les emails déjà envoyés.'); return; }
     var raw = localStorage.getItem(challengeDistribCurrentId || '');
     var d = raw ? JSON.parse(raw) : null;
-    var cfg = getEmailJSConfig();
-    if (!cfg.publicKey || !cfg.serviceId || !cfg.templateId) { showToast('📧 Configurez EmailJS dans les paramètres.'); return; }
-    var sent = 0, failed = 0;
-    loadEmailJS(function() {
-        emailjs.init(cfg.publicKey);
-        unsent.forEach(function(p) {
-            emailjs.send(cfg.serviceId, cfg.templateId, {
-                to_name: p.name_fr || p.name_ar || 'Participant',
-                to_email: p.email,
-                from_name: (typeof currentProfile !== 'undefined' && currentProfile?.full_name) || (typeof currentUser !== 'undefined' && currentUser?.email) || 'Formateur',
-                message: t('challengeDistribEmailMsg') + '\n\n' + t('challengeDistribYourCode') + ': ' + p.code + '\n' + t('challengeDistribYourLink') + ': ' + p.link,
-                code: p.code,
-                link: p.link,
-                qr_url: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(p.link),
-                quiz_name: d ? d.title : 'Challenge'
-            }).then(function() { p.status = 'sent'; sent++; challengeRenderDistribTable(); }).catch(function(err) { failed++; console.warn('EmailJS error:', err && (err.text || err.message || JSON.stringify(err))); })
-            .finally(function() { if (sent + failed === unsent.length) showToast('📧 ' + sent + ' envoyé(s)' + (failed ? ', ' + failed + ' échec(s)' : '') + '.'); });
-        });
+    var count = 0;
+    unsent.forEach(function(p) {
+        if (typeof emailjs !== 'undefined') {
+            var pubKey = localStorage.getItem('emailjs_public_key');
+            var svcId = localStorage.getItem('emailjs_service_id');
+            var tplId = localStorage.getItem('emailjs_template_id');
+            if (pubKey && svcId && tplId) {
+                emailjs.init(pubKey);
+                emailjs.send(svcId, tplId, {
+                    to_name: p.name_fr || p.name_ar || 'Participant',
+                    to_email: p.email,
+                    message: t('challengeDistribEmailMsg') + '\n\n' + t('challengeDistribYourCode') + ': ' + p.code + '\n' + t('challengeDistribYourLink') + ': ' + p.link,
+                    code: p.code,
+                    link: p.link,
+                    challenge_title: d ? d.title : 'Challenge'
+                }).then(function() { p.status = 'sent'; count++; challengeRenderDistribTable(); }).catch(function(err) { console.warn('EmailJS error:', err); });
+            }
+        }
     });
+    if (count === 0) showToast('📧 Configurez EmailJS dans les paramètres.');
+    else showToast('📧 ' + count + ' invitations envoyées.');
 }
 
 function challengeDistribSendOne(idx) {
     var p = challengeDistribData[idx];
     if (!p) return;
     if (!p.email || p.email.indexOf('@') < 0) { showToast('❌ Pas d\'email valide.'); return; }
+    if (p.status === 'sent') { showToast('✅ Déjà envoyé.'); return; }
     var raw = localStorage.getItem(challengeDistribCurrentId || '');
     var d = raw ? JSON.parse(raw) : null;
-    var cfg = getEmailJSConfig();
-    if (!cfg.publicKey || !cfg.serviceId || !cfg.templateId) { showToast('📧 Configurez EmailJS dans les paramètres.'); return; }
-    loadEmailJS(function() {
-        emailjs.init(cfg.publicKey);
-        emailjs.send(cfg.serviceId, cfg.templateId, {
-            to_name: p.name_fr || p.name_ar || 'Participant',
-            to_email: p.email,
-            from_name: (typeof currentProfile !== 'undefined' && currentProfile?.full_name) || (typeof currentUser !== 'undefined' && currentUser?.email) || 'Formateur',
-            message: t('challengeDistribEmailMsg') + '\n\n' + t('challengeDistribYourCode') + ': ' + p.code + '\n' + t('challengeDistribYourLink') + ': ' + p.link,
-            code: p.code,
-            link: p.link,
-            qr_url: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(p.link),
-            quiz_name: d ? d.title : 'Challenge'
-        }).then(function() {
-            p.status = 'sent';
-            challengeRenderDistribTable();
-            showToast('📧 Envoyé à ' + (p.name_fr || p.name_ar || p.email) + '.');
-        }).catch(function(err) {
-            var msg = err && (err.text || err.message || JSON.stringify(err));
-            console.warn('EmailJS error:', msg);
-            showToast('❌ Erreur d\'envoi: ' + msg);
-        });
+    if (typeof emailjs === 'undefined') { showToast('📧 Configurez EmailJS dans les paramètres.'); return; }
+    var pubKey = localStorage.getItem('emailjs_public_key');
+    var svcId = localStorage.getItem('emailjs_service_id');
+    var tplId = localStorage.getItem('emailjs_template_id');
+    if (!pubKey || !svcId || !tplId) { showToast('📧 Configurez EmailJS dans les paramètres.'); return; }
+    emailjs.init(pubKey);
+    emailjs.send(svcId, tplId, {
+        to_name: p.name_fr || p.name_ar || 'Participant',
+        to_email: p.email,
+        message: t('challengeDistribEmailMsg') + '\n\n' + t('challengeDistribYourCode') + ': ' + p.code + '\n' + t('challengeDistribYourLink') + ': ' + p.link,
+        code: p.code,
+        link: p.link,
+        challenge_title: d ? d.title : 'Challenge'
+    }).then(function() {
+        p.status = 'sent';
+        challengeRenderDistribTable();
+        showToast('📧 Envoyé à ' + (p.name_fr || p.name_ar || p.email) + '.');
+    }).catch(function(err) {
+        console.warn('EmailJS error:', err);
+        showToast('❌ Erreur d\'envoi.');
     });
 }
 

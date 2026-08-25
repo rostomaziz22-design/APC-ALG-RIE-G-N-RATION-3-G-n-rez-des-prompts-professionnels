@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr" dir="ltr">
     <head>
         <meta charset="UTF-8">
@@ -87,14 +87,14 @@
                         <div class="hero-text-group">
                             <h1>APC ALGÉRIE <span>GÉNÉRATION 3</span>
                             </h1>
-                            <div class="hero-sub" data-i18n="headerSub">Formateur 2.0<br>Le formateur augmenté par l'IA<br>Assistant intelligent de conception pédagogique selon l'Approche Par Compétences (APC).</div>
+                            <div class="hero-sub" data-i18n="headerSub">Formateur 2.0 – Assistant intelligent de conception pédagogique APC</div>
                             </div>
                             <div class="hero-flag-video">
                                 <video src="https://videos.pexels.com/video-files/13859860/13859860-hd_1280_720_25fps.mp4" autoplay loop muted playsinline>
                                 </video>
                             </div>
                         </div>
-                        <div class="hero-desc" data-i18n="headerDesc">Une IA pédagogique qui génère automatiquement des prompts professionnels, des scénarios pédagogiques, des présentations, des évaluations, des activités de gamification et des ressources conformes à l'Approche Par Compétences (APC) Algérie .</div>
+                        <div class="hero-desc" data-i18n="headerDesc">Générez des prompts professionnels pour ChatGPT, Claude, Gemini et Copilot afin de concevoir vos scénarios pédagogiques selon l'Approche Par Compétences.</div>
                             <div class="nav-links">
                                 <a class="nav-link" onclick="goTo('index.html')" data-i18n="tab_home">🏠 Accueil</a>
                                 <a class="nav-link" onclick="goTo('generator.html')" data-i18n="tab_generator">📝 Générateur de Prompts</a>
@@ -191,7 +191,7 @@
                                                                     </span>
                                                                 </div>
                                                             </div>
-                                                            <div class="model-selector admin-only">
+                                                            <div class="model-selector">
                                                                 <div class="model-group-title" data-i18n="modelSelection">Modèle à utiliser</div>
                                                                     <label>
                                                                     <input type="radio" name="modelChoice" value="auto" checked>
@@ -218,35 +218,33 @@
                                                                     <span data-i18n="modelLlama">☐ Llama 3.3 70B (OpenRouter)</span>
                                                                     </label>
                                                                     <label>
-<input type="radio" name="modelChoice" value="groq-70b"> <span data-i18n="modelGroq70b">☐ Llama 3.3 70B (Groq)</span>
-                                                                    </label>
-                                                                    
-                                                                    <label>
-                                                                    <input type="radio" name="modelChoice" value="or-nemotron-nano-free">
-                                                                    <span data-i18n="modelNemotronNanoFree">☐ Nemotron 3 Nano 30B (OpenRouter free)</span>
+                                                                    <input type="radio" name="modelChoice" value="groq-llama">
+                                                                    <span data-i18n="modelGroqLlama">☐ GPT OSS 120B (Groq)</span>
                                                                     </label>
                                                                     <label>
-                                                                    <input type="radio" name="modelChoice" value="or-gemma4-free">
-                                                                    <span data-i18n="modelGemma4Free">☐ Gemma 4 31B (OpenRouter free)</span>
+                                                                    <input type="radio" name="modelChoice" value="groq-scout">
+                                                                    <span data-i18n="modelGroqScout">☐ GPT OSS 120B (Groq)</span>
                                                                     </label>
                                                                     <label>
-                                                                    <input type="radio" name="modelChoice" value="or-gptoss20b-free">
-                                                                    <span data-i18n="modelGptOss20bFree">☐ GPT OSS 20B (OpenRouter free)</span>
+                                                                    <input type="radio" name="modelChoice" value="llama32-free">
+                                                                    <span data-i18n="modelLlama32Free">☐ Llama 3.2 3B (OpenRouter free)</span>
                                                                     </label>
                                                                     <label>
-                                                                    <input type="radio" name="modelChoice" value="or-ling3-free">
-                                                                    <span data-i18n="modelLing3Free">☐ Ling 3.0 Flash (OpenRouter free)</span>
+                                                                    <input type="radio" name="modelChoice" value="hermes405b-free">
+                                                                    <span data-i18n="modelHermes405bFree">☐ Hermes 3 405B (OpenRouter free)</span>
                                                                     </label>
                                                                     <label>
-                                                                    <input type="radio" name="modelChoice" value="or-nemotron-super-free">
-                                                                    <span data-i18n="modelNemotronSuperFree">☐ Nemotron 3 Super 120B (OpenRouter free)</span>
+                                                                    <input type="radio" name="modelChoice" value="deepseek-v3-free">
+                                                                    <span data-i18n="modelDeepseekV3Free">☐ Nemotron 3 Super 120B (OpenRouter free)</span>
                                                                     </label>
-                                                                </div>
-                                                                <div class="free-mode-row">
-                                                                    <label class="free-mode-label"><input type="checkbox" id="freeModeToggle"> 🔓 Mode libre (tous sujets)</label>
-                                                                </div>
-                                                                <div class="free-mode-row">
-                                                                    <label class="free-mode-label"><input type="checkbox" id="axonToggle"> 🧠 AXON Intelligence (mémoire évolutive)</label>
+                                                                    <label>
+                                                                    <input type="radio" name="modelChoice" value="owl-alpha">
+                                                                    <span data-i18n="modelOwlAlpha">☐ Nemotron Nano 9B (OpenRouter free)</span>
+                                                                    </label>
+                                                                    <label>
+                                                                    <input type="radio" name="modelChoice" value="llama4-scout-free">
+                                                                    <span data-i18n="modelLlama4ScoutFree">☐ GPT OSS 20B (OpenRouter free)</span>
+                                                                    </label>
                                                                 </div>
                                                                 <div class="btn-row">
                                                                     <button class="btn btn-primary" id="modalSaveBtn">💾 <span data-i18n="saveBtn">Enregistrer</span>
@@ -305,13 +303,13 @@
                                                         </script>
                                                         <script src="https://unpkg.com/@supabase/supabase-js@2">
                                                         </script>
-                                                        <script src="js/supabase.js?v=20260707">
+                                                        <script src="js/supabase.js">
                                                         </script>
                                                         <script src="js/compat.js?v=2">
                                                         </script>
-                                                        <script src="js/shared.v2.js?v=1.9.9">
+                                                        <script src="js/shared.v2.js">
                                                         </script>
-                                                        <script src="js/from-doc.js?v=1.9.9">
+                                                        <script src="js/from-doc.js">
                                                         </script>
                                                     </body>
                                                 </html>

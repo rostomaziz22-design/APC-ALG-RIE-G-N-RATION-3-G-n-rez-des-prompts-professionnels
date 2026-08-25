@@ -154,9 +154,7 @@ RÈGLES DE QUALITÉ :
 - Évite le remplissage : chaque ligne doit apporter une information utile
 - Adapte le nombre de slides (entre 5 et 10) à la richesse du document source : plus le document est riche, plus tu génères de slides
 
-Le JSON retourné doit être parfaitement valide et bien formé.
-
-⚠️ PRÉSENTATION OFFICIELLE DE LA PLATEFORME (si le document ou la question concerne la plateforme APC Algérie GÉNÉRATION 3, utilise UNIQUEMENT cette définition) : plateforme numérique intelligente dédiée à la conception, la génération et le développement de ressources pédagogiques et de documents de formation (RMC, PF, PE, RES, ROP-M) pour le secteur de la formation et de l'enseignement professionnels. L'IA au service de l'Approche Par Compétences (APC). Conçue et développée par Aziz Mohamed Rostom. Ce n'est PAS une plateforme d'apprentissage pour les apprenants : c'est un outil de conception pour les formateurs et les établissements.`;
+Le JSON retourné doit être parfaitement valide et bien formé.`;
         const msgs = [
             { role: 'system', content: sysPrompt.trim() },
             { role: 'user', content: prompt }
@@ -262,8 +260,9 @@ Le JSON retourné doit être parfaitement valide et bien formé.
             clearInterval(msgInterval);
             const el = document.getElementById('loadingText');
             const sub = document.getElementById('loadingSub');
-            if (el) el.textContent = "❌ Aucun fournisseur IA disponible";
-            if (sub) sub.textContent = "Tous les quotas gratuits sont épuisés (Gemini, Groq, OpenRouter). Attends la réinitialisation (~24h) ou ajoute une clé API payante dans ⚙️ Paramètres.";
+            const realErr = (err && err.message) ? String(err.message) : String(err || 'Erreur inconnue');
+            if (el) el.textContent = "❌ Échec de la génération de la présentation";
+            if (sub) sub.textContent = realErr + (/(429|per\s*day|daily|quota|limit|épuis|exhausted|RESOURCE_EXHAUSTED)/i.test(realErr) ? " — Quotas gratuits épuisés (réinitialisation ~24h) ou ajoutez une clé API payante dans ⚙️ Paramètres." : '');
             console.error(err);
         }
     });

@@ -194,12 +194,17 @@ async function signOut() {
     currentProfile = null;
     localStorage.removeItem('ai_conversations');
     localStorage.removeItem('current_conv_id');
-    localStorage.removeItem('isAdmin');
     sessionStorage.removeItem('pending_prompt');
     sessionStorage.removeItem('pending_options');
     sessionStorage.removeItem('generator_form');
     localStorage.removeItem('gammaData');
     localStorage.removeItem('saved_pass');
+    // 🔐 Isolement multi-comptes : vider la mémoire AXON locale du compte courant
+    // (la vraie mémoire reste dans Supabase, rechargée au prochain login).
+    ['axon_user','axon_conversation','axon_knowledge','axon_corrections','axon_documents','axon_statistics','axon_cache'].forEach(function(k) {
+        localStorage.removeItem(k);
+    });
+    localStorage.removeItem('axon_owner');
 
     // Effet déconnexion : écran noir + message + barre colorée
     var overlay = document.createElement('div');
@@ -255,7 +260,6 @@ el.innerHTML = `<span class="auth-user">👤 ${name}</span> <button class="btn-i
     });
     localStorage.setItem('isAdmin', currentProfile?.role === 'admin' ? 'true' : 'false');
     if (currentUser) localStorage.setItem('sb_user_id', currentUser.id);
-    if (typeof updateAdminModelsVisibility === 'function') updateAdminModelsVisibility();
 }
 async function saveCourse(data) {
     if (!supabaseClient || !currentUser) throw new Error('Connectez-vous pour sauvegarder');
@@ -462,118 +466,17 @@ async function deletePromptExample(id) {
     const { error } = await supabaseClient.from('prompts_examples').delete().eq('id', id);
     if (error) throw error;
 }
-function _fetchWithTimeout(url, ms) {
-    var ctrl = new AbortController();
-    var id = setTimeout(function() { ctrl.abort(); }, ms);
-    return fetch(url, { signal: ctrl.signal }).then(function(r) {
-        clearTimeout(id);
-        return r;
-    }, function(e) {
-        clearTimeout(id);
-        throw e;
-    });
-}
-
-async function _resolveGeo() {
-    if (sessionStorage.getItem('_device_ip')) return;
-    try {
-        var resp = await _fetchWithTimeout('/api/geo', 3000);
-        if (resp.ok) {
-            var g = await resp.json();
-            console.log('[geo] /api/geo =>', JSON.stringify(g));
-            if (g.ip && g.ip !== 'Non disponible') {
-                sessionStorage.setItem('_device_ip', g.ip);
-                sessionStorage.setItem('_device_region', g.region || 'Inconnue');
-                return;
-            }
-        } else {
-            console.warn('[geo] /api/geo status', resp.status);
-        }
-    } catch (e) {
-        console.warn('[geo] /api/geo error:', e.message || e);
-    }
-    try {
-        var extResp = await _fetchWithTimeout('https://ipinfo.io/json', 5000);
-        if (extResp.ok) {
-            var ext = await extResp.json();
-            console.log('[geo] ipinfo.io =>', JSON.stringify(ext));
-            sessionStorage.setItem('_device_ip', ext.ip || '');
-            var parts = [ext.country, ext.region, ext.city].filter(Boolean);
-            sessionStorage.setItem('_device_region', parts.join(', ') || 'Inconnue');
-        } else {
-            console.warn('[geo] ipinfo.io status', extResp.status);
-        }
-    } catch (e) {
-        console.warn('[geo] ipinfo.io error:', e.message || e);
-    }
-    if (!sessionStorage.getItem('_device_ip')) {
-        sessionStorage.removeItem('_geo_attempted');
-    }
-}
-
-var _geoPromise = null;
-
-function _prefetchGeo() {
-    if (sessionStorage.getItem('_geo_attempted')) return;
-    sessionStorage.setItem('_geo_attempted', '1');
-    _geoPromise = _resolveGeo();
-    _geoPromise.then(function() {
-        console.log('[geo] prefetch done');
-    });
-}
-
 async function logActivity(eventType, extra) {
     if (!supabaseClient || !currentUser) return;
     try {
-        var details = extra || {};
-        var sessionId = details.session_id || '';
-        if (sessionId) delete details.session_id;
-        details.user_agent = navigator.userAgent;
-        if (!sessionStorage.getItem('_device_ip')) {
-            if (_geoPromise) await _geoPromise;
-        }
-        details.ip = sessionStorage.getItem('_device_ip') || 'Non disponible';
-        details.region = sessionStorage.getItem('_device_region') || 'Non disponible';
-        var payload = { user_id: currentUser.id, event_type: eventType, session_id: sessionId, details: details };
+        var payload = { user_id: currentUser.id, event_type: eventType, details: extra || {} };
+        if (extra && extra.session_id) { payload.session_id = extra.session_id; delete payload.details.session_id; }
         await supabaseClient.from('user_activity_log').insert(payload);
     } catch (e) { console.warn('logActivity error:', e); }
 }
 
-_prefetchGeo();
-
-var _hbTimer = null;
-function _startHeartbeat() {
-    if (_hbTimer) return;
-    if (!supabaseClient || !currentUser) { setTimeout(_startHeartbeat, 1000); return; }
-    function ping() {
-        if (!supabaseClient || !currentUser) return;
-        supabaseClient.from('profiles').update({ last_active: new Date().toISOString() }).eq('id', currentUser.id).then(function(r) {
-            if (r.error) console.warn('[hb]', r.error.message);
-        });
-    }
-    ping();
-    _hbTimer = setInterval(ping, 30000);
-}
-function _stopHeartbeat() {
-    if (_hbTimer) { clearInterval(_hbTimer); _hbTimer = null; }
-}
-
-var _origSignIn = signIn;
-signIn = async function(email, password) {
-    var r = await _origSignIn(email, password);
-    if (currentUser) _startHeartbeat();
-    return r;
-};
-
-var _origSignOut = signOut;
-signOut = async function() {
-    _stopHeartbeat();
-    await _origSignOut();
-};
-
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() { initSupabase(); _startHeartbeat(); });
+    document.addEventListener('DOMContentLoaded', initSupabase);
 } else {
     initSupabase();
-    _startHeartbeat();
 }
