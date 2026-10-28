@@ -1106,3 +1106,15 @@ Port depuis « D:\platform APC » (principd) :
 - Note technique : Wikimedia limite par identifiant client — Node/curl (`User-Agent` technique) reçoivent `429`, le navigateur reçoit `200`. Les essais de pertinence doivent donc se faire dans le navigateur.
 - Push : dépôt **privé** (Vercel) `9f6e113` → `6979861` ; dépôt **public** `c2fe219` → `081a5d3` (même contenu).
 - mjr3 : `APP_VERSION` `1.8.9` → `1.9.0` → `1.9.1` → `1.9.2` → `1.9.3` → `1.9.4` → `1.9.5` → `1.9.6`.
+
+## État du schéma Supabase — `supabase-schema.sql` (vérifié v1.9.6)
+
+- Fichier unique de référence : `supabase-schema.sql` (racine). À exécuter en entier dans **Supabase → SQL Editor**.
+- **23 tables** : `profiles`, `specialities`, `modules`, `competences`, `courses`, `scenarios`, `presentations`, `generated_images`, `prompts_examples`, `course_favorites`, `quizzes`, `quiz_attempts`, `quiz_access_codes`, `competence_flowers`, `challenges`, `challenge_teams`, `challenge_participants`, `challenge_rounds`, `challenge_submissions`, `ai_conversations`, `user_activity_log`, `game_saves`, `axon_memory`. RLS **activée sur les 23** (69 policies).
+- **Mise à jour 28/10/2026** :
+  - section 25 (nouvelle) — pipeline d'images v1.8.6 → v1.9.6 : colonne `generated_images.source` (`ia` par défaut, `pollkey` avec clé API ; **les images Commons/Wikipédia ne sont jamais enregistrées dans la banque**), index `idx_images_created`, `idx_images_visibility`, `idx_presentations_created` ;
+  - le script est désormais **ré-exécutable sans erreur** : `DROP POLICY IF EXISTS` avant chaque `CREATE POLICY`, `DROP CONSTRAINT IF EXISTS` avant `unique_quiz_code` et `unique_challenge_code` ;
+  - correction d'un défaut historique : `competence_flowers` référençait `challenge_participants` et `challenges` **avant** leur création → la table n'était pas créée au 1er passage. Les 2 colonnes (`participant_id`, `challenge_id`) sont maintenant ajoutées en section 17bis, après les tables référencées ;
+  - numérotation des sections corrigée (deux « 22 » → 22 et 23).
+- **Validation réelle** (PostgreSQL 17.11 local, base vierge + schéma `auth` de substitution) : 1re passe = **0 erreur**, 2e passe = **0 erreur**, 23 tables créées, RLS partout, 69 policies, clés étrangères de `competence_flowers` présentes.
+- Règle : toute évolution du schéma s'ajoute **en fin de fichier**, en section idempotente, et se reporte dans `AGENTS.md` + `RAPPORT_PLATEFORME.md`.
