@@ -1,5 +1,5 @@
 'use strict'; console.log('✅ shared.v2.js CHARGÉ');
-        const APP_VERSION = '1.9.1';
+        const APP_VERSION = '1.9.2';
         function checkVersionNotification() {
             var saved = localStorage.getItem('app_version');
             if (saved !== APP_VERSION) {
@@ -5022,7 +5022,7 @@ setTimeout(function(){
         attemptsFree: 3,
         defaultCount: 6
     };
-    var S = { version: '1.9.1', token: 0, busy: false, lastFree: 0, blobs: {}, netFail: 0, blocked: false, used: {}, genCursor: 0 };
+    var S = { version: '1.9.2', token: 0, busy: false, lastFree: 0, blobs: {}, netFail: 0, blocked: false, used: {}, genCursor: 0 };
 
     /* ---------------- utilitaires ---------------- */
     function lsGet(k, d) { try { var v = localStorage.getItem(k); return (v === null || v === '') ? d : v; } catch (e) { return d; } }
@@ -5231,7 +5231,15 @@ setTimeout(function(){
         proposer: 1, choisir: 1, preparer: 1, organiser: 1, controler: 1, mesurer: 1, calculer: 1, appliquer: 1,
         assurer: 1, mettre: 1, prendre: 1, donner: 1, selon: 1, partie: 1, parties: 1, ligne: 1, lignes: 1,
         page: 1, slide: 1, texte: 1, point: 1, points: 1, exemple: 1, exemples: 1, the: 1, and: 1, for: 1,
-        with: 1, from: 1, this: 1, that: 1, are: 1, was: 1, were: 1
+        with: 1, from: 1, this: 1, that: 1, are: 1, was: 1, were: 1,
+        /* v1.9.2 : mots pédagogiques abstraits — ils ne décrivent aucune image et
+           détournent la recherche (ils donnaient « knowledge », « criteria »…). */
+        savoirs: 1, savoirfaire: 1, savoiretre: 1, competence: 1, competences: 1, objectif: 1, objectifs: 1,
+        critere: 1, criteres: 1, criteree: 1, grille: 1, indicateur: 1, indicateurs: 1, ressource: 1,
+        ressources: 1, situation: 1, deroulement: 1, duree: 1, modalite: 1, modalites: 1, evaluation: 1,
+        analyse: 1, synthese: 1, conclusion: 1, introduction: 1, presentation: 1, contenu: 1, chapitre: 1,
+        seance: 1, sequence: 1, methodologie: 1, activite: 1, exercice: 1, production: 1, attendu: 1,
+        attendus: 1, indicateurs2: 1, prealable: 1, prerequis: 1, duree2: 1
     };
     function rawWords(s) {
         var contentTxt = '', titleTxt = (s && s.title) ? String(s.title) : '';
