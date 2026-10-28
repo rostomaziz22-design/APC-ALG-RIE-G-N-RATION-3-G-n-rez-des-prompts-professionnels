@@ -1,5 +1,5 @@
 'use strict'; console.log('✅ shared.v2.js CHARGÉ');
-        const APP_VERSION = '1.9.0';
+        const APP_VERSION = '1.9.1';
         function checkVersionNotification() {
             var saved = localStorage.getItem('app_version');
             if (saved !== APP_VERSION) {
@@ -5022,7 +5022,7 @@ setTimeout(function(){
         attemptsFree: 3,
         defaultCount: 6
     };
-    var S = { version: '1.9.0', token: 0, busy: false, lastFree: 0, blobs: {}, netFail: 0, blocked: false, used: {}, genCursor: 0 };
+    var S = { version: '1.9.1', token: 0, busy: false, lastFree: 0, blobs: {}, netFail: 0, blocked: false, used: {}, genCursor: 0 };
 
     /* ---------------- utilitaires ---------------- */
     function lsGet(k, d) { try { var v = localStorage.getItem(k); return (v === null || v === '') ? d : v; } catch (e) { return d; } }
@@ -5161,7 +5161,7 @@ setTimeout(function(){
 
     /* ---------------- voie 3 : repli Wikimedia Commons ---------------- */
     function commonsQuery(s) {
-        var kw = keywords(s, 9);
+        var kw = keywords(s, 4);   // v1.9.1 : Commons fait un ET implicite → 4 mots maximum
         return kw.join(' ').replace(/\s+/g, ' ').slice(0, 140).trim();
     }
     // v1.8.8 : Wikimedia Commons ne trouve RIEN pour les requêtes en français
@@ -5251,14 +5251,15 @@ setTimeout(function(){
         }
         return out;
     }
-    function enQuery(s) {
+    function enQuery(s, max) {
+        max = max || 3;            // v1.9.1 : 3 mots = requête précise (au-delà, Commons renvoie 0)
         var words = keywords(s, 30), out = [], seen = {};
-        for (var i = 0; i < words.length && out.length < 6; i++) {
+        for (var i = 0; i < words.length && out.length < max; i++) {
             var e = FR_EN[words[i]];
             if (!e) continue;
-            e.split(' ').forEach(function (x) { if (!seen[x] && out.length < 6) { seen[x] = 1; out.push(x); } });
+            e.split(' ').forEach(function (x) { if (!seen[x] && out.length < max) { seen[x] = 1; out.push(x); } });
         }
-        return out.join(' ').slice(0, 120).trim();
+        return out.join(' ').slice(0, 90).trim();
     }
     var GENERIC_Q = ['vocational training', 'classroom', 'workshop tools', 'computer lab', 'students learning',
         'training workshop', 'technical drawing', 'electrical engineering', 'maintenance'];
@@ -5286,8 +5287,9 @@ setTimeout(function(){
         try {
             var tries = [], seenQ = {};
             function add(q) { q = String(q || '').trim(); var k = q.toLowerCase(); if (q && !seenQ[k]) { seenQ[k] = 1; tries.push(q); } }
-            add(commonsQuery(s));
-            add(enQuery(s));
+            add(commonsQuery(s));        // 4 mots du contenu, en français
+            add(enQuery(s, 3));          // 3 mots traduits (précis)
+            add(enQuery(s, 2));          // 2 mots (plus large)
             for (var g = 0; g < 3; g++) add(GENERIC_Q[(g + (S.genCursor || 0)) % GENERIC_Q.length]);
             S.genCursor = (S.genCursor || 0) + 1;
             for (var t = 0; t < tries.length; t++) {
