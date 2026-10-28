@@ -1,5 +1,5 @@
 'use strict'; console.log('✅ shared.v2.js CHARGÉ');
-        const APP_VERSION = '1.9.4';
+        const APP_VERSION = '1.9.5';
         function checkVersionNotification() {
             var saved = localStorage.getItem('app_version');
             if (saved !== APP_VERSION) {
@@ -5022,7 +5022,7 @@ setTimeout(function(){
         attemptsFree: 3,
         defaultCount: 6
     };
-    var S = { version: '1.9.4', token: 0, busy: false, lastFree: 0, blobs: {}, netFail: 0, blocked: false, used: {}, genCursor: 0,
+    var S = { version: '1.9.5', token: 0, busy: false, lastFree: 0, blobs: {}, netFail: 0, blocked: false, used: {}, genCursor: 0,
               wmDown: false, wmCalls: 0, wmCache: {} };
     /* v1.9.4 : cache + budget des appels Wikimedia. Sans ça, une présentation de
        10 diapos enchaîne ~40 requêtes et l'API finit par répondre 429
@@ -5189,10 +5189,10 @@ setTimeout(function(){
         'scenario': 'scenario', 'pedagogique': 'teaching', 'formation': 'training', 'apprentissage': 'learning',
         'evaluation': 'assessment', 'savoir': 'knowledge', 'competence': 'competence', 'atelier': 'workshop',
         'maintenance': 'maintenance', 'informatique': 'computer', 'ordinateur': 'computer', 'reseau': 'network',
-        'securite': 'security', 'electricite': 'electricity', 'electrique': 'electrical', 'mecanique': 'mechanical',
+        'securite': 'safety helmet', 'electricite': 'electricity', 'electrique': 'electrical', 'mecanique': 'mechanical',
         'soudure': 'welding', 'plomberie': 'plumbing', 'construction': 'construction', 'batiment': 'building',
         'froid': 'refrigeration', 'climatisation': 'air conditioning', 'automatisme': 'automation',
-        'robotique': 'robotics', 'energie': 'energy', 'solaire': 'solar', 'mesure': 'measurement',
+        'robotique': 'robotics', 'energie': 'energy', 'solaire': 'solar', 'mesure': 'measuring instrument',
         'outillage': 'tools', 'machine': 'machine', 'etudiant': 'student', 'apprenant': 'learner',
         'formateur': 'trainer', 'classe': 'classroom', 'projet': 'project', 'groupe': 'group', 'grille': 'grid',
         'critere': 'criteria', 'indicateur': 'indicator', 'ressource': 'resource', 'situation': 'situation',
@@ -5271,7 +5271,11 @@ setTimeout(function(){
         var clean = function (t) {
             return String(t).replace(/[#*|>\[\]`_~:(),.;!?«»"'\/\\]/g, ' ').replace(/\s+/g, ' ').trim();
         };
-        return clean(contentTxt + ' ' + titleTxt);   // le CONTENU passe avant le titre
+        // v1.9.4 : le titre passe en tête — mais les titres creux (« Analyse des
+        // savoirs », « Grille critériée ») sont neutralisés par STOP_FR, donc seuls
+        // les titres porteurs de sens (« Topographie », « Techniques de soudure »)
+        // orientent la recherche, en plus du contenu.
+        return clean(titleTxt + ' ' + contentTxt);
     }
     function keywords(s, max) {
         var words = rawWords(s).split(' '), out = [], seen = {};
@@ -5439,6 +5443,14 @@ setTimeout(function(){
     }
     var GENERIC_Q = ['vocational training', 'classroom', 'workshop tools', 'computer lab', 'students learning',
         'training workshop', 'technical drawing', 'electrical engineering', 'maintenance'];
+    /* v1.9.4 : mots anglais trop vagues pour servir de requête à eux seuls. */
+    var GENERIC_EN = {
+        security: 1, safety: 1, measurement: 1, control: 1, inspection: 1, management: 1,
+        quality: 1, production: 1, training: 1, learning: 1, knowledge: 1, skills: 1, data: 1,
+        service: 1, system: 1, equipment: 1, technology: 1, communication: 1, information: 1,
+        energy: 1, power: 1, work: 1, time: 1, team: 1, company: 1, professional: 1, situation: 1,
+        criteria: 1, assessment: 1, competence: 1, resource: 1, project: 1, group: 1, classroom: 1
+    };
     // v1.8.9 : Wikimedia accepte « filetype:bitmap » → 100 % d'images exploitables
     // (avant : pages de livres .djvu, PDF, SVG… affichées comme des scans)
     function isBadMime(m) { return !/^image\/(jpeg|png|webp)$/i.test(String(m || '')); }
@@ -5489,7 +5501,13 @@ setTimeout(function(){
             var kwsAll = keywords(s, 8);
             for (var q1 = 0; q1 < kwsAll.length && q1 < 4; q1++) {
                 var one = deaccent(kwsAll[q1]).replace(/[^a-z0-9]/g, '');
-                add(FR_EN[one] || kwsAll[q1]);
+                var tr = FR_EN[one];
+                if (!tr) continue;     // v1.9.4 : jamais de mot français brut (« station » → gare)
+                // les traductions trop vagues (« security », « measurement ») ramènent
+                // n'importe quoi : on ne les interroge pas seules
+                var parts2 = tr.split(' '), vague = true;
+                for (var z = 0; z < parts2.length; z++) if (!GENERIC_EN[parts2[z]]) { vague = false; break; }
+                if (!vague) add(tr);
             }
             add(commonsQuery(s));
             add(enQuery(s, 3));
