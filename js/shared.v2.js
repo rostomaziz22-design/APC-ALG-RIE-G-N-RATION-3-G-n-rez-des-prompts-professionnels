@@ -1,5 +1,5 @@
-'use strict'; console.log('✅ shared.v2.js CHARGÉ');
-        const APP_VERSION = '1.8.6';
+﻿'use strict'; console.log('✅ shared.v2.js CHARGÉ');
+        const APP_VERSION = '1.8.7';
         function checkVersionNotification() {
             var saved = localStorage.getItem('app_version');
             if (saved !== APP_VERSION) {
@@ -5022,7 +5022,7 @@ setTimeout(function(){
         attemptsFree: 3,
         defaultCount: 6
     };
-    var S = { version: '1.8.6', token: 0, busy: false, lastFree: 0, blobs: {} };
+    var S = { version: '1.8.7', token: 0, busy: false, lastFree: 0, blobs: {}, netFail: 0, blocked: false };
 
     /* ---------------- utilitaires ---------------- */
     function lsGet(k, d) { try { var v = localStorage.getItem(k); return (v === null || v === '') ? d : v; } catch (e) { return d; } }
@@ -5111,6 +5111,9 @@ setTimeout(function(){
     /* ---------------- voie 1 : API gratuite (séquencée + Retry-After) ---------------- */
     async function tryFree(prompt, seed) {
         var urlStr = freeUrl(prompt, seed);
+        // v1.8.7 : si fetch est bloqué (CSP ou réseau), on cesse de vérifier et on laisse
+        // le navigateur charger l'image par <img src="…"> — c'est autorisé par img-src https:
+        if (S.blocked) return urlStr;
         for (var i = 0; i < CFG.attemptsFree; i++) {
             var wait = (S.lastFree + CFG.gapFree) - Date.now();
             if (wait > 0) await sleep(wait);
@@ -5124,8 +5127,14 @@ setTimeout(function(){
                 S.lastFree = Date.now() + ra - CFG.gapFree; // le prochain tour attendra « ra »
                 console.warn('🖼️ [images] quota gratuit atteint (402) → nouvelle tentative dans ' + Math.round(ra / 1000) + ' s');
             } else if (r.status === 0) {
-                console.warn('🖼️ [images] réseau indisponible → nouvel essai dans 3 s');
-                await sleep(3000);
+                S.netFail++;
+                if (S.netFail >= 2) {
+                    S.blocked = true;
+                    console.warn('🖼️ [images] fetch bloqué (CSP/réseau) → bascule en mode <img> direct, les images se chargeront seules');
+                    return urlStr;
+                }
+                console.warn('🖼️ [images] réseau indisponible → nouvel essai dans 2 s');
+                await sleep(2000);
             } else {
                 console.warn('🖼️ [images] échec HTTP ' + r.status + ' : ' + urlStr.slice(0, 120));
                 break;
@@ -5216,7 +5225,9 @@ setTimeout(function(){
     async function oneImage(s) {
         var prompt = buildPrompt(s);
         var seed = seedOf(prompt);
-        if (getKey()) {
+        // v1.8.7 : en mode <img> direct (fetch bloqué), la clé est inutilisable
+        // (un <img> ne peut pas envoyer l'en-tête Authorization) → on passe au gratuit
+        if (getKey() && !S.blocked) {
             var ku = await tryKey(prompt, seed);
             if (ku) return { url: ku, source: 'pollkey' };
         }
