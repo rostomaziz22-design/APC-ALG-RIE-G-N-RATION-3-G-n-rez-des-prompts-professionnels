@@ -1,5 +1,5 @@
 'use strict'; console.log('✅ shared.v2.js CHARGÉ');
-        const APP_VERSION = '1.9.5';
+        const APP_VERSION = '1.9.6';
         function checkVersionNotification() {
             var saved = localStorage.getItem('app_version');
             if (saved !== APP_VERSION) {
@@ -5022,7 +5022,7 @@ setTimeout(function(){
         attemptsFree: 3,
         defaultCount: 6
     };
-    var S = { version: '1.9.5', token: 0, busy: false, lastFree: 0, blobs: {}, netFail: 0, blocked: false, used: {}, genCursor: 0,
+    var S = { version: '1.9.6', token: 0, busy: false, lastFree: 0, blobs: {}, netFail: 0, blocked: false, used: {}, genCursor: 0,
               wmDown: false, wmCalls: 0, wmCache: {} };
     /* v1.9.4 : cache + budget des appels Wikimedia. Sans ça, une présentation de
        10 diapos enchaîne ~40 requêtes et l'API finit par répondre 429
@@ -5294,7 +5294,8 @@ setTimeout(function(){
         for (var i = 0; i < words.length && out.length < max; i++) {
             var e = FR_EN[deaccent(words[i]).replace(/[^a-z0-9]/g, '')];
             if (!e) continue;
-            e.split(' ').forEach(function (x) { if (!seen[x] && out.length < max) { seen[x] = 1; out.push(x); } });
+            // v1.9.6 : « management », « security »… n'apportent que du bruit
+            e.split(' ').forEach(function (x) { if (!seen[x] && out.length < max && !GENERIC_EN[x]) { seen[x] = 1; out.push(x); } });
         }
         return out.join(' ').slice(0, 90).trim();
     }
@@ -5314,7 +5315,8 @@ setTimeout(function(){
         emblem: 1, embleme: 1, signature: 1, stamp: 1, timbre: 1, banner: 1, bandeau: 1,
         diagram: 1, diagrams: 1, diagramme: 1, diagrammes: 1, schema: 1, schemas: 1, schematic: 1,
         hierarchie: 1, hierarchy: 1, organigramme: 1, flowchart: 1,
-        map: 1, maps: 1, carte: 1, cartes: 1, graph: 1, graphs: 1, graphique: 1, chart: 1, charts: 1, courbe: 1
+        map: 1, maps: 1, carte: 1, cartes: 1, graph: 1, graphs: 1, graphique: 1, chart: 1, charts: 1, courbe: 1,
+        svg: 1, vectoriel: 1, drawing: 1, dessin: 1, planche: 1, croquis: 1, sketch: 1, clipart: 1
     };
     function fileTokens(src) {
         var name = String(src || '').split('?')[0].split('/').pop();
@@ -5436,7 +5438,12 @@ setTimeout(function(){
         var cands = pageImages(await getJson(search), subj);
         for (var c = 0; c < cands.length; c++) {
             var t = deaccent(cands[c].title).replace(/[^a-z0-9]/g, '');
-            if (t && (t.indexOf(key) === 0 || key.indexOf(t) === 0)) { found = cands[c].src; break; }
+            // v1.9.6 : on n'accepte que le titre exact ou « mot-clé (précision) »
+            // (« Chantier (bâtiment) » oui, « Réseau social » non)
+            if (t === key) { found = cands[c].src; break; }
+            var tt = deaccent(cands[c].title);
+            var re = new RegExp('^' + deaccent(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*\\((.+)\\)\\s*$');
+            if (re.test(tt)) { found = cands[c].src; break; }
         }
         wmCacheSet(ck, found);
         return found;
@@ -5449,7 +5456,8 @@ setTimeout(function(){
         quality: 1, production: 1, training: 1, learning: 1, knowledge: 1, skills: 1, data: 1,
         service: 1, system: 1, equipment: 1, technology: 1, communication: 1, information: 1,
         energy: 1, power: 1, work: 1, time: 1, team: 1, company: 1, professional: 1, situation: 1,
-        criteria: 1, assessment: 1, competence: 1, resource: 1, project: 1, group: 1, classroom: 1
+        criteria: 1, assessment: 1, competence: 1, resource: 1, project: 1, group: 1, classroom: 1,
+        network: 1, social: 1, management: 1, system2: 1
     };
     // v1.8.9 : Wikimedia accepte « filetype:bitmap » → 100 % d'images exploitables
     // (avant : pages de livres .djvu, PDF, SVG… affichées comme des scans)
