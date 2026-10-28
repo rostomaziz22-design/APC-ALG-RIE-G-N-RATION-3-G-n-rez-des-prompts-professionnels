@@ -1,5 +1,5 @@
-﻿'use strict'; console.log('✅ shared.v2.js CHARGÉ');
-        const APP_VERSION = '1.8.7';
+'use strict'; console.log('✅ shared.v2.js CHARGÉ');
+        const APP_VERSION = '1.8.8';
         function checkVersionNotification() {
             var saved = localStorage.getItem('app_version');
             if (saved !== APP_VERSION) {
@@ -5022,7 +5022,7 @@ setTimeout(function(){
         attemptsFree: 3,
         defaultCount: 6
     };
-    var S = { version: '1.8.7', token: 0, busy: false, lastFree: 0, blobs: {}, netFail: 0, blocked: false };
+    var S = { version: '1.8.8', token: 0, busy: false, lastFree: 0, blobs: {}, netFail: 0, blocked: false, used: {}, genCursor: 0 };
 
     /* ---------------- utilitaires ---------------- */
     function lsGet(k, d) { try { var v = localStorage.getItem(k); return (v === null || v === '') ? d : v; } catch (e) { return d; } }
@@ -5170,23 +5170,82 @@ setTimeout(function(){
         var words = txt.split(' ').filter(function (w) { return w.length > 4; }).slice(0, 4);
         return (parts.concat(words)).join(' ').slice(0, 140).trim();
     }
+    // v1.8.8 : Wikimedia Commons ne trouve RIEN pour les requêtes en français
+    // (« maintenance informatique » → 0 résultat, « vocational training » → 8).
+    // On traduit donc les mots-clés métier FR → EN, puis on complète par des
+    // requêtes génériques tournantes : chaque slide reçoit une image différente.
+    var FR_EN = {
+        'scenario': 'scenario', 'pedagogique': 'teaching', 'formation': 'training', 'apprentissage': 'learning',
+        'evaluation': 'assessment', 'savoir': 'knowledge', 'competence': 'competence', 'atelier': 'workshop',
+        'maintenance': 'maintenance', 'informatique': 'computer', 'ordinateur': 'computer', 'reseau': 'network',
+        'securite': 'security', 'electricite': 'electricity', 'electrique': 'electrical', 'mecanique': 'mechanical',
+        'soudure': 'welding', 'plomberie': 'plumbing', 'construction': 'construction', 'batiment': 'building',
+        'froid': 'refrigeration', 'climatisation': 'air conditioning', 'automatisme': 'automation',
+        'robotique': 'robotics', 'energie': 'energy', 'solaire': 'solar', 'mesure': 'measurement',
+        'outillage': 'tools', 'machine': 'machine', 'etudiant': 'student', 'apprenant': 'learner',
+        'formateur': 'trainer', 'classe': 'classroom', 'projet': 'project', 'groupe': 'group', 'grille': 'grid',
+        'critere': 'criteria', 'indicateur': 'indicator', 'ressource': 'resource', 'situation': 'situation',
+        'professionnel': 'professional', 'professionnelle': 'professional', 'sante': 'health',
+        'agriculture': 'agriculture', 'transport': 'transport', 'logistique': 'logistics', 'commerce': 'business',
+        'gestion': 'management', 'documentation': 'documentation', 'schema': 'diagram', 'analyse': 'analysis',
+        'objectif': 'objective', 'phase': 'phase', 'activite': 'activity', 'exercice': 'exercise',
+        'conclusion': 'conclusion', 'introduction': 'introduction', 'presentation': 'presentation'
+    };
+    function deaccent(t) {
+        t = String(t || '').toLowerCase();
+        try { t = t.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); } catch (e) {}
+        return t;
+    }
+    function enQuery(s) {
+        var txt = (s && s.title) ? String(s.title) + ' ' : '';
+        if (s && Array.isArray(s.content)) txt += s.content.join(' ');
+        else if (s && typeof s.content === 'string') txt += s.content;
+        txt = txt.replace(/[#*|>\[\]`_~:(),.;!?«»"'\/\\-]/g, ' ').replace(/\s+/g, ' ').trim();
+        var words = deaccent(txt).split(' ').filter(function (w) { return w.length > 3; });
+        var out = [], seen = {};
+        for (var i = 0; i < words.length && out.length < 4; i++) {
+            var e = FR_EN[words[i]];
+            if (!e) continue;
+            e.split(' ').forEach(function (x) { if (!seen[x]) { seen[x] = 1; out.push(x); } });
+        }
+        return out.join(' ').slice(0, 120).trim();
+    }
+    var GENERIC_Q = ['vocational training', 'classroom', 'workshop tools', 'computer lab', 'students learning',
+        'training workshop', 'technical drawing', 'electrical engineering', 'maintenance'];
+    function isBadMime(m) { return /svg|tiff|xcf|pdf|gif/i.test(String(m || '')); }
+    async function commonsSearch(q) {
+        var u = 'https://commons.wikimedia.org/w/api.php?action=query&generator=search'
+            + '&gsrsearch=' + encodeURIComponent(q)
+            + '&gsrnamespace=6&gsrlimit=24&prop=imageinfo&iiprop=url|mime&iiurlwidth=1024&format=json&origin=*';
+        var r = await fetch(u, { signal: (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) ? AbortSignal.timeout(20000) : undefined });
+        if (!r.ok) return [];
+        var d = await r.json();
+        var pages = (d && d.query && d.query.pages) ? Object.values(d.query.pages) : [];
+        var out = [];
+        for (var i = 0; i < pages.length; i++) {
+            var ii = pages[i].imageinfo && pages[i].imageinfo[0];
+            if (!ii || isBadMime(ii.mime)) continue;
+            var url = ii.thumburl || ii.url;
+            if (url && /^https:\/\//.test(url)) out.push(url);
+        }
+        return out;
+    }
     async function tryCommons(s) {
         try {
-            var q = commonsQuery(s);
-            if (!q) return '';
-            var u = 'https://commons.wikimedia.org/w/api.php?action=query&generator=search'
-                + '&gsrsearch=' + encodeURIComponent(q)
-                + '&gsrnamespace=6&gsrlimit=12&prop=imageinfo&iiprop=url|mime&iiurlwidth=1024&format=json&origin=*';
-            var r = await fetch(u, { signal: (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) ? AbortSignal.timeout(20000) : undefined });
-            if (!r.ok) return '';
-            var d = await r.json();
-            var pages = (d && d.query && d.query.pages) ? Object.values(d.query.pages) : [];
-            for (var i = 0; i < pages.length; i++) {
-                var ii = pages[i].imageinfo && pages[i].imageinfo[0];
-                if (!ii) continue;
-                if (/svg|tiff|xcf|pdf|gif/i.test(String(ii.mime || ''))) continue;
-                var url = ii.thumburl || ii.url;
-                if (url && /^https:\/\//.test(url)) return url;
+            var tries = [], seenQ = {};
+            function add(q) { q = String(q || '').trim(); var k = q.toLowerCase(); if (q && !seenQ[k]) { seenQ[k] = 1; tries.push(q); } }
+            add(commonsQuery(s));
+            add(enQuery(s));
+            for (var g = 0; g < 3; g++) add(GENERIC_Q[(g + (S.genCursor || 0)) % GENERIC_Q.length]);
+            S.genCursor = (S.genCursor || 0) + 1;
+            for (var t = 0; t < tries.length; t++) {
+                var urls = await commonsSearch(tries[t]);
+                for (var i = 0; i < urls.length; i++) {
+                    if (S.used[urls[i]]) continue;      // jamais deux fois la même image
+                    S.used[urls[i]] = 1;
+                    console.log('🖼️ [images] Wikimedia Commons ← « ' + tries[t] + ' »');
+                    return urls[i];
+                }
             }
             return '';
         } catch (e) { return ''; }
