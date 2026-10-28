@@ -1,5 +1,5 @@
 'use strict'; console.log('✅ shared.v2.js CHARGÉ');
-        const APP_VERSION = '1.8.5';
+        const APP_VERSION = '1.8.6';
         function checkVersionNotification() {
             var saved = localStorage.getItem('app_version');
             if (saved !== APP_VERSION) {
@@ -2837,7 +2837,9 @@ FORMAT JSON ATTENDU : {"slides":[{"title":"Titre","image_prompt":"prompt pour im
                 generateAllImages(gammaData.slides).then(urls => {
                     urls.forEach((url, i) => { if (gammaData?.slides[i]) gammaData.slides[i].image_url = url; });
                     urls.forEach((url, i) => {
-                        if (url && gammaData?.slides[i]) {
+                        // v1.8.6 : on n'enregistre dans la banque que les images réellement
+                        // générées par l'IA (les vignettes Commons ne polluent plus la banque)
+                        if (url && gammaData?.slides[i] && gammaData.slides[i].image_source !== 'commons') {
                             saveGeneratedImage({
                                 prompt: gammaData.slides[i].image_prompt || gammaData.slides[i].title || '',
                                 image_url: url,
@@ -2846,6 +2848,8 @@ FORMAT JSON ATTENDU : {"slides":[{"title":"Titre","image_prompt":"prompt pour im
                             });
                         }
                     });
+                    // v1.8.6 : persistance des URLs arrivées pendant la file d'attente
+                    try { if (gammaData) localStorage.setItem('gammaData', JSON.stringify(gammaData)); } catch (e) {}
                     const loadingEl = document.getElementById('loadingText');
                     if (loadingEl) { var li = "🖼️ Images prêtes !"; if (window.__compat && window.__compat.isEnabled) loadingEl.innerHTML = window.__compat.replaceEmoji(li); else loadingEl.textContent = li; }
                     renderGammaSlides();
@@ -2969,7 +2973,7 @@ FORMAT JSON ATTENDU : {"slides":[{"title":"Titre","image_prompt":"prompt pour im
                 const isLeft = idx % 2 === 0;
                 const imageHtml = hasImg
                     ? `<div class="gamma-img-wrap">
-                        <img class="slide-image" src="${s.image_url}" alt="${s.title}" loading="lazy">
+                        <img class="slide-image" src="${(typeof apcDisplayUrl === 'function' ? apcDisplayUrl(s.image_url) : s.image_url)}" alt="${s.title}" loading="lazy">
                         <div class="gamma-img-placeholder">🖼️</div>
                         <div class="gamma-img-err">
                              <span>⚠️ Images momentanément indisponibles</span>
@@ -3237,8 +3241,18 @@ FORMAT JSON ATTENDU : {"slides":[{"title":"Titre","image_prompt":"prompt pour im
         }
         async function urlToBase64(url) {
             try {
-                const resp = await fetch(url, { signal: AbortSignal.timeout(5000) });
+                // v1.8.6 : timeout 5s → 30s (une génération d'image prend 4-8 s) et en-tête
+                // Authorization pour les images produites avec une clé Pollinations.
+                var _h = {};
+                if (url && url.indexOf('gen.pollinations.ai') > -1) {
+                    var _pk = '';
+                    try { _pk = String(localStorage.getItem('pol_key') || '').trim(); } catch (e) {}
+                    if (_pk) _h.Authorization = 'Bearer ' + _pk;
+                }
+                const resp = await fetch(url, { headers: _h, signal: AbortSignal.timeout(30000) });
+                if (!resp.ok) return null;
                 const blob = await resp.blob();
+                if (!blob || blob.size < 500) return null;
                 return new Promise((resolve) => {
                     const reader = new FileReader();
                     reader.onload = () => resolve(reader.result);
@@ -3297,11 +3311,13 @@ FORMAT JSON ATTENDU : {"slides":[{"title":"Titre","image_prompt":"prompt pour im
                 const bulletText = slide.content.map(p => ({
                     text: p, options: { fontSize: 15, color: t.text.replace('#',''), bullet: true, paraSpaceAfter: 8 }
                 }));
+                // v1.8.6 : la colonne image n'est réservée QUE si l'image a réellement été récupérée
+                const _pptxHasImg = !!(slide.image_url && imageCache[slide.image_url]);
                 s.addText(bulletText, {
-                    x: 0.5, y: 1.4, w: slide.image_url ? 6.5 : 12.33, h: 5.2,
+                    x: 0.5, y: 1.4, w: _pptxHasImg ? 6.5 : 12.33, h: 5.2,
                     valign: 'top'
                 });
-                if (slide.image_url && imageCache[slide.image_url]) {
+                if (_pptxHasImg) {
                     try {
                         s.addImage({
                             path: imageCache[slide.image_url],
@@ -4975,3 +4991,410 @@ setTimeout(function(){
         f.appendChild(p);
     }
 }, 500);
+
+/* ============================================================================
+   APC v1.8.6 — PIPELINE D'IMAGES DES PRÉSENTATIONS
+   Correctif « les images ne se génèrent pas sur toutes les slides »
+   ----------------------------------------------------------------------------
+   CAUSE (mesurée) : l'API d'images gratuite (pollinations.ai) autorise
+   1 image toutes les 45 s par adresse IP ; au-delà elle répond HTTP 402.
+   L'ancien code ne faisait AUCUNE requête (il fabriquait seulement une URL) :
+   aucun échec n'était détecté, aucun réessai, aucune attente → 15 slides
+   demandées d'un coup = la plupart des images manquantes.
+
+   CE MODULE (ajouté, rien n'est supprimé) :
+   1. file d'attente SÉQUENTIELLE respectant le quota + l'en-tête Retry-After ;
+   2. clé Pollinations facultative (⚙️ Paramètres) → plus de quota par IP ;
+   3. repli automatique sur Wikimedia Commons (gratuit, sans quota) pour
+      qu'aucune slide ne reste sans image ;
+   4. nombre d'images IA réglable (6 par défaut) pour un rendu complet rapide ;
+   5. statut visible (🖼️ 3/6) + sauvegarde progressive des URLs.
+   ============================================================================ */
+(function () {
+    'use strict';
+    if (window.APC_IMG && window.APC_IMG.version) return;
+
+    var K = { key: 'pol_key', model: 'pol_model', count: 'apc_img_count', fill: 'apc_img_fill' };
+    var CFG = {
+        gapFree: 46000,     // quota gratuit Pollinations : 1 image / 45 s / IP
+        gapKey: 1500,       // avec clé personnelle : aucune limite par IP
+        timeout: 90000,     // une génération prend 4-8 s ; marge large (réseau lent)
+        attemptsFree: 3,
+        defaultCount: 6
+    };
+    var S = { version: '1.8.6', token: 0, busy: false, lastFree: 0, blobs: {} };
+
+    /* ---------------- utilitaires ---------------- */
+    function lsGet(k, d) { try { var v = localStorage.getItem(k); return (v === null || v === '') ? d : v; } catch (e) { return d; } }
+    function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+    function L(fr, ar, en) { var l = lsGet('lang', 'fr'); return l === 'ar' ? ar : (l === 'en' ? en : fr); }
+    function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+    function getKey() { return String(lsGet(K.key, '')).trim(); }
+    function getCount() {
+        var n = parseInt(lsGet(K.count, String(CFG.defaultCount)), 10);
+        if (!n || n < 1) n = CFG.defaultCount;
+        return Math.max(1, Math.min(n, 20));
+    }
+    function getFill() { return lsGet(K.fill, '1') !== '0'; }
+    function seedOf(txt) {
+        txt = String(txt || '');
+        var h = 2166136261;
+        for (var i = 0; i < txt.length; i++) { h ^= txt.charCodeAt(i); h = Math.imul(h, 16777619); }
+        return Math.abs(h) % 99991;
+    }
+
+    /* ---------------- statut visible (bas droite) ---------------- */
+    function ensureUI() {
+        var el = document.getElementById('apcImgProg');
+        if (el) return el;
+        el = document.createElement('div');
+        el.id = 'apcImgProg';
+        el.style.cssText = 'position:fixed;right:16px;bottom:16px;z-index:9600;min-width:220px;max-width:320px;'
+            + 'background:rgba(12,22,34,.94);color:#fff;border:1px solid rgba(120,200,255,.35);border-radius:12px;'
+            + 'padding:10px 12px;font-size:12px;line-height:1.4;box-shadow:0 8px 28px rgba(0,0,0,.45);display:none;';
+        el.innerHTML = '<div style="display:flex;align-items:center;gap:8px;">'
+            + '<span style="font-size:15px;">🖼️</span><span id="apcImgProgTxt" style="flex:1;">—</span></div>'
+            + '<div style="height:4px;background:rgba(255,255,255,.15);border-radius:3px;margin-top:8px;overflow:hidden;">'
+            + '<div id="apcImgProgBar" style="height:100%;width:0%;background:linear-gradient(90deg,#39a0ff,#7ce0a3);transition:width .4s ease;"></div></div>';
+        document.body.appendChild(el);
+        return el;
+    }
+    function setProgress(txt, pct) {
+        var el = ensureUI();
+        var t = document.getElementById('apcImgProgTxt');
+        var b = document.getElementById('apcImgProgBar');
+        el.style.display = 'block';
+        if (t) t.textContent = txt;
+        if (b && typeof pct === 'number') b.style.width = Math.max(0, Math.min(100, Math.round(pct * 100))) + '%';
+    }
+    function hideProgressLater(ms) {
+        setTimeout(function () { var el = document.getElementById('apcImgProg'); if (el) el.style.display = 'none'; }, ms || 5000);
+    }
+
+    /* ---------------- URLs ---------------- */
+    function freeUrl(prompt, seed) {
+        // API gratuite : un seul modèle, 768 px max, 1 image / 45 s / IP.
+        // Pas de model= ni nolicense= : ces paramètres sont ignorés depuis 2026.
+        return 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt)
+            + '?width=768&height=576&seed=' + seed;
+    }
+    function keyUrl(prompt, seed) {
+        var model = lsGet(K.model, 'black-forest-labs/flux.1-schnell');
+        return 'https://gen.pollinations.ai/image/' + encodeURIComponent(prompt)
+            + '?model=' + encodeURIComponent(model) + '&seed=' + seed + '&width=1024&height=768';
+    }
+
+    /* ---------------- requête unique (détection réelle des échecs) ---------------- */
+    async function grab(urlStr, useKey) {
+        var ctrl = null, timer = null;
+        try { ctrl = new AbortController(); } catch (e) {}
+        if (ctrl) timer = setTimeout(function () { try { ctrl.abort(); } catch (e) {} }, CFG.timeout);
+        var headers = {};
+        if (useKey) { var k = getKey(); if (k) headers.Authorization = 'Bearer ' + k; }
+        try {
+            var r = await fetch(urlStr, {
+                headers: headers,
+                signal: ctrl ? ctrl.signal : undefined,
+                mode: 'cors',
+                credentials: 'omit'
+            });
+            var blob = r.ok ? await r.blob() : null;
+            var ra = parseInt(r.headers.get('Retry-After') || '0', 10) || 0;
+            return { ok: r.ok, status: r.status, blob: blob, retryAfter: ra };
+        } catch (e) {
+            return { ok: false, status: 0, blob: null, retryAfter: 0, error: e && e.message };
+        } finally {
+            if (timer) clearTimeout(timer);
+        }
+    }
+
+    /* ---------------- voie 1 : API gratuite (séquencée + Retry-After) ---------------- */
+    async function tryFree(prompt, seed) {
+        var urlStr = freeUrl(prompt, seed);
+        for (var i = 0; i < CFG.attemptsFree; i++) {
+            var wait = (S.lastFree + CFG.gapFree) - Date.now();
+            if (wait > 0) await sleep(wait);
+            var r = await grab(urlStr, false);
+            S.lastFree = Date.now();
+            if (r.ok && r.blob && r.blob.size > 800) return urlStr;
+
+            if (r.status === 402 || r.status === 429) {
+                var ra = r.retryAfter ? r.retryAfter * 1000 : CFG.gapFree;
+                if (ra < 8000) ra = CFG.gapFree;            // Retry-After incohérent → marge normale
+                S.lastFree = Date.now() + ra - CFG.gapFree; // le prochain tour attendra « ra »
+                console.warn('🖼️ [images] quota gratuit atteint (402) → nouvelle tentative dans ' + Math.round(ra / 1000) + ' s');
+            } else if (r.status === 0) {
+                console.warn('🖼️ [images] réseau indisponible → nouvel essai dans 3 s');
+                await sleep(3000);
+            } else {
+                console.warn('🖼️ [images] échec HTTP ' + r.status + ' : ' + urlStr.slice(0, 120));
+                break;
+            }
+        }
+        return '';
+    }
+
+    /* ---------------- voie 2 : clé Pollinations (aucun quota IP) ---------------- */
+    async function tryKey(prompt, seed) {
+        var urlStr = keyUrl(prompt, seed);
+        var wait = (S.lastKey + CFG.gapKey) - Date.now();
+        if (wait > 0) await sleep(wait);
+        var r = await grab(urlStr, true);
+        S.lastKey = Date.now();
+        if (r.ok && r.blob && r.blob.size > 800) {
+            try { S.blobs[urlStr] = URL.createObjectURL(r.blob); } catch (e) {}
+            return urlStr;
+        }
+        console.warn('🖼️ [images] clé Pollinations refusée (HTTP ' + r.status + ') → repli sur l\'API gratuite');
+        return '';
+    }
+    S.lastKey = 0;
+
+    /* ---------------- voie 3 : repli Wikimedia Commons ---------------- */
+    function commonsQuery(s) {
+        var parts = [];
+        if (s && s.title) parts.push(String(s.title));
+        var txt = '';
+        if (s && Array.isArray(s.content)) txt = s.content.join(' ');
+        else if (s && typeof s.content === 'string') txt = s.content;
+        txt = String(txt).replace(/[#*|>\[\]`_~]/g, ' ').replace(/\s+/g, ' ').trim();
+        var words = txt.split(' ').filter(function (w) { return w.length > 4; }).slice(0, 4);
+        return (parts.concat(words)).join(' ').slice(0, 140).trim();
+    }
+    async function tryCommons(s) {
+        try {
+            var q = commonsQuery(s);
+            if (!q) return '';
+            var u = 'https://commons.wikimedia.org/w/api.php?action=query&generator=search'
+                + '&gsrsearch=' + encodeURIComponent(q)
+                + '&gsrnamespace=6&gsrlimit=12&prop=imageinfo&iiprop=url|mime&iiurlwidth=1024&format=json&origin=*';
+            var r = await fetch(u, { signal: (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) ? AbortSignal.timeout(20000) : undefined });
+            if (!r.ok) return '';
+            var d = await r.json();
+            var pages = (d && d.query && d.query.pages) ? Object.values(d.query.pages) : [];
+            for (var i = 0; i < pages.length; i++) {
+                var ii = pages[i].imageinfo && pages[i].imageinfo[0];
+                if (!ii) continue;
+                if (/svg|tiff|xcf|pdf|gif/i.test(String(ii.mime || ''))) continue;
+                var url = ii.thumburl || ii.url;
+                if (url && /^https:\/\//.test(url)) return url;
+            }
+            return '';
+        } catch (e) { return ''; }
+    }
+
+    /* ---------------- répartition des slides illustrées par l'IA ---------------- */
+    function pickIndices(len, n) {
+        n = Math.max(1, Math.min(n, len));
+        var out = [];
+        if (n === 1) return [0];
+        for (var i = 0; i < n; i++) {
+            var v = Math.round(i * (len - 1) / (n - 1));
+            if (out.indexOf(v) === -1) out.push(v);
+        }
+        return out;
+    }
+    function buildPrompt(s) {
+        var base = '';
+        try { base = slideImagePrompt(s); } catch (e) { base = (s && s.title) ? String(s.title) : ''; }
+        return String(base || 'illustration pédagogique').slice(0, 460) + ', educational illustration, clean, professional, no text';
+    }
+
+    /* ---------------- persistance / rendu ---------------- */
+    function persist() {
+        try { if (typeof gammaData !== 'undefined' && gammaData) localStorage.setItem('gammaData', JSON.stringify(gammaData)); } catch (e) {}
+    }
+    function safeRender() {
+        try { if (typeof renderGammaSlides === 'function') renderGammaSlides(); } catch (e) {}
+    }
+    function apcDisplayUrl(urlStr) {
+        if (!urlStr) return '';
+        return S.blobs[urlStr] ? S.blobs[urlStr] : urlStr;
+    }
+
+    /* ---------------- une image (clé → gratuit → Commons) ---------------- */
+    async function oneImage(s) {
+        var prompt = buildPrompt(s);
+        var seed = seedOf(prompt);
+        if (getKey()) {
+            var ku = await tryKey(prompt, seed);
+            if (ku) return { url: ku, source: 'pollkey' };
+        }
+        var fu = await tryFree(prompt, seed);
+        if (fu) return { url: fu, source: 'pollinations' };
+        var cu = await tryCommons(s);
+        if (cu) return { url: cu, source: 'commons' };
+        return null;
+    }
+
+    /* ---------------- file d'attente principale ---------------- */
+    async function runPipeline(slides) {
+        slides = slides || [];
+        if (!slides.length) return [];
+        var tok = ++S.token;
+        S.busy = true;
+        var out = slides.map(function () { return ''; });
+        var idx = pickIndices(slides.length, getCount());
+        var fill = getFill();
+        var total = idx.length + (fill ? Math.max(0, slides.length - idx.length) : 0);
+        var done = 0;
+        try {
+            for (var k = 0; k < idx.length; k++) {
+                if (tok !== S.token) return out;
+                var s = slides[idx[k]];
+                if (!s) continue;
+                setProgress(L('Image ' + (done + 1) + '/' + total + ' — ' + (getKey() ? 'génération…' : 'génération (≈45 s entre chaque)…'),
+                    'الصورة ' + (done + 1) + '/' + total + ' — جارٍ الإنشاء…',
+                    'Image ' + (done + 1) + '/' + total + ' — generating…'), done / Math.max(1, total));
+                var res = await oneImage(s);
+                if (tok !== S.token) return out;
+                if (res) {
+                    s.image_url = res.url;
+                    s.image_source = res.source;
+                    out[idx[k]] = res.url;
+                    persist();
+                    safeRender();
+                }
+                done++;
+            }
+            if (fill) {
+                for (var j = 0; j < slides.length; j++) {
+                    if (tok !== S.token) return out;
+                    var sl = slides[j];
+                    if (!sl || sl.image_url) continue;
+                    setProgress(L('Image ' + (done + 1) + '/' + total + ' — complément (Wikimedia Commons)…',
+                        'الصورة ' + (done + 1) + '/' + total + ' — استكمال بصور ويكيميديا…',
+                        'Image ' + (done + 1) + '/' + total + ' — Wikimedia Commons…'), done / Math.max(1, total));
+                    var cu = await tryCommons(sl);
+                    if (cu) {
+                        sl.image_url = cu;
+                        sl.image_source = 'commons';
+                        out[j] = cu;
+                        persist();
+                        safeRender();
+                    }
+                    done++;
+                }
+            }
+            if (tok === S.token) {
+                var nb = out.filter(Boolean).length;
+                setProgress(L('✅ ' + nb + '/' + slides.length + ' slides illustrées',
+                    '✅ ' + nb + '/' + slides.length + ' شريحة مصوّرة',
+                    '✅ ' + nb + '/' + slides.length + ' illustrated slides'), 1);
+                hideProgressLater(4500);
+            }
+            return out;
+        } finally {
+            if (tok === S.token) S.busy = false;
+        }
+    }
+
+    /* ---------------- rechargement des images générées avec une clé ---------------- */
+    async function apcRestoreGenImages() {
+        try {
+            if (typeof gammaData === 'undefined' || !gammaData || !Array.isArray(gammaData.slides)) return;
+            if (!getKey()) return;
+            var need = gammaData.slides.filter(function (s) { return s && s.image_source === 'pollkey' && s.image_url && !S.blobs[s.image_url]; });
+            for (var i = 0; i < need.length; i++) {
+                var s = need[i];
+                var r = await grab(s.image_url, true);
+                if (r.ok && r.blob) { try { S.blobs[s.image_url] = URL.createObjectURL(r.blob); safeRender(); } catch (e) {} }
+                await sleep(1200);
+            }
+        } catch (e) {}
+    }
+
+    /* ---------------- réglages (⚙️ Paramètres) ---------------- */
+    function injectSettings() {
+        if (!document.getElementById('modalSaveBtn')) return;
+        if (document.getElementById('pollinationsKeyInput')) { syncSettings(); return; }
+        var anchor = document.getElementById('geminiApiKeyInput');
+        var group = (anchor && anchor.closest) ? anchor.closest('.field-group') : null;
+        if (!group || !group.parentNode) return;
+        var div = document.createElement('div');
+        div.className = 'field-group';
+        div.id = 'apcImgSettings';
+        var counts = [4, 6, 8, 10, 15];
+        div.innerHTML =
+            '<label>🖼️ ' + L('Clé API Pollinations (images)', 'مفتاح Pollinations للصور', 'Pollinations API key (images)') + '</label>'
+            + '<div class="hint">' + L(
+                'Facultatif. Sans clé : 1 image toutes les 45 s (limite gratuite) — avec une clé (enter.pollinations.ai) : illimité, sans logo.',
+                'اختياري. بدون مفتاح: صورة كل 45 ثانية. مع مفتاح: بلا حدود وبدون شعار.',
+                'Optional. Without a key: 1 image every 45 s (free limit) — with a key (enter.pollinations.ai): unlimited, no logo.') + '</div>'
+            + '<input type="text" id="pollinationsKeyInput" placeholder="sk_...">'
+            + '<div style="margin-top:10px;display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:12px;">'
+            + '<label style="display:flex;align-items:center;gap:6px;">'
+            + L('Images IA par présentation', 'صور لكل عرض', 'AI images per deck') + ' '
+            + '<select id="apcImgCountSelect" style="padding:3px 6px;">'
+            + counts.map(function (v) { return '<option value="' + v + '">' + v + '</option>'; }).join('')
+            + '</select></label>'
+            + '<label style="display:flex;align-items:center;gap:6px;">'
+            + '<input type="checkbox" id="apcImgFillChk"> '
+            + L('Compléter avec Wikimedia Commons', 'إكمال بصور ويكيميديا', 'Fill with Wikimedia Commons')
+            + '</label></div>';
+        group.parentNode.insertBefore(div, group.nextSibling);
+        syncSettings();
+        var btn = document.getElementById('modalSaveBtn');
+        if (btn) btn.addEventListener('click', saveSettings);
+    }
+    function syncSettings() {
+        var k = document.getElementById('pollinationsKeyInput'); if (k) k.value = String(lsGet(K.key, ''));
+        var c = document.getElementById('apcImgCountSelect'); if (c) c.value = String(getCount());
+        var f = document.getElementById('apcImgFillChk'); if (f) f.checked = getFill();
+    }
+    function saveSettings() {
+        var k = document.getElementById('pollinationsKeyInput'); if (k) lsSet(K.key, k.value.trim());
+        var c = document.getElementById('apcImgCountSelect'); if (c) lsSet(K.count, c.value);
+        var f = document.getElementById('apcImgFillChk'); if (f) lsSet(K.fill, f.checked ? '1' : '0');
+    }
+    var _origLoadKeys = window.loadKeysIntoModal;
+    window.loadKeysIntoModal = function () {
+        try { if (typeof _origLoadKeys === 'function') _origLoadKeys(); } catch (e) {}
+        try { injectSettings(); } catch (e) {}
+    };
+    setTimeout(function () { try { injectSettings(); } catch (e) {} }, 700);
+
+    /* ---------------- API publique + remplacement des fonctions d'origine ---------------- */
+    window.APC_IMG = {
+        version: S.version,
+        run: runPipeline,
+        displayUrl: apcDisplayUrl,
+        blobs: S.blobs,
+        getCount: getCount,
+        setCount: function (n) { lsSet(K.count, String(n)); },
+        restore: apcRestoreGenImages
+    };
+    window.apcDisplayUrl = apcDisplayUrl;
+
+    // Les fonctions d'origine restent définies (aucune suppression) : elles ne sont
+    // simplement plus appelées — on leur substitue la version séquencée.
+    generateImage = function (prompt) { return freeUrl(prompt, seedOf(prompt)); };
+    generateAllImages = function (slides) { return runPipeline(slides || []); };
+    retrySlideImage = async function (idx) {
+        try {
+            if (typeof gammaData === 'undefined' || !gammaData || !gammaData.slides || !gammaData.slides[idx]) return;
+            var s = gammaData.slides[idx];
+            setProgress(L('Nouvelle image…', 'صورة جديدة…', 'New image…'), 0.15);
+            var res = await oneImage(s);
+            if (res) {
+                s.image_url = res.url;
+                s.image_source = res.source;
+                setProgress(L('✅ Image ajoutée', '✅ تمت إضافة الصورة', '✅ Image added'), 1);
+            } else {
+                setProgress(L('⚠️ Aucune image disponible pour l\'instant', '⚠️ لا توجد صورة متاحة الآن', '⚠️ No image available right now'), 1);
+            }
+            persist();
+            safeRender();
+            hideProgressLater(3500);
+        } catch (e) { console.warn('🖼️ [images] retrySlideImage:', e && e.message); }
+    };
+
+    // Premier rendu après chargement : résout les images générées avec une clé
+    setTimeout(function () {
+        try { if (typeof gammaData !== 'undefined' && gammaData && gammaData.slides) { safeRender(); apcRestoreGenImages(); } } catch (e) {}
+    }, 1500);
+
+    console.log('🖼️ [APC_IMG] pipeline images v' + S.version + ' actif — '
+        + (getKey() ? 'clé Pollinations détectée (aucun quota IP)' : 'mode gratuit : 1 image / 45 s par IP')
+        + ' · ' + getCount() + ' images IA + ' + (getFill() ? 'complément Commons' : 'pas de complément'));
+})();

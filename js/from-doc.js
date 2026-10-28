@@ -242,7 +242,7 @@ Le JSON retourné doit être parfaitement valide et bien formé.`;
                     }
                 });
                 urls.forEach((url, i) => {
-                    if (url && gammaData?.slides[i]) {
+                    if (url && gammaData?.slides[i] && gammaData.slides[i].image_source !== 'commons') {
                         saveGeneratedImage({
                             prompt: gammaData.slides[i].image_prompt || gammaData.slides[i].title || '',
                             image_url: url,
