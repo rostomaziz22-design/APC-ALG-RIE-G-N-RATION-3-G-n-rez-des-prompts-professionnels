@@ -1,5 +1,5 @@
 'use strict'; console.log('✅ shared.v2.js CHARGÉ');
-        const APP_VERSION = '1.9.2';
+        const APP_VERSION = '1.9.3';
         function checkVersionNotification() {
             var saved = localStorage.getItem('app_version');
             if (saved !== APP_VERSION) {
@@ -5022,7 +5022,7 @@ setTimeout(function(){
         attemptsFree: 3,
         defaultCount: 6
     };
-    var S = { version: '1.9.2', token: 0, busy: false, lastFree: 0, blobs: {}, netFail: 0, blocked: false, used: {}, genCursor: 0 };
+    var S = { version: '1.9.3', token: 0, busy: false, lastFree: 0, blobs: {}, netFail: 0, blocked: false, used: {}, genCursor: 0 };
 
     /* ---------------- utilitaires ---------------- */
     function lsGet(k, d) { try { var v = localStorage.getItem(k); return (v === null || v === '') ? d : v; } catch (e) { return d; } }
@@ -5251,11 +5251,13 @@ setTimeout(function(){
         return clean(contentTxt + ' ' + titleTxt);   // le CONTENU passe avant le titre
     }
     function keywords(s, max) {
-        var words = deaccent(rawWords(s)).split(' '), out = [], seen = {};
+        var words = rawWords(s).split(' '), out = [], seen = {};
         for (var i = 0; i < words.length && out.length < max; i++) {
-            var w = words[i].replace(/[^a-z0-9]/g, '');
-            if (w.length < 4 || STOP_FR[w] || seen[w] || /^[0-9]+$/.test(w)) continue;
-            seen[w] = 1; out.push(w);
+            // v1.9.3 : on conserve l'orthographe d'origine (accents) pour Wikipédia/Commons
+            var orig = words[i].replace(/[^0-9A-Za-zÀ-ÿ'-]/g, '');
+            var key = deaccent(orig).replace(/[^a-z0-9]/g, '');
+            if (key.length < 4 || STOP_FR[key] || seen[key] || /^[0-9]+$/.test(key)) continue;
+            seen[key] = 1; out.push(orig);
         }
         return out;
     }
@@ -5263,11 +5265,36 @@ setTimeout(function(){
         max = max || 3;            // v1.9.1 : 3 mots = requête précise (au-delà, Commons renvoie 0)
         var words = keywords(s, 30), out = [], seen = {};
         for (var i = 0; i < words.length && out.length < max; i++) {
-            var e = FR_EN[words[i]];
+            var e = FR_EN[deaccent(words[i]).replace(/[^a-z0-9]/g, '')];
             if (!e) continue;
             e.split(' ').forEach(function (x) { if (!seen[x] && out.length < max) { seen[x] = 1; out.push(x); } });
         }
         return out.join(' ').slice(0, 90).trim();
+    }
+    /* v1.9.3 : l'image de l'article Wikipédia correspondant au mot-clé du contenu
+       est bien plus pertinente qu'une recherche plein texte sur Commons
+       (« Multimètre » → photo de multimètre, « Disjoncteur » → disjoncteur). */
+    async function firstPageImage(u) {
+        try {
+            var r = await fetch(u, { signal: (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) ? AbortSignal.timeout(6000) : undefined });
+            if (!r.ok) return '';
+            var d = await r.json();
+            var pages = (d && d.query && d.query.pages) ? Object.values(d.query.pages) : [];
+            for (var i = 0; i < pages.length; i++) {
+                var im = pages[i].thumbnail || pages[i].original;
+                if (im && im.source && /^https:\/\//.test(im.source)) return im.source;
+            }
+            return '';
+        } catch (e) { return ''; }
+    }
+    async function wikiImage(q) {
+        var exact = 'https://fr.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(q)
+            + '&prop=pageimages&piprop=thumbnail&pithumbsize=1024&redirects=1&format=json&origin=*';
+        var img = await firstPageImage(exact);
+        if (img) return img;
+        var search = 'https://fr.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=' + encodeURIComponent(q)
+            + '&gsrlimit=3&prop=pageimages&piprop=thumbnail&pithumbsize=1024&format=json&origin=*';
+        return await firstPageImage(search);
     }
     var GENERIC_Q = ['vocational training', 'classroom', 'workshop tools', 'computer lab', 'students learning',
         'training workshop', 'technical drawing', 'electrical engineering', 'maintenance'];
@@ -5295,9 +5322,20 @@ setTimeout(function(){
         try {
             var tries = [], seenQ = {};
             function add(q) { q = String(q || '').trim(); var k = q.toLowerCase(); if (q && !seenQ[k]) { seenQ[k] = 1; tries.push(q); } }
-            add(commonsQuery(s));        // 4 mots du contenu, en français
-            add(enQuery(s, 3));          // 3 mots traduits (précis)
-            add(enQuery(s, 2));          // 2 mots (plus large)
+            // 1) Wikipédia : l'article correspondant au mot-clé du contenu (le plus pertinent)
+            var KWs = keywords(s, 6);
+            for (var w = 0; w < KWs.length && w < 3; w++) {
+                var wi = await wikiImage(KWs[w]);
+                if (wi && !S.used[wi]) {
+                    S.used[wi] = 1;
+                    console.log('🖼️ [images] Wikipédia ← « ' + KWs[w] + ' »');
+                    return wi;
+                }
+            }
+            // 2) Wikimedia Commons : 4 mots du contenu, puis 3 et 2 mots traduits, puis génériques
+            add(commonsQuery(s));
+            add(enQuery(s, 3));
+            add(enQuery(s, 2));
             for (var g = 0; g < 3; g++) add(GENERIC_Q[(g + (S.genCursor || 0)) % GENERIC_Q.length]);
             S.genCursor = (S.genCursor || 0) + 1;
             for (var t = 0; t < tries.length; t++) {
