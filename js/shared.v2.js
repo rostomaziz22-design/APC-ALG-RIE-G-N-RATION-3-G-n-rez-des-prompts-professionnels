@@ -1,5 +1,5 @@
 'use strict'; console.log('✅ shared.v2.js CHARGÉ');
-        const APP_VERSION = '1.8.9';
+        const APP_VERSION = '1.9.0';
         function checkVersionNotification() {
             var saved = localStorage.getItem('app_version');
             if (saved !== APP_VERSION) {
@@ -5022,7 +5022,7 @@ setTimeout(function(){
         attemptsFree: 3,
         defaultCount: 6
     };
-    var S = { version: '1.8.9', token: 0, busy: false, lastFree: 0, blobs: {}, netFail: 0, blocked: false, used: {}, genCursor: 0 };
+    var S = { version: '1.9.0', token: 0, busy: false, lastFree: 0, blobs: {}, netFail: 0, blocked: false, used: {}, genCursor: 0 };
 
     /* ---------------- utilitaires ---------------- */
     function lsGet(k, d) { try { var v = localStorage.getItem(k); return (v === null || v === '') ? d : v; } catch (e) { return d; } }
@@ -5161,14 +5161,8 @@ setTimeout(function(){
 
     /* ---------------- voie 3 : repli Wikimedia Commons ---------------- */
     function commonsQuery(s) {
-        var parts = [];
-        if (s && s.title) parts.push(String(s.title));
-        var txt = '';
-        if (s && Array.isArray(s.content)) txt = s.content.join(' ');
-        else if (s && typeof s.content === 'string') txt = s.content;
-        txt = String(txt).replace(/[#*|>\[\]`_~]/g, ' ').replace(/\s+/g, ' ').trim();
-        var words = txt.split(' ').filter(function (w) { return w.length > 4; }).slice(0, 4);
-        return (parts.concat(words)).join(' ').slice(0, 140).trim();
+        var kw = keywords(s, 9);
+        return kw.join(' ').replace(/\s+/g, ' ').slice(0, 140).trim();
     }
     // v1.8.8 : Wikimedia Commons ne trouve RIEN pour les requêtes en français
     // (« maintenance informatique » → 0 résultat, « vocational training » → 8).
@@ -5189,24 +5183,80 @@ setTimeout(function(){
         'agriculture': 'agriculture', 'transport': 'transport', 'logistique': 'logistics', 'commerce': 'business',
         'gestion': 'management', 'documentation': 'documentation', 'schema': 'diagram', 'analyse': 'analysis',
         'objectif': 'objective', 'phase': 'phase', 'activite': 'activity', 'exercice': 'exercise',
-        'conclusion': 'conclusion', 'introduction': 'introduction', 'presentation': 'presentation'
+        'conclusion': 'conclusion', 'introduction': 'introduction', 'presentation': 'presentation',
+        'diagnostic': 'diagnosis', 'panne': 'breakdown', 'pannes': 'breakdown', 'cablage': 'wiring',
+        'moteur': 'engine', 'capteur': 'sensor', 'actionneur': 'actuator', 'hydraulique': 'hydraulics',
+        'pneumatique': 'pneumatics', 'usinage': 'machining', 'fraisage': 'milling', 'tournage': 'lathe',
+        'chaudronnerie': 'metalwork', 'menuiserie': 'carpentry', 'coiffure': 'hairdressing',
+        'cuisine': 'cooking', 'restauration': 'catering', 'vente': 'sales', 'comptabilite': 'accounting',
+        'marketing': 'marketing', 'secretariat': 'office', 'communication': 'communication',
+        'dessin': 'drawing', 'topographie': 'surveying', 'maconnerie': 'masonry', 'coffrage': 'formwork',
+        'ferraillage': 'reinforcement', 'peinture': 'painting', 'isolation': 'insulation',
+        'chauffage': 'heating', 'ventilation': 'ventilation', 'sanitaire': 'plumbing', 'eau': 'water',
+        'assainissement': 'sanitation', 'electrotechnique': 'electrotechnics', 'programmation': 'programming',
+        'donnees': 'data', 'cybersecurite': 'cybersecurity', 'prevention': 'prevention', 'risque': 'risk',
+        'qualite': 'quality', 'norme': 'standard', 'incendie': 'fire', 'secours': 'rescue',
+        'hygiene': 'hygiene', 'irrigation': 'irrigation', 'elevage': 'livestock', 'environnement': 'environment',
+        'dechets': 'waste', 'recyclage': 'recycling', 'magasinage': 'warehouse', 'approvisionnement': 'supply',
+        'tourisme': 'tourism', 'hotellerie': 'hospitality', 'entreprise': 'company', 'client': 'customer',
+        'equipe': 'team', 'reunion': 'meeting', 'planning': 'planning', 'budget': 'budget', 'stock': 'inventory',
+        'diagnostiquer': 'diagnosis', 'isoler': 'insulation', 'remplacer': 'replacement', 'circuit': 'circuit',
+        'disjoncteur': 'circuit breaker', 'tableau': 'panel', 'technicien': 'technician', 'technique': 'technical',
+        'normes': 'standards', 'conformite': 'compliance', 'delais': 'deadline', 'chantier': 'worksite',
+        'proprete': 'cleanliness', 'rangement': 'storage', 'controle': 'inspection', 'isolement': 'insulation',
+        'tension': 'voltage', 'multimetre': 'multimeter', 'schema': 'diagram', 'schemas': 'diagram',
+        'notice': 'manual', 'equipements': 'equipment', 'protection': 'protection', 'individuelle': 'personal',
+        'savoirs': 'knowledge', 'savoiretre': 'soft skills', 'savoirfaire': 'skills', 'criteree': 'criteria',
+        'criteres': 'criteria', 'cable': 'cable', 'cables': 'cable', 'moteur': 'motor', 'pompe': 'pump',
+        'vanne': 'valve', 'reservoir': 'tank', 'chaudiere': 'boiler', 'compresseur': 'compressor',
+        'poste': 'station', 'reseau': 'network', 'serveur': 'server', 'logiciel': 'software',
+        'materiel': 'hardware', 'fichier': 'file', 'sauvegarde': 'backup', 'virus': 'virus'
     };
     function deaccent(t) {
         t = String(t || '').toLowerCase();
         try { t = t.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); } catch (e) {}
         return t;
     }
+    /* v1.9.0 : les images doivent refléter le CONTENU de la diapo, pas seulement son titre.
+       On extrait donc les mots porteurs du contenu (les plus significatifs d'abord),
+       en écartant les mots vides et les verbes de consigne sans valeur visuelle. */
+    var STOP_FR = {
+        les: 1, des: 1, une: 1, aux: 1, avec: 1, pour: 1, dans: 1, sur: 1, par: 1, plus: 1, est: 1, sont: 1,
+        etre: 1, avoir: 1, fait: 1, faire: 1, cette: 1, ces: 1, son: 1, ses: 1, leur: 1, leurs: 1, qui: 1,
+        que: 1, dont: 1, comme: 1, entre: 1, sans: 1, sous: 1, vers: 1, tout: 1, tous: 1, toute: 1,
+        toutes: 1, ainsi: 1, chaque: 1, lors: 1, afin: 1, aussi: 1, tres: 1, bien: 1, peu: 1, meme: 1,
+        autres: 1, alors: 1, donc: 1, car: 1, elle: 1, ils: 1, nous: 1, vous: 1, pas: 1, peut: 1, doivent: 1,
+        doit: 1, permet: 1, permettre: 1, utiliser: 1, realise: 1, realiser: 1, effectuer: 1, respecter: 1,
+        verifier: 1, identifier: 1, analyser: 1, definir: 1, citer: 1, decrire: 1, expliquer: 1, justifier: 1,
+        proposer: 1, choisir: 1, preparer: 1, organiser: 1, controler: 1, mesurer: 1, calculer: 1, appliquer: 1,
+        assurer: 1, mettre: 1, prendre: 1, donner: 1, selon: 1, partie: 1, parties: 1, ligne: 1, lignes: 1,
+        page: 1, slide: 1, texte: 1, point: 1, points: 1, exemple: 1, exemples: 1, the: 1, and: 1, for: 1,
+        with: 1, from: 1, this: 1, that: 1, are: 1, was: 1, were: 1
+    };
+    function rawWords(s) {
+        var contentTxt = '', titleTxt = (s && s.title) ? String(s.title) : '';
+        if (s && Array.isArray(s.content)) contentTxt = s.content.join(' ');
+        else if (s && typeof s.content === 'string') contentTxt = s.content;
+        var clean = function (t) {
+            return String(t).replace(/[#*|>\[\]`_~:(),.;!?«»"'\/\\]/g, ' ').replace(/\s+/g, ' ').trim();
+        };
+        return clean(contentTxt + ' ' + titleTxt);   // le CONTENU passe avant le titre
+    }
+    function keywords(s, max) {
+        var words = deaccent(rawWords(s)).split(' '), out = [], seen = {};
+        for (var i = 0; i < words.length && out.length < max; i++) {
+            var w = words[i].replace(/[^a-z0-9]/g, '');
+            if (w.length < 4 || STOP_FR[w] || seen[w] || /^[0-9]+$/.test(w)) continue;
+            seen[w] = 1; out.push(w);
+        }
+        return out;
+    }
     function enQuery(s) {
-        var txt = (s && s.title) ? String(s.title) + ' ' : '';
-        if (s && Array.isArray(s.content)) txt += s.content.join(' ');
-        else if (s && typeof s.content === 'string') txt += s.content;
-        txt = txt.replace(/[#*|>\[\]`_~:(),.;!?«»"'\/\\-]/g, ' ').replace(/\s+/g, ' ').trim();
-        var words = deaccent(txt).split(' ').filter(function (w) { return w.length > 3; });
-        var out = [], seen = {};
-        for (var i = 0; i < words.length && out.length < 4; i++) {
+        var words = keywords(s, 30), out = [], seen = {};
+        for (var i = 0; i < words.length && out.length < 6; i++) {
             var e = FR_EN[words[i]];
             if (!e) continue;
-            e.split(' ').forEach(function (x) { if (!seen[x]) { seen[x] = 1; out.push(x); } });
+            e.split(' ').forEach(function (x) { if (!seen[x] && out.length < 6) { seen[x] = 1; out.push(x); } });
         }
         return out.join(' ').slice(0, 120).trim();
     }
@@ -5265,9 +5315,17 @@ setTimeout(function(){
         return out;
     }
     function buildPrompt(s) {
-        var base = '';
-        try { base = slideImagePrompt(s); } catch (e) { base = (s && s.title) ? String(s.title) : ''; }
-        return String(base || 'illustration pédagogique').slice(0, 460) + ', educational illustration, clean, professional, no text';
+        var title = (s && s.title) ? String(s.title) : '';
+        var kw = keywords(s, 14);          // mots issus du CONTENU de la diapo
+        var model = '';
+        try { model = String((s && s.image_prompt) || '').trim(); } catch (e) {}
+        var parts = [];
+        if (model) parts.push(model.slice(0, 190));
+        if (title) parts.push(title);
+        if (kw.length) parts.push(kw.join(', '));
+        var base = parts.join('. ').slice(0, 430);
+        if (!base) base = 'illustration pedagogique';
+        return base + ', educational illustration, clean, professional, no text';
     }
 
     /* ---------------- persistance / rendu ---------------- */
