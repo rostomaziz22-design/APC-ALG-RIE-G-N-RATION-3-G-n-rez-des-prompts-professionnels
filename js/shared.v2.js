@@ -1,5 +1,5 @@
 'use strict'; console.log('✅ shared.v2.js CHARGÉ');
-        const APP_VERSION = '1.9.3';
+        const APP_VERSION = '1.9.4';
         function checkVersionNotification() {
             var saved = localStorage.getItem('app_version');
             if (saved !== APP_VERSION) {
@@ -5022,7 +5022,24 @@ setTimeout(function(){
         attemptsFree: 3,
         defaultCount: 6
     };
-    var S = { version: '1.9.3', token: 0, busy: false, lastFree: 0, blobs: {}, netFail: 0, blocked: false, used: {}, genCursor: 0 };
+    var S = { version: '1.9.4', token: 0, busy: false, lastFree: 0, blobs: {}, netFail: 0, blocked: false, used: {}, genCursor: 0,
+              wmDown: false, wmCalls: 0, wmCache: {} };
+    /* v1.9.4 : cache + budget des appels Wikimedia. Sans ça, une présentation de
+       10 diapos enchaîne ~40 requêtes et l'API finit par répondre 429
+       (« You are making too many requests ») : plus aucune image trouvée. */
+    try { var _wc = JSON.parse(localStorage.getItem('apc_wm_cache') || '{}'); if (_wc && typeof _wc === 'object') S.wmCache = _wc; } catch (e) {}
+    function wmCacheGet(k) { return Object.prototype.hasOwnProperty.call(S.wmCache, k) ? S.wmCache[k] : null; }
+    function wmCacheSet(k, v) {
+        if (Object.keys(S.wmCache).length > 240) S.wmCache = {};
+        S.wmCache[k] = v;
+        try { localStorage.setItem('apc_wm_cache', JSON.stringify(S.wmCache)); } catch (e) {}
+    }
+    function wmBudget() {
+        if (S.wmDown) return false;
+        if (S.wmCalls >= 26) return false;
+        S.wmCalls++;
+        return true;
+    }
 
     /* ---------------- utilitaires ---------------- */
     function lsGet(k, d) { try { var v = localStorage.getItem(k); return (v === null || v === '') ? d : v; } catch (e) { return d; } }
@@ -5239,7 +5256,13 @@ setTimeout(function(){
         ressources: 1, situation: 1, deroulement: 1, duree: 1, modalite: 1, modalites: 1, evaluation: 1,
         analyse: 1, synthese: 1, conclusion: 1, introduction: 1, presentation: 1, contenu: 1, chapitre: 1,
         seance: 1, sequence: 1, methodologie: 1, activite: 1, exercice: 1, production: 1, attendu: 1,
-        attendus: 1, indicateurs2: 1, prealable: 1, prerequis: 1, duree2: 1
+        attendus: 1, indicateurs2: 1, prealable: 1, prerequis: 1, duree2: 1,
+        /* v1.9.4 : mots « méta » de la grille d'évaluation — aucune photo ne les
+           représente (« conformité » donnait un logo, « standards » un schéma). */
+        conformite: 1, conformites: 1, delai: 1, delais: 1, respect: 1, respects: 1,
+        norme: 1, normes: 1, standard: 1, standards: 1, exigence: 1, exigences: 1,
+        prescription: 1, prescriptions: 1, tolerance: 1, tolerances: 1, critere2: 1,
+        pertinence: 1, coherence: 1, exactitude: 1, precision: 1, qualite2: 1, soin: 1
     };
     function rawWords(s) {
         var contentTxt = '', titleTxt = (s && s.title) ? String(s.title) : '';
@@ -5273,28 +5296,146 @@ setTimeout(function(){
     }
     /* v1.9.3 : l'image de l'article Wikipédia correspondant au mot-clé du contenu
        est bien plus pertinente qu'une recherche plein texte sur Commons
-       (« Multimètre » → photo de multimètre, « Disjoncteur » → disjoncteur). */
-    async function firstPageImage(u) {
-        try {
-            var r = await fetch(u, { signal: (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) ? AbortSignal.timeout(6000) : undefined });
-            if (!r.ok) return '';
-            var d = await r.json();
-            var pages = (d && d.query && d.query.pages) ? Object.values(d.query.pages) : [];
-            for (var i = 0; i < pages.length; i++) {
-                var im = pages[i].thumbnail || pages[i].original;
-                if (im && im.source && /^https:\/\//.test(im.source)) return im.source;
-            }
-            return '';
-        } catch (e) { return ''; }
+       (« Multimètre » → photo de multimètre, « Disjoncteur » → disjoncteur).
+       v1.9.4 : on n'accepte plus n'importe quelle image d'article —
+         • les logos, armoiries, diagrammes, schémas et cartes sont écartés
+           (« conformité » renvoyait le logo du Conseil constitutionnel,
+            « normes » le schéma « Hiérarchie des normes ») ;
+         • en recherche, le titre de l'article doit reprendre le mot-clé ;
+         • si l'article exact existe mais n'a pas de photo correcte, on ne
+           bascule pas sur une recherche floue : on passe au mot-clé suivant. */
+    var BAD_TOKENS = {
+        logo: 1, logos: 1, logotype: 1, icon: 1, icons: 1, icone: 1, icones: 1, pictogram: 1, pictogramme: 1,
+        blason: 1, armoiries: 1, armoirie: 1, coat: 1, arms: 1, flag: 1, flags: 1, drapeau: 1, seal: 1, sceau: 1,
+        emblem: 1, embleme: 1, signature: 1, stamp: 1, timbre: 1, banner: 1, bandeau: 1,
+        diagram: 1, diagrams: 1, diagramme: 1, diagrammes: 1, schema: 1, schemas: 1, schematic: 1,
+        hierarchie: 1, hierarchy: 1, organigramme: 1, flowchart: 1,
+        map: 1, maps: 1, carte: 1, cartes: 1, graph: 1, graphs: 1, graphique: 1, chart: 1, charts: 1, courbe: 1
+    };
+    function fileTokens(src) {
+        var name = String(src || '').split('?')[0].split('/').pop();
+        try { name = decodeURIComponent(name); } catch (e) {}
+        name = name.replace(/^\d+px-/, '').replace(/\.[a-z0-9]+$/i, '');
+        return deaccent(name).split(/[^a-z0-9]+/).filter(function (t) { return t.length > 2; });
     }
-    async function wikiImage(q) {
+    function isBadImage(src) {
+        if (!src) return true;
+        if (/\.svg(\?|$)/i.test(src)) return true;
+        var t = fileTokens(src);
+        for (var i = 0; i < t.length; i++) if (BAD_TOKENS[t[i]]) return true;
+        return false;
+    }
+    function wmFetch(u, ms) {
+        var opt = (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) ? { signal: AbortSignal.timeout(ms || 6000) } : undefined;
+        return fetch(u, opt).then(function (r) {
+            if (r.status !== 429 && r.status !== 403) return r;
+            // petite pause puis une seule nouvelle tentative avant d'abandonner
+            return new Promise(function (res) { setTimeout(res, 1500); }).then(function () {
+                var o2 = (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) ? { signal: AbortSignal.timeout(ms || 6000) } : undefined;
+                return fetch(u, o2);
+            });
+        }).catch(function () { return null; });
+    }
+    function getJson(u) {
+        return wmFetch(u, 6000).then(function (r) {
+            if (!r) return null;                                   // incident réseau ponctuel
+            if (r.status === 429 || r.status === 403) { S.wmDown = true; return null; }
+            return r.ok ? r.json() : null;
+        }).catch(function () { return null; });
+    }
+    /* v1.9.4 : contrôle de SUJET — le nom du fichier doit citer le mot-clé
+       (ou sa traduction anglaise). Sans ça, l'article « Respect » renvoyait
+       une peinture et l'article « Technicien » une gravure de l'Odyssée. */
+    function subjectTokens(s, extra) {
+        var out = {}, add = function (t) {
+            t = deaccent(t).replace(/[^a-z0-9]/g, '');
+            if (t.length >= 4) out[t] = 1;
+        };
+        keywords(s, 8).forEach(function (w) {
+            add(w);
+            var e = FR_EN[deaccent(w).replace(/[^a-z0-9]/g, '')];
+            if (e) String(e).split(' ').forEach(add);
+        });
+        if (extra) String(extra).split(/[^A-Za-z0-9]+/).forEach(add);
+        return out;
+    }
+    function matchesSubject(src, subj) {
+        if (!subj) return true;
+        var t = fileTokens(src);
+        for (var i = 0; i < t.length; i++) {
+            if (subj[t[i]]) return true;
+            for (var k in subj) {
+                if (t[i].length >= 5 && k.length >= 5 && (t[i].indexOf(k) === 0 || k.indexOf(t[i]) === 0)) return true;
+            }
+        }
+        return false;
+    }
+    /* v1.9.4 : note d'un fichier — plus il cite de mots du sujet, mieux c'est ;
+       les photos (.jpg/.webp) passent avant les PNG, souvent des schémas. */
+    function imgScore(u, subj) {
+        var t = fileTokens(u), hits = 0;
+        for (var i = 0; i < t.length; i++) {
+            var hit = !!subj[t[i]];
+            if (!hit) {
+                for (var k in subj) {
+                    if (t[i].length >= 5 && k.length >= 5 && (t[i].indexOf(k) === 0 || k.indexOf(t[i]) === 0)) { hit = true; break; }
+                }
+            }
+            if (hit) hits++;
+        }
+        if (!hits) return 0;
+        var s = hits;
+        if (/\.(jpe?g|webp)(\?|$)/i.test(u)) s += 1;
+        if (/\.png(\?|$)/i.test(u)) s -= 0.5;
+        return s;
+    }
+    function pageImages(d, subj) {
+        var pages = (d && d.query && d.query.pages) ? Object.values(d.query.pages) : [], out = [];
+        for (var i = 0; i < pages.length; i++) {
+            var p = pages[i] || {};
+            if (p.missing !== undefined) continue;                              // page inexistante
+            if (p.pageprops && p.pageprops.disambiguation !== undefined) continue; // page d'homonymie
+            var im = p.thumbnail || p.original;
+            if (!im || !im.source || !/^https:\/\//.test(im.source)) continue;
+            if (isBadImage(im.source)) continue;
+            if (!matchesSubject(im.source, subj)) continue;
+            out.push({ title: String(p.title || ''), src: im.source });
+        }
+        return out;
+    }
+    async function wikiImage(q, subj) {
+        subj = subj || subjectTokens({ content: [q] });
+        var ck = 'w:' + q, hit = wmCacheGet(ck);
+        if (hit !== null) return hit;
+        if (!wmBudget()) return '';
+        var found = '';
+        // 1) article portant exactement ce titre (ou une redirection) : le plus fiable
         var exact = 'https://fr.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(q)
-            + '&prop=pageimages&piprop=thumbnail&pithumbsize=1024&redirects=1&format=json&origin=*';
-        var img = await firstPageImage(exact);
-        if (img) return img;
+            + '&redirects=1&prop=pageimages|pageprops&piprop=thumbnail&pithumbsize=1024&format=json&origin=*';
+        var d = await getJson(exact);
+        if (d && d.query && d.query.pages) {
+            var all = Object.values(d.query.pages);
+            var exists = false;
+            for (var i = 0; i < all.length; i++) if (all[i] && all[i].missing === undefined) exists = true;
+            if (exists) {
+                var ex = pageImages(d, subj);
+                found = ex.length ? ex[0].src : '';   // article réel : pas de repli sur une recherche floue
+                wmCacheSet(ck, found);
+                return found;
+            }
+        }
+        // 2) sinon recherche, mais seulement sur un titre qui reprend le mot-clé
+        var key = deaccent(q).replace(/[^a-z0-9]/g, '');
+        if (key.length < 4 || S.wmDown || !wmBudget()) { wmCacheSet(ck, ''); return ''; }
         var search = 'https://fr.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=' + encodeURIComponent(q)
-            + '&gsrlimit=3&prop=pageimages&piprop=thumbnail&pithumbsize=1024&format=json&origin=*';
-        return await firstPageImage(search);
+            + '&gsrlimit=5&prop=pageimages|pageprops&piprop=thumbnail&pithumbsize=1024&format=json&origin=*';
+        var cands = pageImages(await getJson(search), subj);
+        for (var c = 0; c < cands.length; c++) {
+            var t = deaccent(cands[c].title).replace(/[^a-z0-9]/g, '');
+            if (t && (t.indexOf(key) === 0 || key.indexOf(t) === 0)) { found = cands[c].src; break; }
+        }
+        wmCacheSet(ck, found);
+        return found;
     }
     var GENERIC_Q = ['vocational training', 'classroom', 'workshop tools', 'computer lab', 'students learning',
         'training workshop', 'technical drawing', 'electrical engineering', 'maintenance'];
@@ -5302,11 +5443,18 @@ setTimeout(function(){
     // (avant : pages de livres .djvu, PDF, SVG… affichées comme des scans)
     function isBadMime(m) { return !/^image\/(jpeg|png|webp)$/i.test(String(m || '')); }
     async function commonsSearch(q) {
+        var ck = 'c:' + q;
+        var hit = wmCacheGet(ck);
+        if (hit !== null) return hit;
+        var empty = [];
+        if (!wmBudget()) return empty;
         var u = 'https://commons.wikimedia.org/w/api.php?action=query&generator=search'
             + '&gsrsearch=' + encodeURIComponent(q + ' filetype:bitmap')
             + '&gsrnamespace=6&gsrlimit=24&prop=imageinfo&iiprop=url|mime&iiurlwidth=1024&format=json&origin=*';
-        var r = await fetch(u, { signal: (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) ? AbortSignal.timeout(20000) : undefined });
-        if (!r.ok) return [];
+        var r = await wmFetch(u, 20000);
+        if (!r) return empty;
+        if (r.status === 429 || r.status === 403) { S.wmDown = true; return empty; }
+        if (!r.ok) return empty;
         var d = await r.json();
         var pages = (d && d.query && d.query.pages) ? Object.values(d.query.pages) : [];
         var out = [];
@@ -5314,37 +5462,66 @@ setTimeout(function(){
             var ii = pages[i].imageinfo && pages[i].imageinfo[0];
             if (!ii || isBadMime(ii.mime)) continue;
             var url = ii.thumburl || ii.url;
-            if (url && /^https:\/\//.test(url)) out.push(url);
+            if (!url || !/^https:\/\//.test(url)) continue;
+            if (isBadImage(url)) continue;
+            out.push(url);
         }
+        wmCacheSet(ck, out);
         return out;
     }
     async function tryCommons(s) {
         try {
             var tries = [], seenQ = {};
             function add(q) { q = String(q || '').trim(); var k = q.toLowerCase(); if (q && !seenQ[k]) { seenQ[k] = 1; tries.push(q); } }
+            var subj = subjectTokens(s);
             // 1) Wikipédia : l'article correspondant au mot-clé du contenu (le plus pertinent)
             var KWs = keywords(s, 6);
-            for (var w = 0; w < KWs.length && w < 3; w++) {
-                var wi = await wikiImage(KWs[w]);
+            for (var w = 0; w < KWs.length && w < 2 && !S.wmDown; w++) {
+                var wi = await wikiImage(KWs[w], subj);
                 if (wi && !S.used[wi]) {
                     S.used[wi] = 1;
                     console.log('🖼️ [images] Wikipédia ← « ' + KWs[w] + ' »');
                     return wi;
                 }
             }
-            // 2) Wikimedia Commons : 4 mots du contenu, puis 3 et 2 mots traduits, puis génériques
+            // 2) Wikimedia Commons : un mot concret à la fois (le plus susceptible de
+            //    tomber sur une photo du sujet), puis 3 et 2 mots, puis génériques
+            var kwsAll = keywords(s, 8);
+            for (var q1 = 0; q1 < kwsAll.length && q1 < 4; q1++) {
+                var one = deaccent(kwsAll[q1]).replace(/[^a-z0-9]/g, '');
+                add(FR_EN[one] || kwsAll[q1]);
+            }
             add(commonsQuery(s));
             add(enQuery(s, 3));
             add(enQuery(s, 2));
-            for (var g = 0; g < 3; g++) add(GENERIC_Q[(g + (S.genCursor || 0)) % GENERIC_Q.length]);
+            for (var g = 0; g < 2; g++) add(GENERIC_Q[(g + (S.genCursor || 0)) % GENERIC_Q.length]);
             S.genCursor = (S.genCursor || 0) + 1;
+            // 2a) dès qu'une requête donne un fichier qui parle vraiment du sujet, on s'arrête
+            //     (avant, on interrogeait les 9 requêtes d'un coup → budget épuisé avant la
+            //      dernière diapo, qui restait sans image)
             for (var t = 0; t < tries.length; t++) {
+                if (S.wmDown) break;
                 var urls = await commonsSearch(tries[t]);
+                var pick = '', bestScore = 0.6;
                 for (var i = 0; i < urls.length; i++) {
-                    if (S.used[urls[i]]) continue;      // jamais deux fois la même image
-                    S.used[urls[i]] = 1;
+                    if (S.used[urls[i]]) continue;
+                    var sc = imgScore(urls[i], subj);
+                    if (sc > bestScore) { bestScore = sc; pick = urls[i]; }
+                }
+                if (pick) {
+                    S.used[pick] = 1;
                     console.log('🖼️ [images] Wikimedia Commons ← « ' + tries[t] + ' »');
-                    return urls[i];
+                    return pick;
+                }
+            }
+            // 3) dernier recours : la pertinence n'est plus garantie, mais la slide reste illustrée
+            for (var t2 = 0; t2 < tries.length; t2++) {
+                var u2 = await commonsSearch(tries[t2]);
+                for (var j = 0; j < u2.length; j++) {
+                    if (S.used[u2[j]]) continue;
+                    S.used[u2[j]] = 1;
+                    console.log('🖼️ [images] Wikimedia Commons (large) ← « ' + tries[t2] + ' »');
+                    return u2[j];
                 }
             }
             return '';
@@ -5409,6 +5586,7 @@ setTimeout(function(){
     async function runPipeline(slides) {
         slides = slides || [];
         if (!slides.length) return [];
+        S.wmDown = false; S.wmCalls = 0;   // v1.9.4 : nouveau budget Wikimedia à chaque présentation
         var tok = ++S.token;
         S.busy = true;
         var out = slides.map(function () { return ''; });
