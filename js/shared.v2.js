@@ -1,5 +1,5 @@
 'use strict'; console.log('✅ shared.v2.js CHARGÉ');
-        const APP_VERSION = '1.8.8';
+        const APP_VERSION = '1.8.9';
         function checkVersionNotification() {
             var saved = localStorage.getItem('app_version');
             if (saved !== APP_VERSION) {
@@ -5022,7 +5022,7 @@ setTimeout(function(){
         attemptsFree: 3,
         defaultCount: 6
     };
-    var S = { version: '1.8.8', token: 0, busy: false, lastFree: 0, blobs: {}, netFail: 0, blocked: false, used: {}, genCursor: 0 };
+    var S = { version: '1.8.9', token: 0, busy: false, lastFree: 0, blobs: {}, netFail: 0, blocked: false, used: {}, genCursor: 0 };
 
     /* ---------------- utilitaires ---------------- */
     function lsGet(k, d) { try { var v = localStorage.getItem(k); return (v === null || v === '') ? d : v; } catch (e) { return d; } }
@@ -5212,10 +5212,12 @@ setTimeout(function(){
     }
     var GENERIC_Q = ['vocational training', 'classroom', 'workshop tools', 'computer lab', 'students learning',
         'training workshop', 'technical drawing', 'electrical engineering', 'maintenance'];
-    function isBadMime(m) { return /svg|tiff|xcf|pdf|gif/i.test(String(m || '')); }
+    // v1.8.9 : Wikimedia accepte « filetype:bitmap » → 100 % d'images exploitables
+    // (avant : pages de livres .djvu, PDF, SVG… affichées comme des scans)
+    function isBadMime(m) { return !/^image\/(jpeg|png|webp)$/i.test(String(m || '')); }
     async function commonsSearch(q) {
         var u = 'https://commons.wikimedia.org/w/api.php?action=query&generator=search'
-            + '&gsrsearch=' + encodeURIComponent(q)
+            + '&gsrsearch=' + encodeURIComponent(q + ' filetype:bitmap')
             + '&gsrnamespace=6&gsrlimit=24&prop=imageinfo&iiprop=url|mime&iiurlwidth=1024&format=json&origin=*';
         var r = await fetch(u, { signal: (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) ? AbortSignal.timeout(20000) : undefined });
         if (!r.ok) return [];
